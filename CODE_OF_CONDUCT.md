@@ -1,5 +1,5 @@
 
-# Contributor Covenant Code of Conduct
+# ShapeShift Code of Conduct
 
 ## Our Pledge
 
