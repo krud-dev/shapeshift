@@ -14,14 +14,6 @@ package dev.krud.shapeshift.util
 
 import java.lang.reflect.Field
 
-fun <T> Class<T>.instantiate(): T {
-    try {
-        return this.newInstance()
-    } catch (e: Exception) {
-        throw RuntimeException(e)
-    }
-}
-
 fun Field.getValue(target: Any): Any? {
     return this.get(target)
 }
