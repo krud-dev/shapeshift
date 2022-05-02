@@ -14,13 +14,9 @@ import dev.krud.shapeshift.transformer.base.FieldTransformer
 import java.lang.reflect.Field
 
 class CommaDelimitedStringToListTransformer : FieldTransformer<String, List<*>> {
-    override fun fromType(): Class<String> {
-        return String::class.java
-    }
+    override val fromType: Class<String> = String::class.java
 
-    override fun toType(): Class<List<*>> {
-        return List::class.java
-    }
+    override val toType: Class<List<*>> = List::class.java
 
     override fun transform(
         fromField: Field,

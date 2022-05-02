@@ -15,13 +15,9 @@ import java.lang.reflect.Field
 import java.util.*
 
 class LongToDateTransformer : FieldTransformer<Long, Date> {
-    override fun fromType(): Class<Long> {
-        return Long::class.java
-    }
+    override val fromType: Class<Long> = Long::class.java
 
-    override fun toType(): Class<Date> {
-        return Date::class.java
-    }
+    override val toType: Class<Date> = Date::class.java
 
     override fun transform(
         fromField: Field,

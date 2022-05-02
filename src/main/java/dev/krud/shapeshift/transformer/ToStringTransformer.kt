@@ -14,13 +14,9 @@ import dev.krud.shapeshift.transformer.base.FieldTransformer
 import java.lang.reflect.Field
 
 class ToStringTransformer : FieldTransformer<Any, String> {
-    override fun fromType(): Class<Any> {
-        return Any::class.java
-    }
+    override val fromType: Class<Any> = Any::class.java
 
-    override fun toType(): Class<String> {
-        return String::class.java
-    }
+    override val toType: Class<String> = String::class.java
 
     override fun transform(
         fromField: Field,
