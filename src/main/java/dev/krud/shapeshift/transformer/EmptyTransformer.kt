@@ -13,7 +13,7 @@ package dev.krud.shapeshift.transformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import java.lang.reflect.Field
 
-class DefaultTransformer : FieldTransformer<Any, Any> {
+object EmptyTransformer : FieldTransformer<Any, Any> {
     override fun fromType(): Class<Any> {
         return Any::class.java
     }

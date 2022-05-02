@@ -8,9 +8,21 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package dev.krud.shapeshift.annotation
+package dev.krud.shapeshift
 
-import java.lang.reflect.Field
+import dev.krud.shapeshift.transformer.EmptyTransformer
+import dev.krud.shapeshift.transformer.base.FieldTransformer
 
-
-data class ObjectFieldPair(val `object`: Any, val field: Field, val type: Class<*>)
+data class TransformerRegistration<From : Any, To : Any>(
+    val transformer: FieldTransformer<From, To>,
+    val default: Boolean = false,
+    val name: String? = null
+) {
+    companion object {
+        val EMPTY = TransformerRegistration(
+            EmptyTransformer,
+            false,
+            "empty"
+        )
+    }
+}

@@ -12,14 +12,14 @@ package dev.krud.shapeshift.transformer.base
 
 import java.lang.reflect.Field
 
-interface FieldTransformer<FromType, ToType> {
-    /**
-     * Whether or not the transformer is considered default for the [FromType]-[ToType] pair
-     */
-    val isDefault: Boolean
-        get() = false
+typealias ClassPair = Pair<Class<out Any>, Class<out Any>>
 
-    fun fromType(): Class<FromType>
-    fun toType(): Class<ToType>
-    fun transform(fromField: Field, toField: Field, originalValue: FromType?, fromObject: Any, toObject: Any): ToType?
+interface FieldTransformer<From : Any, To : Any> {
+    fun fromType(): Class<From>
+    fun toType(): Class<To>
+    fun transform(fromField: Field, toField: Field, originalValue: From?, fromObject: Any, toObject: Any): To?
+
+    companion object {
+        val FieldTransformer<*, *>.id: ClassPair get() = fromType() to toType()
+    }
 }

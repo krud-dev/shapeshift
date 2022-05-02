@@ -7,39 +7,9 @@
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package dev.krud.shapeshift.dto
 
-package dev.krud.shapeshift.dto;
+import dev.krud.shapeshift.annotation.MappedField
+import java.lang.reflect.Field
 
-import dev.krud.shapeshift.annotation.MappedField;
-
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Map;
-
-public class EntityStructureDTO {
-
-    private List<MappedField> typeAnnotations;
-
-    private Map<Field, List<MappedField>> annotations;
-
-    public EntityStructureDTO(List<MappedField> typeAnnotations, Map<Field, List<MappedField>> annotations) {
-        this.typeAnnotations = typeAnnotations;
-        this.annotations = annotations;
-    }
-
-    public List<MappedField> getTypeAnnotations() {
-        return typeAnnotations;
-    }
-
-    public void setTypeAnnotations(List<MappedField> typeAnnotations) {
-        this.typeAnnotations = typeAnnotations;
-    }
-
-    public Map<Field, List<MappedField>> getAnnotations() {
-        return annotations;
-    }
-
-    public void setAnnotations(Map<Field, List<MappedField>> annotations) {
-        this.annotations = annotations;
-    }
-}
+class MappingStructureDTO(var typeAnnotations: List<MappedField>, var annotations: Map<Field, List<MappedField>>)

@@ -7,51 +7,42 @@
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+package dev.krud.shapeshift.annotation
 
-package dev.krud.shapeshift.annotation;
-
-import dev.krud.shapeshift.FieldMapper;
-import dev.krud.shapeshift.transformer.DefaultTransformer;
-import dev.krud.shapeshift.transformer.base.FieldTransformer;
-
-import java.lang.annotation.*;
+import dev.krud.shapeshift.transformer.EmptyTransformer
+import dev.krud.shapeshift.transformer.base.FieldTransformer
+import java.lang.annotation.Retention
+import java.lang.annotation.RetentionPolicy
+import kotlin.reflect.KClass
 
 /**
- * Indicates that an annotated field should be mapped to a field on a different model by the {@link FieldMapper}
+ * Indicates that an annotated field should be mapped to a field on a different model by the [FieldMapper]
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE})
-@Repeatable(MappedFields.class)
-public @interface MappedField {
-
+@Target(AnnotationTarget.FIELD, AnnotationTarget.CLASS)
+@Repeatable
+annotation class MappedField(
     /**
      * The target class to map the field to
      */
-    Class<?> target() default Void.class;
-
-
+    val target: KClass<*> = Nothing::class,
     /**
      * (Optional) The field name to map the value from.
      * When used  at the field level, allows for mapping of nested values
      * If left empty at the type level, an exception will be thrown. Otherwise, the name of the field will be used.
      */
-    String mapFrom() default "";
-
+    val mapFrom: String = "",
     /**
      * (Optional) The field name to map the value to.
      * If left empty, the name of the field will be used.
      */
-    String mapTo() default "";
-
+    val mapTo: String = "",
     /**
-     * The {@link FieldTransformer} to use on the value
+     * The [FieldTransformer] to use on the value
      */
-    Class<? extends FieldTransformer> transformer() default DefaultTransformer.class;
-
+    val transformer: KClass<out FieldTransformer<*, *>> = EmptyTransformer::class,
     /**
-     * Bean name for a defined {@link FieldTransformer} bean to use on the value
-     * Supersedes {@link MappedField#transformer()} if specified
+     * Bean name for a defined [FieldTransformer] bean to use on the value
+     * Supersedes [MappedField.transformer] if specified
      */
-    String transformerRef() default "";
-}
-
+    val transformerRef: String = ""
+)
