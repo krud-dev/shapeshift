@@ -23,7 +23,6 @@ import dev.krud.shapeshift.util.setValue
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Field
 
-
 class FieldMapper(
     transformers: List<TransformerRegistration<out Any, out Any>> = emptyList()
 ) {
@@ -34,7 +33,6 @@ class FieldMapper(
     internal val defaultTransformers: MutableMap<ClassPair, TransformerRegistration<out Any, out Any>> = mutableMapOf()
     private val mappingStructures: MutableMap<ClassPair, MappingStructureDTO> = mutableMapOf()
     private val entityFieldsCache: MutableMap<Class<*>, Map<String, Field>> = mutableMapOf()
-
 
     fun <From : Any, To : Any> registerTransformer(registration: TransformerRegistration<From, To>) {
         val name = registration.name ?: registration.transformer::class.simpleName!!
@@ -96,7 +94,6 @@ class FieldMapper(
                 }
                 processMappedField(annotation, fromObject, toObject, trueFromPath, trueToPath)
             }
-
         }
 
         return toObject
@@ -126,7 +123,7 @@ class FieldMapper(
         }
         if (value != null) {
             try {
-                if(!toPair.field.type.isAssignableFrom(value::class.java)) {
+                if (!toPair.field.type.isAssignableFrom(value::class.java)) {
                     error("Type mismatch: Expected ${toPair.field.type} but got ${value::class.java}")
                 }
                 toPair.field.setValue(toPair.target, value)
@@ -216,14 +213,15 @@ class FieldMapper(
                 val fields = clazz.declaredFields
                 val defaultMappingTarget = clazz.getDeclaredAnnotation(DefaultMappingTarget::class.java)
                 val defaultFromClass: Class<*> = defaultMappingTarget?.value?.java ?: Nothing::class.java
-                typeAnnotations.addAll(clazz.getDeclaredAnnotationsByType(MappedField::class.java)
-                    .filter { mappedField ->
-                        try {
-                            return@filter isOfType(defaultFromClass, mappedField.target.java, toClass)
-                        } catch (e: IllegalStateException) {
-                            error("Could not create entity structure for <" + fromClass.simpleName + ", " + toClass.simpleName + ">: " + e.message)
+                typeAnnotations.addAll(
+                    clazz.getDeclaredAnnotationsByType(MappedField::class.java)
+                        .filter { mappedField ->
+                            try {
+                                return@filter isOfType(defaultFromClass, mappedField.target.java, toClass)
+                            } catch (e: IllegalStateException) {
+                                error("Could not create entity structure for <" + fromClass.simpleName + ", " + toClass.simpleName + ">: " + e.message)
+                            }
                         }
-                    }
                 )
                 for (field in fields) {
                     val availableAnnotations = field.getDeclaredAnnotationsByType(MappedField::class.java)
@@ -266,7 +264,6 @@ class FieldMapper(
             if (transformerRegistration != TransformerRegistration.EMPTY) {
                 log.trace("Found transformer by ref of type [ " + transformerRegistration.transformer.javaClass.name + " ]")
             }
-
         }
         if (transformerRegistration == TransformerRegistration.EMPTY) {
             log.trace("Checking transformer field")

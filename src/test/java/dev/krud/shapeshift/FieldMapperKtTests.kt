@@ -16,7 +16,6 @@ import dev.krud.shapeshift.transformer.base.FieldTransformer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import strikt.api.expectCatching
 import strikt.api.expectThat
 import strikt.api.expectThrows
 import strikt.assertions.isEqualTo
@@ -236,9 +235,7 @@ internal class FieldMapperKtTests {
             .isEqualTo(
                 "ExampleFieldTransformer"
             )
-
     }
-
 
     @Test
     internal fun `registering same transformer twice should throw exception`() {
@@ -253,7 +250,6 @@ internal class FieldMapperKtTests {
             mapper.registerTransformer(registration)
         }
     }
-
 
     @Test
     internal fun `type level mapped field throws exception if mapFrom is empty`() {
@@ -302,7 +298,6 @@ internal class FieldMapperKtTests {
         @MappedField(target = ToWithBase::class)
         val long: Long = 1L
     }
-
 
     internal class FromWithComplexPath {
         @MappedField(target = GenericTo::class, mapFrom = "grandchild.greatGrandchild.long")
@@ -375,7 +370,7 @@ internal class FieldMapperKtTests {
         val long: Long = 1L
     }
 
-    @MappedField(target = ToWithShallowPath::class, mapFrom="long", mapTo = "toWithShallowPath.child.long")
+    @MappedField(target = ToWithShallowPath::class, mapFrom = "long", mapTo = "toWithShallowPath.child.long")
     internal class FromWithMapToSelfQualifierOnType {
         val long: Long = 1L
     }
@@ -383,13 +378,11 @@ internal class FieldMapperKtTests {
     internal class TransformerlessFrom {
         @MappedField(target = GenericTo::class)
         val long: Long = 1L
-
     }
 
     @MappedField(target = GenericTo::class, mapFrom = "long")
     internal class TransformerlessTypeLevelFrom {
         val long: Long = 1L
-
     }
 
     internal class NoTargetFrom {
@@ -400,7 +393,6 @@ internal class FieldMapperKtTests {
     internal class DefaultTransformerFrom {
         @MappedField(target = StringTo::class)
         val long: Long = 1L
-
     }
 
     internal class NameTransformerFrom {

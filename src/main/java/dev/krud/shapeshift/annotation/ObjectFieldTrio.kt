@@ -12,5 +12,4 @@ package dev.krud.shapeshift.annotation
 
 import java.lang.reflect.Field
 
-
 data class ObjectFieldTrio(val target: Any, val field: Field, val type: Class<*>)

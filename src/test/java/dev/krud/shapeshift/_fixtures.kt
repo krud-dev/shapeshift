@@ -39,14 +39,13 @@ abstract class BaseEntity {
 }
 
 abstract class BaseRO {
-    val id: Long = 321L;
+    val id: Long = 321L
 }
 
 @DefaultMappingTarget(EntityRO::class)
 class Entity {
     @MappedField
     val birthDate = Date(1)
-
 }
 
 class EntityRO : BaseRO() {
