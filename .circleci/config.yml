@@ -33,9 +33,29 @@ jobs:
           path: ~/test-results
       - store_artifacts:
           path: ~/test-results/junit
+  deploy:
+    <<: *jdk_image
+    steps:
+      - checkout
+      - run:
+          name: Import GPG key
+          command: echo -e "$GPG_KEY" | gpg --import
+      - run:
+          name: Build and deploy jar
+          command: mvn -s ops/settings.xml -DskipTests -Possrh deploy
+
 workflows:
   version: 2
   build:
     jobs:
       - test
       - ktlint
+      - deploy:
+          context: shapeshift_ossrh
+          requires:
+            - test
+            - ktlint
+          filters:
+            branches:
+              only:
+                - master
