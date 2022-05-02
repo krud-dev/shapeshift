@@ -10,6 +10,7 @@
 
 package dev.krud.shapeshift
 
+import dev.krud.shapeshift.annotation.DefaultMappingTarget
 import dev.krud.shapeshift.annotation.MappedField
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import org.junit.jupiter.api.BeforeEach
@@ -91,6 +92,22 @@ internal class FieldMapperKtTests {
         }
 
         @Test
+        internal fun `simple mapping on type level`() {
+            val result = mapper.map(TransformerlessTypeLevelFrom(), GenericTo::class.java)
+
+            expectThat(result.long)
+                .isEqualTo(1L)
+        }
+
+        @Test
+        internal fun `simple mapping with default target mapping`() {
+            val result = mapper.map(FromWithDefaultMappingTarget(), GenericTo::class.java)
+
+            expectThat(result.long)
+                .isEqualTo(1L)
+        }
+
+        @Test
         internal fun `complex path mapping on mapFrom`() {
             val result = mapper.map(FromWithComplexPath(), GenericTo::class.java)
 
@@ -107,6 +124,38 @@ internal class FieldMapperKtTests {
         }
 
         @Test
+        internal fun `mapFrom with self field qualifier`() {
+            val result = mapper.map(FromWithMapFromSelfQualifier(), GenericTo::class.java)
+
+            expectThat(result.long)
+                .isEqualTo(1L)
+        }
+
+        @Test
+        internal fun `mapFrom with self field qualifier on type level`() {
+            val result = mapper.map(FromWithMapFromSelfQualifierOnType(), GenericTo::class.java)
+
+            expectThat(result.long)
+                .isEqualTo(1L)
+        }
+
+        @Test
+        internal fun `mapTo with self field qualifier`() {
+            val result = mapper.map(FromWithMapToSelfQualifier(), ToWithShallowPath::class.java)
+
+            expectThat(result.child?.long)
+                .isEqualTo(1L)
+        }
+
+        @Test
+        internal fun `mapTo with self field qualifier on type level`() {
+            val result = mapper.map(FromWithMapToSelfQualifierOnType(), ToWithShallowPath::class.java)
+
+            expectThat(result.child?.long)
+                .isEqualTo(1L)
+        }
+
+        @Test
         internal fun `nested class mapping`() {
             val result = mapper.map(
                 FromWithBase(),
@@ -117,6 +166,13 @@ internal class FieldMapperKtTests {
                 .isEqualTo(1L)
 
             expectThat(result.baseLong)
+                .isEqualTo(1L)
+        }
+
+        @Test
+        internal fun `mapping null object`() {
+            val result = mapper.map(FromWithNullField(), ToWithPopulatedField::class.java)
+            expectThat(result.long)
                 .isEqualTo(1L)
         }
     }
@@ -209,10 +265,32 @@ internal class FieldMapperKtTests {
     }
 
     @Test
-    internal fun `mapped field without default mapping target and no target should throw exception`() {
+    internal fun `field level mapped field without default mapping target and no target should throw exception`() {
         expectThrows<IllegalStateException> {
             mapper.map(FromWithoutDefinedTarget(), GenericTo::class.java)
         }
+    }
+
+    @Test
+    internal fun `type level mapped field without default mapping target and no target should throw exception`() {
+        expectThrows<IllegalStateException> {
+            mapper.map(TypeFromWithoutDefinedTarget(), GenericTo::class.java)
+        }
+    }
+
+    @DefaultMappingTarget(GenericTo::class)
+    internal class FromWithDefaultMappingTarget {
+        @MappedField
+        val long: Long = 1L
+    }
+
+    internal class FromWithNullField {
+        @MappedField(target = ToWithPopulatedField::class)
+        val long: Long? = null
+    }
+
+    internal class ToWithPopulatedField {
+        val long: Long? = 1L
     }
 
     internal abstract class BaseFromWithMappedField {
@@ -255,6 +333,11 @@ internal class FieldMapperKtTests {
         val long: Long = 1L
     }
 
+    @MappedField(mapFrom = "long")
+    internal class TypeFromWithoutDefinedTarget {
+        val long: Long = 1L
+    }
+
     internal class FromWithInvalidFromPath {
         @MappedField(target = GenericTo::class, mapFrom = "i.am.invalid")
         val long: Long = 1L
@@ -271,9 +354,40 @@ internal class FieldMapperKtTests {
         val long: Long = 1L
     }
 
-    @MappedField(target = MultipleFieldTo::class)
+    internal class FromWithMapFromSelfQualifier {
+        @MappedField(target = GenericTo::class, mapFrom = "child.long")
+        val child: Child = Child()
+        class Child {
+            val long: Long = 1L
+        }
+    }
+
+    @MappedField(target = GenericTo::class, mapFrom = "fromWithMapFromSelfQualifierOnType.child.long")
+    internal class FromWithMapFromSelfQualifierOnType {
+        val child: Child = Child()
+        class Child {
+            val long: Long = 1L
+        }
+    }
+
+    internal class FromWithMapToSelfQualifier {
+        @MappedField(target = ToWithShallowPath::class, mapTo = "toWithShallowPath.child.long")
+        val long: Long = 1L
+    }
+
+    @MappedField(target = ToWithShallowPath::class, mapFrom="long", mapTo = "toWithShallowPath.child.long")
+    internal class FromWithMapToSelfQualifierOnType {
+        val long: Long = 1L
+    }
+
     internal class TransformerlessFrom {
         @MappedField(target = GenericTo::class)
+        val long: Long = 1L
+
+    }
+
+    @MappedField(target = GenericTo::class, mapFrom = "long")
+    internal class TransformerlessTypeLevelFrom {
         val long: Long = 1L
 
     }
@@ -312,6 +426,14 @@ internal class FieldMapperKtTests {
         val secondLong: Long? = null
     }
 
+    internal class ToWithShallowPath {
+        val child: Child? = null
+
+        class Child {
+            val long: Long? = null
+        }
+    }
+
     internal class ToWithComplexPath {
         val child: Child = Child()
 
@@ -336,9 +458,9 @@ internal class FieldMapperKtTests {
     }
 
     internal class LongToStringTransformer : FieldTransformer<Long, String> {
-        override fun fromType(): Class<Long> = Long::class.java
+        override val fromType: Class<Long> = Long::class.java
 
-        override fun toType(): Class<String> = String::class.java
+        override val toType: Class<String> = String::class.java
 
         override fun transform(
             fromField: Field,
