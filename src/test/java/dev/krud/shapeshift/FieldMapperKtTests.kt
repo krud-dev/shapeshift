@@ -22,7 +22,7 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.message
 import java.lang.reflect.Field
 
-internal class FieldMapperKtTest {
+internal class FieldMapperKtTests {
     internal lateinit var mapper: FieldMapper
 
     @BeforeEach
