@@ -72,16 +72,15 @@ class FieldMapper(
             }
 
             var trueToPath = typeAnnotation.mapTo
-            if (trueToPath.startsWith(toClazz::class.java.simpleName, ignoreCase = true)) {
-                trueToPath = trueToPath.substring(trueFromPath.indexOf(NODE_DELIMITER) + 1)
+            if (trueToPath.startsWith(toClazz.simpleName, ignoreCase = true)) {
+                trueToPath = trueToPath.substring(trueToPath.indexOf(NODE_DELIMITER) + 1)
             }
             processMappedField(typeAnnotation, fromObject, toObject, trueFromPath, trueToPath)
         }
 
         for ((field, annotations) in mappingStructure.annotations) {
             for (annotation in annotations) {
-                var trueFromPath = ""
-                trueFromPath = if (annotation.mapFrom.isBlank()) {
+                val trueFromPath = if (annotation.mapFrom.isBlank()) {
                     field.name
                 } else {
                     if (!annotation.mapFrom.startsWith(field.name + NODE_DELIMITER)) {
@@ -90,7 +89,12 @@ class FieldMapper(
                         annotation.mapFrom
                     }
                 }
-                processMappedField(annotation, fromObject, toObject, trueFromPath, annotation.mapTo)
+
+                var trueToPath = annotation.mapTo
+                if (trueToPath.startsWith(toClazz.simpleName, ignoreCase = true)) {
+                    trueToPath = trueToPath.substring(trueToPath.indexOf(NODE_DELIMITER) + 1)
+                }
+                processMappedField(annotation, fromObject, toObject, trueFromPath, trueToPath)
             }
 
         }
@@ -203,42 +207,39 @@ class FieldMapper(
     }
 
     fun getMappingStructure(fromClass: Class<*>, toClass: Class<*>): MappingStructureDTO {
-        var mappingStructure = mappingStructures[fromClass to toClass]
-        if (mappingStructure != null) {
-            return mappingStructure
-        }
-        val annotations: MutableMap<Field, List<MappedField>> = HashMap()
-        val typeAnnotations: MutableList<MappedField> = ArrayList()
-        var clazz: Class<*>? = fromClass
-        while (clazz != null) {
-            val fields = clazz.declaredFields
-            val defaultMappingTarget = clazz.getDeclaredAnnotation(DefaultMappingTarget::class.java)
-            val defaultFromClass: Class<*> = defaultMappingTarget?.value?.java ?: Nothing::class.java
-            typeAnnotations.addAll(clazz.getDeclaredAnnotationsByType(MappedField::class.java)
-                .filter { mappedField ->
-                    try {
-                        return@filter isOfType(defaultFromClass, mappedField.target.java, toClass)
-                    } catch (e: IllegalStateException) {
-                        error("Could not create entity structure for <" + fromClass.simpleName + ", " + toClass.simpleName + ">: " + e.message)
-                    }
-                }
-            )
-            for (field in fields) {
-                val availableAnnotations = field.getDeclaredAnnotationsByType(MappedField::class.java)
+        val key = fromClass to toClass
+        return mappingStructures.computeIfAbsent(key) {
+            val annotations: MutableMap<Field, List<MappedField>> = HashMap()
+            val typeAnnotations: MutableList<MappedField> = ArrayList()
+            var clazz: Class<*>? = fromClass
+            while (clazz != null) {
+                val fields = clazz.declaredFields
+                val defaultMappingTarget = clazz.getDeclaredAnnotation(DefaultMappingTarget::class.java)
+                val defaultFromClass: Class<*> = defaultMappingTarget?.value?.java ?: Nothing::class.java
+                typeAnnotations.addAll(clazz.getDeclaredAnnotationsByType(MappedField::class.java)
                     .filter { mappedField ->
                         try {
                             return@filter isOfType(defaultFromClass, mappedField.target.java, toClass)
                         } catch (e: IllegalStateException) {
-                            throw IllegalStateException("Could not create entity structure for <" + fromClass.simpleName + ", " + toClass.simpleName + ">: " + e.message)
+                            error("Could not create entity structure for <" + fromClass.simpleName + ", " + toClass.simpleName + ">: " + e.message)
                         }
                     }
-                annotations[field] = availableAnnotations
+                )
+                for (field in fields) {
+                    val availableAnnotations = field.getDeclaredAnnotationsByType(MappedField::class.java)
+                        .filter { mappedField ->
+                            try {
+                                return@filter isOfType(defaultFromClass, mappedField.target.java, toClass)
+                            } catch (e: IllegalStateException) {
+                                throw IllegalStateException("Could not create entity structure for <" + fromClass.simpleName + ", " + toClass.simpleName + ">: " + e.message)
+                            }
+                        }
+                    annotations[field] = availableAnnotations
+                }
+                clazz = clazz.superclass
             }
-            clazz = clazz.superclass
+            MappingStructureDTO(typeAnnotations, annotations)
         }
-        mappingStructure = MappingStructureDTO(typeAnnotations, annotations)
-        mappingStructures[fromClass to toClass] = mappingStructure
-        return mappingStructure
     }
 
     private fun isOfType(defaultFromClass: Class<*>, fromClass: Class<*>, toClass: Class<*>): Boolean {
