@@ -4,6 +4,15 @@ aliases:
     docker:
       - image: cimg/openjdk:8.0
 jobs:
+  ktlint:
+    <<: *jdk_image
+    steps:
+      - checkout
+      - run:
+          name: Lint
+          command: mvn antrun:run@ktlint
+      - store_artifacts:
+          path: target/ktlint.xml
   test:
     <<: *jdk_image
     steps:
@@ -29,3 +38,4 @@ workflows:
   build:
     jobs:
       - test
+      - ktlint
