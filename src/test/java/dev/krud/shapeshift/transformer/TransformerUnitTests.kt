@@ -99,7 +99,7 @@ class TransformerUnitTests {
 
     @Test
     fun testDefaultTransformer() {
-        val outcome = DefaultTransformer().transform(
+        val outcome = EmptyTransformer.transform(
             TestPojo.getField("testLong"),
             TestPojo.getField("testLong"),
             1L,
