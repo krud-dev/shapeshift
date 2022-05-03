@@ -21,7 +21,7 @@
         <kotlin.version>1.6.20</kotlin.version>
 
         <!-- Dependency versions -->
-        <slf4j.version>1.7.32</slf4j.version>
+        <slf4j.version>1.7.36</slf4j.version>
     </properties>
 
     <licenses>
@@ -307,8 +307,7 @@
                         <phase>verify</phase>
                         <configuration>
                             <target name="ktlint">
-                                <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
-                                      classname="com.pinterest.ktlint.Main" classpathref="maven.plugin.classpath">
+                                <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true" classname="com.pinterest.ktlint.Main" classpathref="maven.plugin.classpath">
                                     <arg value="src/**/*.kt"/>
                                     <arg value="--reporter=plain"/>
                                     <arg value="--reporter=checkstyle,output=${project.build.directory}/ktlint.xml"/>
@@ -323,8 +322,7 @@
                         <id>ktlint-format</id>
                         <configuration>
                             <target name="ktlint">
-                                <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
-                                      classname="com.pinterest.ktlint.Main" classpathref="maven.plugin.classpath">
+                                <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true" classname="com.pinterest.ktlint.Main" classpathref="maven.plugin.classpath">
                                     <arg value="-F"/>
                                     <arg value="src/**/*.kt"/>
                                 </java>
