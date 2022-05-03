@@ -143,6 +143,7 @@ class FieldMapper(
             if (type == SourceType.FROM) {
                 return null
             } else {
+                // Impossible to reach
                 error("$path leads to a null target")
             }
         }

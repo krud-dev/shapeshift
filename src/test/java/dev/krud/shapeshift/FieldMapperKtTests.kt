@@ -174,6 +174,14 @@ internal class FieldMapperKtTests {
             expectThat(result.long)
                 .isEqualTo(1L)
         }
+
+        @Test
+        internal fun `mapping nested null object`() {
+            val result = mapper.map(FromWithNullShallowPath(), ToWithPopulatedField::class.java)
+
+            expectThat(result.long)
+                .isEqualTo(1L)
+        }
     }
 
     @Test
@@ -331,6 +339,15 @@ internal class FieldMapperKtTests {
     @MappedField(mapFrom = "long")
     internal class TypeFromWithoutDefinedTarget {
         val long: Long = 1L
+    }
+
+    internal class FromWithNullShallowPath {
+        @MappedField(target = ToWithPopulatedField::class, mapFrom = "long")
+        val child: Child? = null
+
+        class Child {
+            val long: Long? = null
+        }
     }
 
     internal class FromWithInvalidFromPath {
