@@ -23,7 +23,7 @@ import dev.krud.shapeshift.util.setValue
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Field
 
-class FieldMapper(
+class ShapeShift(
     transformers: List<TransformerRegistration<out Any, out Any>> = emptyList()
 ) {
     internal val transformers: MutableList<TransformerRegistration<out Any, out Any>> = transformers.toMutableList()
@@ -41,7 +41,6 @@ class FieldMapper(
         if (existingTransformer != TransformerRegistration.EMPTY) {
             error("Transformer with name $name already exists with type ${existingTransformer.transformer::class}")
         }
-
         if (newRegistration.default) {
             val existingDefaultTransformer = defaultTransformers[newRegistration.transformer.id]
             if (existingDefaultTransformer != null) {
@@ -285,7 +284,7 @@ class FieldMapper(
     }
 
     companion object {
-        private val log = LoggerFactory.getLogger(FieldMapper::class.java)
+        private val log = LoggerFactory.getLogger(ShapeShift::class.java)
         const val NODE_DELIMITER = "."
         val NODE_DELIMITER_REGEX = Regex("\\.")
 

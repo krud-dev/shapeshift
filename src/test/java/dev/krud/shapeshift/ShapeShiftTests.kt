@@ -22,19 +22,19 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.message
 import java.lang.reflect.Field
 
-internal class FieldMapperKtTests {
-    internal lateinit var mapper: FieldMapper
+internal class ShapeShiftTests {
+    internal lateinit var shapeShift: ShapeShift
 
     @BeforeEach
     internal fun setUp() {
-        mapper = FieldMapper()
+        shapeShift = ShapeShift()
     }
 
     @Nested
     inner class Scenarios {
         @Test
         internal fun `multiple mapped fields on field`() {
-            val result = mapper.map(FromWithMultipleMappedFields(), MultipleFieldTo::class.java)
+            val result = shapeShift.map(FromWithMultipleMappedFields(), MultipleFieldTo::class.java)
             expectThat(result.long)
                 .isEqualTo(1L)
             expectThat(result.secondLong)
@@ -43,7 +43,7 @@ internal class FieldMapperKtTests {
 
         @Test
         internal fun `simple mapping without transformer`() {
-            val result = mapper.map(TransformerlessFrom(), GenericTo::class.java)
+            val result = shapeShift.map(TransformerlessFrom(), GenericTo::class.java)
 
             expectThat(result.long)
                 .isEqualTo(1L)
@@ -51,12 +51,12 @@ internal class FieldMapperKtTests {
 
         @Test
         internal fun `simple mapping with transformer by type`() {
-            mapper.registerTransformer(
+            shapeShift.registerTransformer(
                 TransformerRegistration(
                     LongToStringTransformer()
                 )
             )
-            val result = mapper.map(TypeTransformerFrom(), StringTo::class.java)
+            val result = shapeShift.map(TypeTransformerFrom(), StringTo::class.java)
 
             expectThat(result.long)
                 .isEqualTo("1")
@@ -64,13 +64,13 @@ internal class FieldMapperKtTests {
 
         @Test
         internal fun `simple mapping with transformer by name`() {
-            mapper.registerTransformer(
+            shapeShift.registerTransformer(
                 TransformerRegistration(
                     LongToStringTransformer(),
                     name = "myTransformer"
                 )
             )
-            val result = mapper.map(NameTransformerFrom(), StringTo::class.java)
+            val result = shapeShift.map(NameTransformerFrom(), StringTo::class.java)
 
             expectThat(result.long)
                 .isEqualTo("1")
@@ -78,13 +78,13 @@ internal class FieldMapperKtTests {
 
         @Test
         internal fun `simple mapping with default transformer`() {
-            mapper.registerTransformer(
+            shapeShift.registerTransformer(
                 TransformerRegistration(
                     LongToStringTransformer(),
                     default = true
                 )
             )
-            val result = mapper.map(DefaultTransformerFrom(), StringTo::class.java)
+            val result = shapeShift.map(DefaultTransformerFrom(), StringTo::class.java)
 
             expectThat(result.long)
                 .isEqualTo("1")
@@ -92,7 +92,7 @@ internal class FieldMapperKtTests {
 
         @Test
         internal fun `simple mapping on type level`() {
-            val result = mapper.map(TransformerlessTypeLevelFrom(), GenericTo::class.java)
+            val result = shapeShift.map(TransformerlessTypeLevelFrom(), GenericTo::class.java)
 
             expectThat(result.long)
                 .isEqualTo(1L)
@@ -100,7 +100,7 @@ internal class FieldMapperKtTests {
 
         @Test
         internal fun `simple mapping with default target mapping`() {
-            val result = mapper.map(FromWithDefaultMappingTarget(), GenericTo::class.java)
+            val result = shapeShift.map(FromWithDefaultMappingTarget(), GenericTo::class.java)
 
             expectThat(result.long)
                 .isEqualTo(1L)
@@ -108,7 +108,7 @@ internal class FieldMapperKtTests {
 
         @Test
         internal fun `complex path mapping on mapFrom`() {
-            val result = mapper.map(FromWithComplexPath(), GenericTo::class.java)
+            val result = shapeShift.map(FromWithComplexPath(), GenericTo::class.java)
 
             expectThat(result.long)
                 .isEqualTo(1L)
@@ -116,7 +116,7 @@ internal class FieldMapperKtTests {
 
         @Test
         internal fun `complex path mapping on mapTo`() {
-            val result = mapper.map(FromToComplexPath(), ToWithComplexPath::class.java)
+            val result = shapeShift.map(FromToComplexPath(), ToWithComplexPath::class.java)
 
             expectThat(result.child.grandchild?.greatGrandchild?.long)
                 .isEqualTo(1L)
@@ -124,7 +124,7 @@ internal class FieldMapperKtTests {
 
         @Test
         internal fun `mapFrom with self field qualifier`() {
-            val result = mapper.map(FromWithMapFromSelfQualifier(), GenericTo::class.java)
+            val result = shapeShift.map(FromWithMapFromSelfQualifier(), GenericTo::class.java)
 
             expectThat(result.long)
                 .isEqualTo(1L)
@@ -132,7 +132,7 @@ internal class FieldMapperKtTests {
 
         @Test
         internal fun `mapFrom with self field qualifier on type level`() {
-            val result = mapper.map(FromWithMapFromSelfQualifierOnType(), GenericTo::class.java)
+            val result = shapeShift.map(FromWithMapFromSelfQualifierOnType(), GenericTo::class.java)
 
             expectThat(result.long)
                 .isEqualTo(1L)
@@ -140,7 +140,7 @@ internal class FieldMapperKtTests {
 
         @Test
         internal fun `mapTo with self field qualifier`() {
-            val result = mapper.map(FromWithMapToSelfQualifier(), ToWithShallowPath::class.java)
+            val result = shapeShift.map(FromWithMapToSelfQualifier(), ToWithShallowPath::class.java)
 
             expectThat(result.child?.long)
                 .isEqualTo(1L)
@@ -148,7 +148,7 @@ internal class FieldMapperKtTests {
 
         @Test
         internal fun `mapTo with self field qualifier on type level`() {
-            val result = mapper.map(FromWithMapToSelfQualifierOnType(), ToWithShallowPath::class.java)
+            val result = shapeShift.map(FromWithMapToSelfQualifierOnType(), ToWithShallowPath::class.java)
 
             expectThat(result.child?.long)
                 .isEqualTo(1L)
@@ -156,7 +156,7 @@ internal class FieldMapperKtTests {
 
         @Test
         internal fun `nested class mapping`() {
-            val result = mapper.map(
+            val result = shapeShift.map(
                 FromWithBase(),
                 ToWithBase::class.java
             )
@@ -170,14 +170,14 @@ internal class FieldMapperKtTests {
 
         @Test
         internal fun `mapping null object`() {
-            val result = mapper.map(FromWithNullField(), ToWithPopulatedField::class.java)
+            val result = shapeShift.map(FromWithNullField(), ToWithPopulatedField::class.java)
             expectThat(result.long)
                 .isEqualTo(1L)
         }
 
         @Test
         internal fun `mapping nested null object`() {
-            val result = mapper.map(FromWithNullShallowPath(), ToWithPopulatedField::class.java)
+            val result = shapeShift.map(FromWithNullShallowPath(), ToWithPopulatedField::class.java)
 
             expectThat(result.long)
                 .isEqualTo(1L)
@@ -187,7 +187,7 @@ internal class FieldMapperKtTests {
     @Test
     internal fun `mismatch between from and to types should throw exception`() {
         expectThrows<IllegalStateException> {
-            mapper.map(
+            shapeShift.map(
                 DefaultTransformerFrom(),
                 StringTo::class.java
             )
@@ -197,7 +197,7 @@ internal class FieldMapperKtTests {
     @Test
     internal fun `supplying invalid from path should throw exception`() {
         expectThrows<IllegalStateException> {
-            mapper.map(
+            shapeShift.map(
                 FromWithInvalidFromPath(), GenericTo::class.java
             )
         }
@@ -206,7 +206,7 @@ internal class FieldMapperKtTests {
     @Test
     internal fun `supplying invalid to path should throw exception`() {
         expectThrows<IllegalStateException> {
-            mapper.map(
+            shapeShift.map(
                 FromWithInvalidToPath(), GenericTo::class.java
             )
         }
@@ -225,9 +225,9 @@ internal class FieldMapperKtTests {
             true,
             "second"
         )
-        mapper.registerTransformer(firstRegistration)
+        shapeShift.registerTransformer(firstRegistration)
         expectThrows<IllegalStateException> {
-            mapper.registerTransformer(secondRegistration)
+            shapeShift.registerTransformer(secondRegistration)
         }
     }
 
@@ -238,8 +238,8 @@ internal class FieldMapperKtTests {
             false,
             null
         )
-        mapper.registerTransformer(registration)
-        expectThat(mapper.transformers.first().name)
+        shapeShift.registerTransformer(registration)
+        expectThat(shapeShift.transformers.first().name)
             .isEqualTo(
                 "ExampleFieldTransformer"
             )
@@ -253,16 +253,30 @@ internal class FieldMapperKtTests {
             "first"
         )
 
-        mapper.registerTransformer(registration)
+        shapeShift.registerTransformer(registration)
         expectThrows<IllegalStateException> {
-            mapper.registerTransformer(registration)
+            shapeShift.registerTransformer(registration)
+        }
+    }
+
+    @Test
+    internal fun `using unregistered transformer by name should throw exception`() {
+        expectThrows<IllegalStateException> {
+            shapeShift.map(NameTransformerFrom(), StringTo::class.java)
+        }
+    }
+
+    @Test
+    internal fun `using unregistered transformer by type should throw exception`() {
+        expectThrows<IllegalStateException> {
+            shapeShift.map(TypeTransformerFrom(), StringTo::class.java)
         }
     }
 
     @Test
     internal fun `type level mapped field throws exception if mapFrom is empty`() {
         expectThrows<IllegalStateException> {
-            mapper.map(FromWithInvalidTypeAnnotation(), GenericTo::class.java)
+            shapeShift.map(FromWithInvalidTypeAnnotation(), GenericTo::class.java)
         }.and {
             this.message.isEqualTo("mapFrom can not be empty when used at a type level")
         }
@@ -271,14 +285,14 @@ internal class FieldMapperKtTests {
     @Test
     internal fun `field level mapped field without default mapping target and no target should throw exception`() {
         expectThrows<IllegalStateException> {
-            mapper.map(FromWithoutDefinedTarget(), GenericTo::class.java)
+            shapeShift.map(FromWithoutDefinedTarget(), GenericTo::class.java)
         }
     }
 
     @Test
     internal fun `type level mapped field without default mapping target and no target should throw exception`() {
         expectThrows<IllegalStateException> {
-            mapper.map(TypeFromWithoutDefinedTarget(), GenericTo::class.java)
+            shapeShift.map(TypeFromWithoutDefinedTarget(), GenericTo::class.java)
         }
     }
 
