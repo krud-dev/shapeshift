@@ -254,7 +254,7 @@ class ShapeShift(
         fromPair: ObjectFieldTrio,
         toPair: ObjectFieldTrio
     ): TransformerRegistration<*, *> {
-        val transformationPair = Pair<Any?, Any?>(fromPair.type, toPair.type)
+        val transformationPair = fromPair to toPair
         log.trace("Attempting to find transformer for transformation pair [ $transformationPair ]")
         var transformerRegistration: TransformerRegistration<*, *> = TransformerRegistration.EMPTY
         log.trace("Checking transformerRef field")
@@ -262,7 +262,9 @@ class ShapeShift(
             log.trace("transformerRef is not empty with value [ " + annotation.transformerRef + " ]")
             transformerRegistration = getTransformerByName(annotation.transformerRef)
             if (transformerRegistration != TransformerRegistration.EMPTY) {
-                log.trace("Found transformer by ref of type [ " + transformerRegistration.transformer.javaClass.name + " ]")
+                log.trace("Found transformer by ref [ ${annotation.transformerRef} ] of type [ " + transformerRegistration.transformer.javaClass.name + " ]")
+            } else {
+                error("Could not find transformer by ref [ ${annotation.transformerRef} ] on $fromPair")
             }
         }
         if (transformerRegistration == TransformerRegistration.EMPTY) {
@@ -278,6 +280,11 @@ class ShapeShift(
                 return TransformerRegistration.EMPTY
             } else {
                 transformerRegistration = getTransformerByType(annotation.transformer.java)
+                if (transformerRegistration != TransformerRegistration.EMPTY) {
+                    log.trace("Found transformer by type [ ${annotation.transformer.java} ]")
+                } else {
+                    error("Could not find transformer by type [ ${annotation.transformer.java} ] on $fromPair")
+                }
             }
         }
         return transformerRegistration
