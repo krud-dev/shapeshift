@@ -10,6 +10,7 @@
 
 package dev.krud.shapeshift.transformer
 
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -17,97 +18,186 @@ import java.lang.reflect.Field
 import java.util.*
 
 class TransformerUnitTests {
-    @Test
-    fun testCommaDelimitedStringToListTransformer() {
-        val testString = "var1,var2,var3,var4"
-        val expectedOutcome = Arrays.asList("var1", "var2", "var3", "var4")
-        val transformer = CommaDelimitedStringToListTransformer()
-        val outcome: List<String?> = transformer.transform(
-            TestPojo.getField("testString"),
-            TestPojo.getField("testStringList"),
-            testString,
-            TestPojo.INSTANCE,
-            TestPojo.INSTANCE
-        ) as List<String?>
-        expectThat(outcome)
-            .isEqualTo(expectedOutcome)
+
+    @Nested
+    inner class CommaDelimitedStringToList {
+        @Test
+        fun `transformer should return list of strings if given a comma delimited string`() {
+            val testString = "var1,var2,var3,var4"
+            val expectedOutcome = listOf("var1", "var2", "var3", "var4")
+            val transformer = CommaDelimitedStringToListTransformer()
+            val outcome = transformer.transform(
+                TestPojo.getField("testString"),
+                TestPojo.getField("testStringList"),
+                testString,
+                TestPojo.INSTANCE,
+                TestPojo.INSTANCE
+            )
+            expectThat(outcome)
+                .isEqualTo(expectedOutcome)
+        }
+
+        @Test
+        fun `transformer should return null if originalValue is null`() {
+            val transformer = CommaDelimitedStringToListTransformer()
+            val outcome = transformer.transform(
+                TestPojo.getField("testString"),
+                TestPojo.getField("testStringList"),
+                null,
+                TestPojo.INSTANCE,
+                TestPojo.INSTANCE
+            )
+            expectThat(outcome)
+                .isEqualTo(null)
+        }
     }
 
-    @Test
-    fun testStringListToCommaDelimitedStringTransformer() {
-        val testStringList = Arrays.asList("var1", "var2", "var3", "var4")
-        val expectedOutcome = "var1,var2,var3,var4"
-        val transformer = StringListToCommaDelimitedStringTransformer()
-        val outcome = transformer.transform(
-            TestPojo.getField("testStringList"),
-            TestPojo.getField("testString"),
-            testStringList,
-            TestPojo.INSTANCE,
-            TestPojo.INSTANCE
-        )
-        expectThat(outcome)
-            .isEqualTo(expectedOutcome)
+    @Nested
+    inner class StringListToCommaDelimitedString {
+        @Test
+        fun `transformer should return comma delimited string if given a list of strings`() {
+            val testStringList = listOf("var1", "var2", "var3", "var4")
+            val expectedOutcome = "var1,var2,var3,var4"
+            val transformer = StringListToCommaDelimitedStringTransformer()
+            val outcome = transformer.transform(
+                TestPojo.getField("testStringList"),
+                TestPojo.getField("testString"),
+                testStringList,
+                TestPojo.INSTANCE,
+                TestPojo.INSTANCE
+            )
+            expectThat(outcome)
+                .isEqualTo(expectedOutcome)
+        }
+
+        @Test
+        fun `transformer should return null if originalValue is null`() {
+            val transformer = StringListToCommaDelimitedStringTransformer()
+            val outcome = transformer.transform(
+                TestPojo.getField("testStringList"),
+                TestPojo.getField("testString"),
+                null,
+                TestPojo.INSTANCE,
+                TestPojo.INSTANCE
+            )
+            expectThat(outcome)
+                .isEqualTo(null)
+        }
     }
 
-    @Test
-    fun testDateToLongTransformer() {
-        val testDate = Date(100000)
-        val expectedOutcome = testDate.time
-        val transformer = DateToLongTransformer()
-        val outcome = transformer.transform(
-            TestPojo.getField("testDate"),
-            TestPojo.getField("testLong"),
-            testDate,
-            TestPojo.INSTANCE,
-            TestPojo.INSTANCE
-        )
-        expectThat(outcome)
-            .isEqualTo(expectedOutcome)
+    @Nested
+    inner class DateToLong {
+        @Test
+        fun `transformer should return long if given a date`() {
+            val testDate = Date(100000)
+            val expectedOutcome = testDate.time
+            val transformer = DateToLongTransformer()
+            val outcome = transformer.transform(
+                TestPojo.getField("testDate"),
+                TestPojo.getField("testLong"),
+                testDate,
+                TestPojo.INSTANCE,
+                TestPojo.INSTANCE
+            )
+            expectThat(outcome)
+                .isEqualTo(expectedOutcome)
+        }
+
+        @Test
+        fun `transformer should return null if originalValue is null`() {
+            val transformer = DateToLongTransformer()
+            val outcome = transformer.transform(
+                TestPojo.getField("testDate"),
+                TestPojo.getField("testLong"),
+                null,
+                TestPojo.INSTANCE,
+                TestPojo.INSTANCE
+            )
+            expectThat(outcome)
+                .isEqualTo(null)
+        }
     }
 
-    @Test
-    fun testLongToDateTransformer() {
-        val testLong: Long = 100000
-        val expectedOutcome = Date(testLong)
-        val transformer = LongToDateTransformer()
-        val outcome = transformer.transform(
-            TestPojo.getField("testLong"),
-            TestPojo.getField("testDate"),
-            testLong,
-            TestPojo.INSTANCE,
-            TestPojo.INSTANCE
-        )
-        expectThat(outcome)
-            .isEqualTo(expectedOutcome)
+    @Nested
+    inner class LongToDate {
+        @Test
+        fun `transformer should return long if given a date`() {
+            val testLong: Long = 100000
+            val expectedOutcome = Date(testLong)
+            val transformer = LongToDateTransformer()
+            val outcome = transformer.transform(
+                TestPojo.getField("testLong"),
+                TestPojo.getField("testDate"),
+                testLong,
+                TestPojo.INSTANCE,
+                TestPojo.INSTANCE
+            )
+            expectThat(outcome)
+                .isEqualTo(expectedOutcome)
+        }
+
+        @Test
+        fun `transformer should return null if originalValue is null`() {
+            val transformer = LongToDateTransformer()
+            val outcome = transformer.transform(
+                TestPojo.getField("testLong"),
+                TestPojo.getField("testDate"),
+                null,
+                TestPojo.INSTANCE,
+                TestPojo.INSTANCE
+            )
+            expectThat(outcome)
+                .isEqualTo(null)
+        }
     }
 
-    @Test
-    fun testToStringTransformer() {
-        val testInt = 130405
-        val expectedOutcome = testInt.toString()
-        val transformer = ToStringTransformer()
-        val outcome = transformer.transform(
-            TestPojo.getField("testInt"),
-            TestPojo.getField("testString"),
-            testInt,
-            TestPojo.INSTANCE,
-            TestPojo.INSTANCE
-        )
-        expectThat(outcome)
-            .isEqualTo(expectedOutcome)
+    @Nested
+    inner class ToString {
+        @Test
+        fun `transformer should return string if given a value`() {
+            val testInt = 130405
+            val expectedOutcome = testInt.toString()
+            val transformer = ToStringTransformer()
+            val outcome = transformer.transform(
+                TestPojo.getField("testInt"),
+                TestPojo.getField("testString"),
+                testInt,
+                TestPojo.INSTANCE,
+                TestPojo.INSTANCE
+            )
+            expectThat(outcome)
+                .isEqualTo(expectedOutcome)
+        }
+
+        @Test
+        fun `transformer should return null if originalValue is null`() {
+            val transformer = ToStringTransformer()
+            val outcome = transformer.transform(
+                TestPojo.getField("testInt"),
+                TestPojo.getField("testString"),
+                null,
+                TestPojo.INSTANCE,
+                TestPojo.INSTANCE
+            )
+            expectThat(outcome)
+                .isEqualTo(null)
+        }
     }
 
-    @Test
-    fun testDefaultTransformer() {
-        val outcome = EmptyTransformer.transform(
-            TestPojo.getField("testLong"),
-            TestPojo.getField("testLong"),
-            1L,
-            TestPojo.INSTANCE,
-            TestPojo.INSTANCE
-        )
-        expectThat(outcome)
-            .isEqualTo(1L)
+    @Nested
+    inner class Empty {
+        @Test
+        fun `transformer should return originalValue`() {
+            val outcome = EmptyTransformer.transform(
+                TestPojo.getField("testLong"),
+                TestPojo.getField("testLong"),
+                1L,
+                TestPojo.INSTANCE,
+                TestPojo.INSTANCE
+            )
+            expectThat(outcome)
+                .isEqualTo(1L)
+        }
     }
 
     internal class TestPojo {
