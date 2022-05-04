@@ -14,10 +14,10 @@ package dev.krud.shapeshift.util
 
 import java.lang.reflect.Field
 
-fun Field.getValue(target: Any): Any? {
+internal fun Field.getValue(target: Any): Any? {
     return this.get(target)
 }
 
-fun Field.setValue(target: Any, value: Any?) {
+internal fun Field.setValue(target: Any, value: Any?) {
     this.set(target, value)
 }

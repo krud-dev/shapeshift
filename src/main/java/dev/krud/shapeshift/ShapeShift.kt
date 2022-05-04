@@ -12,8 +12,8 @@ package dev.krud.shapeshift
 
 import dev.krud.shapeshift.annotation.DefaultMappingTarget
 import dev.krud.shapeshift.annotation.MappedField
-import dev.krud.shapeshift.annotation.ObjectFieldTrio
-import dev.krud.shapeshift.dto.MappingStructureDTO
+import dev.krud.shapeshift.dto.MappingStructure
+import dev.krud.shapeshift.dto.ObjectFieldTrio
 import dev.krud.shapeshift.transformer.EmptyTransformer
 import dev.krud.shapeshift.transformer.base.ClassPair
 import dev.krud.shapeshift.transformer.base.FieldTransformer
@@ -31,7 +31,7 @@ class ShapeShift(
     internal val transformersByTypeCache: MutableMap<Class<out FieldTransformer<*, *>>, TransformerRegistration<*, *>> =
         mutableMapOf()
     internal val defaultTransformers: MutableMap<ClassPair, TransformerRegistration<out Any, out Any>> = mutableMapOf()
-    private val mappingStructures: MutableMap<ClassPair, MappingStructureDTO> = mutableMapOf()
+    private val mappingStructures: MutableMap<ClassPair, MappingStructure> = mutableMapOf()
     private val entityFieldsCache: MutableMap<Class<*>, Map<String, Field>> = mutableMapOf()
 
     fun <From : Any, To : Any> registerTransformer(registration: TransformerRegistration<From, To>) {
@@ -203,7 +203,7 @@ class ShapeShift(
         }
     }
 
-    fun getMappingStructure(fromClass: Class<*>, toClass: Class<*>): MappingStructureDTO {
+    private fun getMappingStructure(fromClass: Class<*>, toClass: Class<*>): MappingStructure {
         val key = fromClass to toClass
         return mappingStructures.computeIfAbsent(key) {
             val annotations: MutableMap<Field, List<MappedField>> = HashMap()
@@ -236,7 +236,7 @@ class ShapeShift(
                 }
                 clazz = clazz.superclass
             }
-            MappingStructureDTO(typeAnnotations, annotations)
+            MappingStructure(typeAnnotations, annotations)
         }
     }
 
