@@ -51,11 +51,14 @@ internal class ShapeShiftTests {
 
         @Test
         internal fun `simple mapping with transformer by type`() {
-            shapeShift.registerTransformer(
-                TransformerRegistration(
-                    LongToStringTransformer()
+            shapeShift = ShapeShiftBuilder()
+                .withTransformer(
+                    TransformerRegistration(
+                        LongToStringTransformer()
+                    )
                 )
-            )
+                .build()
+
             val result = shapeShift.map(TypeTransformerFrom(), StringTo::class.java)
 
             expectThat(result.long)
@@ -64,12 +67,14 @@ internal class ShapeShiftTests {
 
         @Test
         internal fun `simple mapping with transformer by name`() {
-            shapeShift.registerTransformer(
-                TransformerRegistration(
-                    LongToStringTransformer(),
-                    name = "myTransformer"
+            shapeShift = ShapeShiftBuilder()
+                .withTransformer(
+                    TransformerRegistration(
+                        LongToStringTransformer(),
+                        name = "myTransformer"
+                    )
                 )
-            )
+                .build()
             val result = shapeShift.map(NameTransformerFrom(), StringTo::class.java)
 
             expectThat(result.long)
@@ -78,12 +83,14 @@ internal class ShapeShiftTests {
 
         @Test
         internal fun `simple mapping with default transformer`() {
-            shapeShift.registerTransformer(
-                TransformerRegistration(
-                    LongToStringTransformer(),
-                    default = true
+            shapeShift = ShapeShiftBuilder()
+                .withTransformer(
+                    TransformerRegistration(
+                        LongToStringTransformer(),
+                        default = true
+                    )
                 )
-            )
+                .build()
             val result = shapeShift.map(DefaultTransformerFrom(), StringTo::class.java)
 
             expectThat(result.long)
@@ -225,9 +232,13 @@ internal class ShapeShiftTests {
             true,
             "second"
         )
-        shapeShift.registerTransformer(firstRegistration)
+
+        val builder = ShapeShiftBuilder()
+            .withTransformer(firstRegistration)
+            .withTransformer(secondRegistration)
+
         expectThrows<IllegalStateException> {
-            shapeShift.registerTransformer(secondRegistration)
+            builder.build()
         }
     }
 
@@ -238,7 +249,9 @@ internal class ShapeShiftTests {
             false,
             null
         )
-        shapeShift.registerTransformer(registration)
+        shapeShift = ShapeShiftBuilder()
+            .withTransformer(registration)
+            .build()
         expectThat(shapeShift.transformers.first().name)
             .isEqualTo(
                 "ExampleFieldTransformer"
@@ -253,9 +266,12 @@ internal class ShapeShiftTests {
             "first"
         )
 
-        shapeShift.registerTransformer(registration)
+        val builder = ShapeShiftBuilder()
+            .withTransformer(registration)
+            .withTransformer(registration)
+
         expectThrows<IllegalStateException> {
-            shapeShift.registerTransformer(registration)
+            builder.build()
         }
     }
 
@@ -330,6 +346,7 @@ internal class ShapeShiftTests {
 
             class Grandchild {
                 val greatGrandchild: GreatGrandchild = GreatGrandchild()
+
                 class GreatGrandchild {
                     val long: Long = 1L
                 }
@@ -383,6 +400,7 @@ internal class ShapeShiftTests {
     internal class FromWithMapFromSelfQualifier {
         @MappedField(target = GenericTo::class, mapFrom = "child.long")
         val child: Child = Child()
+
         class Child {
             val long: Long = 1L
         }
@@ -391,6 +409,7 @@ internal class ShapeShiftTests {
     @MappedField(target = GenericTo::class, mapFrom = "fromWithMapFromSelfQualifierOnType.child.long")
     internal class FromWithMapFromSelfQualifierOnType {
         val child: Child = Child()
+
         class Child {
             val long: Long = 1L
         }
@@ -465,6 +484,7 @@ internal class ShapeShiftTests {
 
             class Grandchild {
                 val greatGrandchild: GreatGrandchild? = null
+
                 class GreatGrandchild {
                     val long: Long? = null
                 }

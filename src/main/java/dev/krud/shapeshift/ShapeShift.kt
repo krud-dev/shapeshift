@@ -23,10 +23,10 @@ import dev.krud.shapeshift.util.setValue
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Field
 
-class ShapeShift(
-    transformers: List<TransformerRegistration<out Any, out Any>> = emptyList()
+class ShapeShift constructor(
+    transformersRegistrations: List<TransformerRegistration<out Any, out Any>> = emptyList()
 ) {
-    internal val transformers: MutableList<TransformerRegistration<out Any, out Any>> = transformers.toMutableList()
+    internal val transformers: MutableList<TransformerRegistration<out Any, out Any>> = mutableListOf()
     internal val transformersByNameCache: MutableMap<String, TransformerRegistration<out Any, out Any>> = mutableMapOf()
     internal val transformersByTypeCache: MutableMap<Class<out FieldTransformer<*, *>>, TransformerRegistration<*, *>> =
         mutableMapOf()
@@ -34,24 +34,10 @@ class ShapeShift(
     private val mappingStructures: MutableMap<ClassPair, MappingStructure> = mutableMapOf()
     private val entityFieldsCache: MutableMap<Class<*>, Map<String, Field>> = mutableMapOf()
 
-    fun <From : Any, To : Any> registerTransformer(registration: TransformerRegistration<From, To>) {
-        val name = registration.name ?: registration.transformer::class.simpleName!!
-        val newRegistration = registration.copy(name = name)
-        val existingTransformer = getTransformerByName(name)
-        if (existingTransformer != TransformerRegistration.EMPTY) {
-            error("Transformer with name $name already exists with type ${existingTransformer.transformer::class}")
+    init {
+        for (registration in transformersRegistrations) {
+            registerTransformer(registration)
         }
-        if (newRegistration.default) {
-            val existingDefaultTransformer = defaultTransformers[newRegistration.transformer.id]
-            if (existingDefaultTransformer != null) {
-                error("Default transformer with pair ${newRegistration.transformer.id} already exists")
-            }
-            defaultTransformers[newRegistration.transformer.id] = newRegistration
-        }
-
-        transformers.add(newRegistration)
-        transformersByNameCache.remove(name)
-        transformersByTypeCache.remove(newRegistration.transformer::class.java)
     }
 
     fun <From : Any, To : Any> map(fromObject: From, toClazz: Class<To>): To {
@@ -288,6 +274,26 @@ class ShapeShift(
             }
         }
         return transformerRegistration
+    }
+
+    private fun <From : Any, To : Any> registerTransformer(registration: TransformerRegistration<From, To>) {
+        val name = registration.name ?: registration.transformer::class.simpleName!!
+        val newRegistration = registration.copy(name = name)
+        val existingTransformer = getTransformerByName(name)
+        if (existingTransformer != TransformerRegistration.EMPTY) {
+            error("Transformer with name $name already exists with type ${existingTransformer.transformer::class}")
+        }
+        if (newRegistration.default) {
+            val existingDefaultTransformer = defaultTransformers[newRegistration.transformer.id]
+            if (existingDefaultTransformer != null) {
+                error("Default transformer with pair ${newRegistration.transformer.id} already exists")
+            }
+            defaultTransformers[newRegistration.transformer.id] = newRegistration
+        }
+
+        transformers.add(newRegistration)
+        transformersByNameCache.remove(name)
+        transformersByTypeCache.remove(newRegistration.transformer::class.java)
     }
 
     companion object {
