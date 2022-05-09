@@ -9,10 +9,15 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install
+          command: mvn install -DskipTests
+      - run:
           name: Lint
           command: mvn antrun:run@ktlint
       - store_artifacts:
-          path: target/ktlint.xml
+          path: shapeshift/target/ktlint.xml
+      - store_artifacts:
+          path: spring-boot-starter-shapeshift/target/ktlint.xml
   test:
     <<: *jdk_image
     steps:
