@@ -41,6 +41,7 @@
     <modules>
         <module>simple-mapping</module>
         <module>advanced-mapping</module>
+        <module>transformer-mapping</module>
     </modules>
 
     <dependencies>
