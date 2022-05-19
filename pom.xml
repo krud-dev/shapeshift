@@ -14,7 +14,7 @@
     <groupId>dev.krud</groupId>
     <artifactId>shapeshift-parent</artifactId>
     <name>shapeshift-parent</name>
-    <version>0.0.1</version>
+    <version>0.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <url>https://github.com/krud-dev/shapeshift</url>
     <description>A Kotlin library for intelligent object mapping.</description>
@@ -208,12 +208,12 @@
             <dependency>
                 <groupId>dev.krud</groupId>
                 <artifactId>shapeshift</artifactId>
-                <version>0.0.1</version>
+                <version>0.0.2-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>dev.krud</groupId>
                 <artifactId>spring-boot-starter-shapeshift</artifactId>
-                <version>0.0.1</version>
+                <version>0.0.2-SNAPSHOT</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
