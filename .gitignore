@@ -109,4 +109,8 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
-/.flattened-pom.xml
+.flattened-pom.xml
+
+
+### Mac ###
+.DS_Store
