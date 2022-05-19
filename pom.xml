@@ -16,6 +16,8 @@
     <name>shapeshift-parent</name>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
+    <url>https://github.com/krud-dev/shapeshift</url>
+    <description>A Kotlin library for intelligent object mapping.</description>
 
     <properties>
         <java.version>1.8</java.version>
@@ -217,6 +219,7 @@
     </dependencyManagement>
 
     <build>
+        <sourceDirectory>src/main/kotlin</sourceDirectory>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
