@@ -108,8 +108,8 @@ class ShapeShift constructor(
         }
         if (value != null) {
             try {
-                if (!toPair.field.type.isAssignableFrom(value::class.java)) {
-                    error("Type mismatch: Expected ${toPair.field.type} but got ${value::class.java}")
+                if (!toPair.type.isAssignableFrom(value::class.java)) {
+                    error("Type mismatch: Expected ${toPair.type} but got ${value::class.java}")
                 }
                 toPair.field.setValue(toPair.target, value)
             } catch (e: Exception) {
@@ -139,15 +139,17 @@ class ShapeShift constructor(
             "Field ${nodes.firstOrNull()} not found on class ${target::class.java}"
         )
 
+        val fieldType = field.type.kotlin.javaObjectType
+
         if (nodes.size == 1) {
-            return ObjectFieldTrio(target, field, field.type) // todo: boxPrimitveType
+            return ObjectFieldTrio(target, field, fieldType)
         }
         nodes.removeFirst()
         field.isAccessible = true
         var subTarget = field.get(target)
 
         if (subTarget == null && type == SourceType.TO) {
-            subTarget = field.type.newInstance()
+            subTarget = fieldType.newInstance()
             field.set(target, subTarget)
         }
 

@@ -20,6 +20,6 @@ interface FieldTransformer<From : Any, To : Any> {
     fun transform(fromField: Field, toField: Field, originalValue: From?, fromObject: Any, toObject: Any): To?
 
     companion object {
-        val FieldTransformer<*, *>.id: ClassPair get() = fromType to toType
+        val FieldTransformer<*, *>.id: ClassPair get() = fromType.kotlin.javaObjectType to toType.kotlin.javaObjectType
     }
 }
