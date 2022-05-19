@@ -10,8 +10,15 @@
 
 package dev.krud.shapeshift
 
+import dev.krud.shapeshift.transformer.base.FieldTransformer
+
 class ShapeShiftBuilder {
     private val transformers: MutableList<TransformerRegistration<*, *>> = mutableListOf()
+
+    fun withTransformer(fieldTransformer: FieldTransformer<*, *>, default: Boolean = false, name: String? = null): ShapeShiftBuilder {
+        transformers.add(TransformerRegistration(fieldTransformer, default, name))
+        return this
+    }
 
     fun withTransformer(transformerRegistration: TransformerRegistration<*, *>): ShapeShiftBuilder {
         transformers += transformerRegistration
