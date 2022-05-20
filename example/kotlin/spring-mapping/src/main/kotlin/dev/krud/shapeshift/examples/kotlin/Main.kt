@@ -11,13 +11,10 @@
 package dev.krud.shapeshift.examples.kotlin
 
 import dev.krud.shapeshift.ShapeShift
-import dev.krud.shapeshift.ShapeShiftBuilder
-import dev.krud.shapeshift.transformer.DateToLongTransformer
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.builder.SpringApplicationBuilder
-import java.util.*
 
 @SpringBootApplication
 class Main : InitializingBean {
