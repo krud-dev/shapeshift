@@ -1,4 +1,21 @@
-# [](https://github.com/krud-dev/shapeshift/compare/v0.0.1...v) (2022-05-19)
+# [](https://github.com/krud-dev/shapeshift/compare/v0.1.0...v) (2022-05-20)
+
+
+
+# [0.1.0](https://github.com/krud-dev/shapeshift/compare/v0.0.1...v0.1.0) (2022-05-20)
+
+
+### Bug Fixes
+
+* rename ShapeShiftCustomizer to ShapeShiftBuilderCustomizer ([a614b08](https://github.com/krud-dev/shapeshift/commit/a614b08d1b818ee0618bc922dd4001588ac9f7d3))
+* upgrade org.jetbrains.kotlin:kotlin-stdlib-jdk8 from 1.6.20 to 1.6.21 ([7d008c2](https://github.com/krud-dev/shapeshift/commit/7d008c272bf3373e5da91f6a8ac68fb700bacc01))
+
+
+### Features
+
+* add inline map method for convenience ([b6670c4](https://github.com/krud-dev/shapeshift/commit/b6670c47011d47617f232e51d9e2a628d8143816))
+* add map method which receives an already instantiated object ([8efa6cd](https://github.com/krud-dev/shapeshift/commit/8efa6cdc5cddfd198635585f6446234cc4580c5b))
+* add ShapeShiftCustomizer ([17d6572](https://github.com/krud-dev/shapeshift/commit/17d6572a8ad8e1e33a448a0ab921ecbfe2c081cf))
 
 
 
