@@ -26,11 +26,11 @@ fun main() {
         secondChild = AdvancedChildEntity("Second Child"),
     )
     // Map the AdvancedEntity to a AdvancedEntityDisplay using ShapeShift
-    val advancedEntityDisplay = shapeShift.map(advancedEntity, AdvancedEntityDisplay::class.java)
+    val advancedEntityDisplay = shapeShift.map<AdvancedEntityDisplay>(advancedEntity)
     println("AdvancedEntityDisplay: $advancedEntityDisplay")
 
     // Map the AdvancedEntity to a ReducedAdvancedEntityDisplay using ShapeShift
-    val reducedAdvancedEntityDisplay = shapeShift.map(advancedEntity, ReducedAdvancedEntityDisplay::class.java)
+    val reducedAdvancedEntityDisplay = shapeShift.map<ReducedAdvancedEntityDisplay>(advancedEntity)
     println("ReducedAdvancedEntityDisplay: $reducedAdvancedEntityDisplay")
 
 }

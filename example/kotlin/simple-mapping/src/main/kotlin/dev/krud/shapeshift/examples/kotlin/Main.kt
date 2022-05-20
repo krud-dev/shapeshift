@@ -26,6 +26,6 @@ fun main() {
         privateData = "Test private data"
     )
     // Map the SimpleEntity to a SimpleEntityDisplay using ShapeShift
-    val simpleEntityDisplay = shapeShift.map(simpleEntity, SimpleEntityDisplay::class.java)
+    val simpleEntityDisplay = shapeShift.map<SimpleEntityDisplay>(simpleEntity)
     println("SimpleEntityDisplay: $simpleEntityDisplay")
 }
