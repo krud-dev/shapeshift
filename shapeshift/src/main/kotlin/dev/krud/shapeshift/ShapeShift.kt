@@ -40,7 +40,11 @@ class ShapeShift constructor(
         }
     }
 
-    fun <From : Any, To : Any> map(fromObject: From, toClazz: Class<To>): To {
+    inline fun <reified To : Any> map(fromObject: Any): To {
+        return map(fromObject, To::class.java)
+    }
+
+    fun <To : Any> map(fromObject: Any, toClazz: Class<To>): To {
         val mappingStructure = getMappingStructure(fromObject::class.java, toClazz)
         val toObject = toClazz.newInstance()
 
@@ -84,7 +88,7 @@ class ShapeShift constructor(
         return toObject
     }
 
-    private fun <From : Any, To : Any> processMappedField(
+    private fun <To : Any, From : Any> processMappedField(
         annotation: MappedField,
         fromObject: From,
         toObject: To,
