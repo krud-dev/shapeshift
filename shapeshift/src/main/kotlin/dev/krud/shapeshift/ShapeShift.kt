@@ -22,7 +22,6 @@ import dev.krud.shapeshift.util.getValue
 import dev.krud.shapeshift.util.setValue
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Field
-import kotlin.reflect.full.primaryConstructor
 
 class ShapeShift constructor(
     transformersRegistrations: List<TransformerRegistration<out Any, out Any>> = emptyList()
