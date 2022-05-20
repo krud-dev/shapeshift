@@ -25,7 +25,7 @@ import org.springframework.context.annotation.Configuration
 open class ShapeShiftAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(ShapeShift::class)
-    open fun shapeShift(@Autowired(required = false) fieldTransformers: Map<String, FieldTransformer<*, *>>?): ShapeShift {
+    open fun shapeShift(@Autowired(required = false) fieldTransformers: Map<String, FieldTransformer<*, *>>?, @Autowired(required = false) customizers: List<ShapeShiftCustomizer>?): ShapeShift {
         val builder = ShapeShiftBuilder()
         fieldTransformers?.forEach { (name, fieldTransformer) ->
             builder.withTransformer(
@@ -35,6 +35,9 @@ open class ShapeShiftAutoConfiguration {
                     name
                 )
             )
+        }
+        customizers?.forEach { customizer ->
+            customizer.customize(builder)
         }
         return builder.build()
     }
