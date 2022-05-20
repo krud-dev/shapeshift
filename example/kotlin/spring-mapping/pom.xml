@@ -27,13 +27,14 @@
     <properties>
         <java.version>1.8</java.version>
         <kotlin.version>1.6.20</kotlin.version>
+        <shapeshift.version>0.1.0</shapeshift.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>dev.krud</groupId>
             <artifactId>spring-boot-starter-shapeshift</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>${shapeshift.version}</version>
         </dependency>
     </dependencies>
 
