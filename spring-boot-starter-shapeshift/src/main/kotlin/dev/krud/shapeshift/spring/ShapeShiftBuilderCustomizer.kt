@@ -15,7 +15,7 @@ import dev.krud.shapeshift.ShapeShiftBuilder
 /**
  * The customizer allows you to customize the [ShapeShiftBuilder] before it is used to create the [ShapeShift] bean.
  */
-interface ShapeShiftCustomizer {
+interface ShapeShiftBuilderCustomizer {
     /**
      * Customize the [ShapeShiftBuilder] before it is used to create the [ShapeShift] bean.
      */
