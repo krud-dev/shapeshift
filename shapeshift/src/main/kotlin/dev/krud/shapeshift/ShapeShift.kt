@@ -22,6 +22,7 @@ import dev.krud.shapeshift.util.getValue
 import dev.krud.shapeshift.util.setValue
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Field
+import kotlin.reflect.full.primaryConstructor
 
 class ShapeShift constructor(
     transformersRegistrations: List<TransformerRegistration<out Any, out Any>> = emptyList()
@@ -45,9 +46,13 @@ class ShapeShift constructor(
     }
 
     fun <To : Any> map(fromObject: Any, toClazz: Class<To>): To {
-        val mappingStructure = getMappingStructure(fromObject::class.java, toClazz)
         val toObject = toClazz.newInstance()
+        return map(fromObject, toObject)
+    }
 
+    fun <To : Any> map(fromObject: Any, toObject: To): To {
+        val toClazz = toObject::class.java
+        val mappingStructure = getMappingStructure(fromObject::class.java, toClazz)
         for (typeAnnotation in mappingStructure.typeAnnotations) {
             if (typeAnnotation.mapFrom.isBlank()) {
                 error("mapFrom can not be empty when used at a type level")
