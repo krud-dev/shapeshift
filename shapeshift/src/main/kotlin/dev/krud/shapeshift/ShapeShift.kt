@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory
 import java.lang.reflect.Field
 
 class ShapeShift constructor(
-    transformersRegistrations: List<TransformerRegistration<out Any, out Any>> = emptyList()
+    transformersRegistrations: Set<TransformerRegistration<out Any, out Any>> = emptySet()
 ) {
     internal val transformers: MutableList<TransformerRegistration<out Any, out Any>> = mutableListOf()
     internal val transformersByNameCache: MutableMap<String, TransformerRegistration<out Any, out Any>> = mutableMapOf()
@@ -49,7 +49,7 @@ class ShapeShift constructor(
         return map(fromObject, toObject)
     }
 
-    fun <To : Any> map(fromObject: Any, toObject: To): To {
+    private fun <To : Any> map(fromObject: Any, toObject: To): To {
         val toClazz = toObject::class.java
         val mappingStructure = getMappingStructure(fromObject::class.java, toClazz)
         for (typeAnnotation in mappingStructure.typeAnnotations) {

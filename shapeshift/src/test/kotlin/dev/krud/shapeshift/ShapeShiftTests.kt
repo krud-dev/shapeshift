@@ -12,6 +12,7 @@ package dev.krud.shapeshift
 
 import dev.krud.shapeshift.annotation.DefaultMappingTarget
 import dev.krud.shapeshift.annotation.MappedField
+import dev.krud.shapeshift.transformer.DateToLongTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -259,7 +260,7 @@ internal class ShapeShiftTests {
     }
 
     @Test
-    internal fun `registering same transformer twice should throw exception`() {
+    internal fun `registering same transformer twice should result in 1 transformer`() {
         val registration = TransformerRegistration(
             ExampleFieldTransformer(),
             false,
@@ -269,6 +270,29 @@ internal class ShapeShiftTests {
         val builder = ShapeShiftBuilder()
             .withTransformer(registration)
             .withTransformer(registration)
+
+        val shapeShift = builder.build()
+        expectThat(shapeShift.transformers.size)
+            .isEqualTo(1)
+    }
+
+    @Test
+    internal fun `registering transformer with an existing name twice should throw exception`() {
+        val registration = TransformerRegistration(
+            ExampleFieldTransformer(),
+            false,
+            "first"
+        )
+
+        val secondRegistration = TransformerRegistration(
+            DateToLongTransformer(),
+            false,
+            "first"
+        )
+
+        val builder = ShapeShiftBuilder()
+            .withTransformer(registration)
+            .withTransformer(secondRegistration)
 
         expectThrows<IllegalStateException> {
             builder.build()
