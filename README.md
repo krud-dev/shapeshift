@@ -6,3 +6,42 @@
 [![GitHub](https://img.shields.io/github/license/krud-dev/shapeshift)](https://github.com/krud-dev/shapeshift/blob/master/LICENSE)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/krud-dev/shapeshift/issues)
 # ShapeShift
+
+A Kotlin library for intelligent object mapping and conversion between objects. 
+
+## Installation
+
+### Maven
+```xml
+<dependency>
+  <groupId>dev.krud</groupId>
+  <artifactId>shapeshift</artifactId>
+  <version>0.1.0</version>
+</dependency>
+```
+
+### Gradle
+#### Groovy DSL
+```groovy
+implementation 'dev.krud:shapeshift:0.1.0'
+```
+#### Kotlin DSL
+```kotlin
+implementation("dev.krud:shapeshift:0.1.0")
+```
+
+## Requirements
+
+* Minimum supported Kotlin version: 1.6.X
+* Minimum supported Java version: 1.8
+
+## Examples
+
+The `examples` directory contains several independent scenarios for common use cases of this library.
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change. See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
+
+## License
+ShapeShift is licensed under the [MIT](https://choosealicense.com/licenses/mit/) license. For more information, please see the [LICENSE](LICENSE) file.
