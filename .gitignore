@@ -21,8 +21,6 @@ local.properties
 .idea/*
 !.idea/copyright/profiles_settings.xml
 !.idea/copyright/ShapeShift.xml
-!.idea/codeStyles/codeStyleConfig.xml
-!.idea/codeStyles/Project.xml
 *.iml
 
 # External tool builders
