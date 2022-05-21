@@ -1,66 +1,60 @@
 version: 2.1
+orbs:
+    ktlint: idanelh/ktlint@1.0.1
 aliases:
-  - &jdk_image
-    docker:
-      - image: cimg/openjdk:8.0
+    - &jdk_image
+        docker:
+            -   image: cimg/openjdk:8.0
 jobs:
-  ktlint:
-    <<: *jdk_image
-    steps:
-      - checkout
-      - run:
-          name: Install
-          command: mvn install -DskipTests
-      - run:
-          name: Lint
-          command: mvn antrun:run@ktlint
-      - store_artifacts:
-          path: shapeshift/target/ktlint.xml
-      - store_artifacts:
-          path: spring-boot-starter-shapeshift/target/ktlint.xml
-  test:
-    <<: *jdk_image
-    steps:
-      - checkout
-      - run:
-          name: Test JAR
-          command: mvn test
-      - run:
-          name: Save test results
-          command: |
-            mkdir -p ~/test-results/junit/
-            find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/test-results/junit/ \;
-            curl -Os https://uploader.codecov.io/latest/linux/codecov
-            chmod +x codecov
-            ./codecov -t ${CODECOV_TOKEN}
-          when: always
-      - store_test_results:
-          path: ~/test-results
-      - store_artifacts:
-          path: ~/test-results/junit
-  deploy:
-    <<: *jdk_image
-    steps:
-      - checkout
-      - run:
-          name: Import GPG key
-          command: echo -e "$GPG_KEY" | gpg --import
-      - run:
-          name: Build and deploy jar
-          command: mvn -s ops/settings.xml -DskipTests -Possrh deploy
+    test:
+        <<: *jdk_image
+        steps:
+            - checkout
+            -   run:
+                    name: Test JAR
+                    command: mvn test
+            -   run:
+                    name: Save test results
+                    command: |
+                        mkdir -p ~/test-results/junit/
+                        find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} ~/test-results/junit/ \;
+                        curl -Os https://uploader.codecov.io/latest/linux/codecov
+                        chmod +x codecov
+                        ./codecov -t ${CODECOV_TOKEN}
+                    when: always
+            -   store_test_results:
+                    path: ~/test-results
+            -   store_artifacts:
+                    path: ~/test-results/junit
+    deploy:
+        <<: *jdk_image
+        steps:
+            - checkout
+            -   run:
+                    name: Import GPG key
+                    command: echo -e "$GPG_KEY" | gpg --import
+            -   run:
+                    name: Build and deploy jar
+                    command: mvn -s ops/settings.xml -DskipTests -Possrh deploy
 
 workflows:
-  version: 2
-  build:
-    jobs:
-      - test
-      - ktlint
-      - deploy:
-          context: shapeshift_ossrh
-          requires:
+    version: 2
+    build:
+        jobs:
             - test
-            - ktlint
-          filters:
-            branches:
-              only:
-                - master
+            - ktlint/lint:
+                name: lint_shapeshift
+                working-directory: shapeshift
+            - ktlint/lint:
+                name: lint_shapeshift_spring_boot_starter
+                working-directory: spring-boot-starter-shapeshift
+            - deploy:
+                context: shapeshift_ossrh
+                requires:
+                    - lint_shapeshift
+                    - lint_shapeshift_spring_boot_starter
+                    - test
+                filters:
+                    branches:
+                        only:
+                            - master
