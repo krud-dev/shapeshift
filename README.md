@@ -7,7 +7,22 @@
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/krud-dev/shapeshift/issues)
 # ShapeShift
 
-A Kotlin library for intelligent object mapping and conversion between objects. 
+A Kotlin library for intelligent object mapping and conversion between objects.
+
+- [Getting Started](#getting-started)
+- [Installation](#installation)
+    * [Maven](#maven)
+    * [Gradle](#gradle)
+        + [Groovy DSL](#groovy-dsl)
+        + [Kotlin DSL](#kotlin-dsl)
+- [Requirements](#requirements)
+- [Examples](#examples)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Getting Started
+
+Find our full getting started guide [here](docs/getting_started.md).
 
 ## Installation
 
@@ -37,7 +52,7 @@ implementation("dev.krud:shapeshift:0.1.0")
 
 ## Examples
 
-The `examples` directory contains several independent scenarios for common use cases of this library.
+The [example](example/) directory contains several independent scenarios for common use cases of this library.
 
 ## Contributing
 
