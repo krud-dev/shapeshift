@@ -1,3 +1,15 @@
+<p align="center">
+  <a href="https://github.com/chakra-ui/chakra-ui">
+    <img src="https://github.com/krud-dev/shapeshift/blob/master/.assets/logo.png?raw=true" alt="ShapeShift logo" width="250" />
+  </a>
+</p>
+<h1 align="center">ShapeShift️</h1>
+
+<div align="center">
+A Kotlin library for intelligent object mapping and conversion between objects.
+<br/>
+<br/>
+
 ![Maven Central](https://img.shields.io/maven-central/v/dev.krud/shapeshift)
 ![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/dev.krud/shapeshift?server=https%3A%2F%2Fs01.oss.sonatype.org&label=snapshot)
 
@@ -5,9 +17,8 @@
 [![Codecov](https://img.shields.io/codecov/c/gh/krud-dev/shapeshift?token=1EG9H9RK5Q)](https://codecov.io/gh/krud-dev/shapeshift)
 [![GitHub](https://img.shields.io/github/license/krud-dev/shapeshift)](https://github.com/krud-dev/shapeshift/blob/master/LICENSE)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)](https://github.com/krud-dev/shapeshift/issues)
-# ShapeShift
 
-A Kotlin library for intelligent object mapping and conversion between objects.
+</div>
 
 - [Getting Started](#getting-started)
 - [Installation](#installation)
