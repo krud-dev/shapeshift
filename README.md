@@ -1,6 +1,8 @@
+<br/>
+
 <p align="center">
   <a href="https://github.com/chakra-ui/chakra-ui">
-    <img src="https://github.com/krud-dev/shapeshift/blob/master/.assets/logo.png?raw=true" alt="ShapeShift logo" width="250" />
+    <img src=".assets/logo.png" alt="ShapeShift logo" width="250" />
   </a>
 </p>
 <h1 align="center">ShapeShift️</h1>
@@ -20,7 +22,7 @@ A Kotlin library for intelligent object mapping and conversion between objects.
 
 </div>
 
-- [Getting Started](#getting-started)
+- [Documentation](#documentation)
 - [Installation](#installation)
     * [Maven](#maven)
     * [Gradle](#gradle)
@@ -31,9 +33,15 @@ A Kotlin library for intelligent object mapping and conversion between objects.
 - [Contributing](#contributing)
 - [License](#license)
 
-## Getting Started
+## Documentation
 
-Find our full getting started guide [here](docs/getting_started.md).
+To learn how to get started with **ShapeShift**, visit the official documentation website. You'll find in-depth documentation, tips and guides to help you get up and running.
+
+<p>
+  <a href="https://shapeshift.krud.dev/">
+    <img alt="Visit ShapeShift documentation" src=".assets/documentation.png" width="240" />
+  </a>
+</p>
 
 ## Installation
 
