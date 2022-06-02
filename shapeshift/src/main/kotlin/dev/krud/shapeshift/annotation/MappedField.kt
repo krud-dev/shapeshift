@@ -12,6 +12,7 @@ package dev.krud.shapeshift.annotation
 import dev.krud.shapeshift.transformer.EmptyTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
 
 /**
  * Indicates that an annotated field should be mapped to a field on a different model by the [FieldMapper]
