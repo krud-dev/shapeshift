@@ -9,7 +9,4 @@
  */
 package dev.krud.shapeshift.dto
 
-import dev.krud.shapeshift.annotation.MappedField
-import java.lang.reflect.Field
-
-internal class MappingStructure(var typeAnnotations: List<MappedField>, var annotations: Map<Field, List<MappedField>>)
+internal class MappingStructure(var sourceClazz: Class<*>, var targetClazz: Class<*>, val resolvedMappedFields: List<ResolvedMappedField>)

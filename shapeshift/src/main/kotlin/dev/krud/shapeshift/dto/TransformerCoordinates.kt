@@ -7,40 +7,24 @@
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package dev.krud.shapeshift.annotation
+
+package dev.krud.shapeshift.dto
 
 import dev.krud.shapeshift.transformer.EmptyTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer
-import kotlin.reflect.KClass
 
-/**
- * Indicates that an annotated field should be mapped to a field on a different model by the [FieldMapper]
- */
-@Target(AnnotationTarget.FIELD, AnnotationTarget.CLASS)
-@Repeatable
-annotation class MappedField(
-    /**
-     * The target class to map the field to
-     */
-    val target: KClass<*> = Nothing::class,
-    /**
-     * (Optional) The field name to map the value from.
-     * When used  at the field level, allows for mapping of nested values
-     * If left empty at the type level, an exception will be thrown. Otherwise, the name of the field will be used.
-     */
-    val mapFrom: String = "",
-    /**
-     * (Optional) The field name to map the value to.
-     * If left empty, the name of the field will be used.
-     */
-    val mapTo: String = "",
-    /**
-     * The [FieldTransformer] to use on the value
-     */
-    val transformer: KClass<out FieldTransformer<*, *>> = EmptyTransformer::class,
-    /**
-     * Bean name for a defined [FieldTransformer] bean to use on the value
-     * Supersedes [MappedField.transformer] if specified
-     */
-    val transformerRef: String = ""
-)
+data class TransformerCoordinates(
+    val name: String? = null,
+    val type: Class<out FieldTransformer<*, *>>? = null
+) {
+    companion object {
+        val NONE = TransformerCoordinates()
+        fun ofName(name: String) = TransformerCoordinates(name)
+        fun ofType(type: Class<out FieldTransformer<*, *>>): TransformerCoordinates {
+            if (type == EmptyTransformer::class.java) {
+                return NONE
+            }
+            return TransformerCoordinates(type = type)
+        }
+    }
+}
