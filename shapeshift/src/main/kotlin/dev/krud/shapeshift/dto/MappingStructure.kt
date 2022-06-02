@@ -9,29 +9,4 @@
  */
 package dev.krud.shapeshift.dto
 
-import dev.krud.shapeshift.annotation.MappedField
-import dev.krud.shapeshift.transformer.EmptyTransformer
-import dev.krud.shapeshift.transformer.base.FieldTransformer
-import java.lang.reflect.Field
-
-internal class MappingStructure(var typeAnnotations: List<MappedField>, var annotations: Map<Field, List<MappedField>>)
-
-data class TransformerCoordinates(
-    val name: String? = null,
-    val type: Class<out FieldTransformer<*, *>>? = null
-) {
-    companion object {
-        val NONE = TransformerCoordinates()
-        fun ofName(name: String) = TransformerCoordinates(name)
-        fun ofType(type: Class<out FieldTransformer<*, *>>): TransformerCoordinates {
-            if (type == EmptyTransformer::class.java) {
-                return NONE
-            }
-            return TransformerCoordinates(type = type)
-        }
-    }
-}
-
-data class ResolvedMappedField(val mapFrom: List<Field>, val mapTo: List<Field>, val transformerCoordinates: TransformerCoordinates = TransformerCoordinates.NONE)
-
-internal class MappingStructure2(var sourceClazz: Class<*>, var targetClazz: Class<*>, val resolvedMappedFields: List<ResolvedMappedField>)
+internal class MappingStructure(var sourceClazz: Class<*>, var targetClazz: Class<*>, val resolvedMappedFields: List<ResolvedMappedField>)

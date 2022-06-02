@@ -10,16 +10,16 @@
 
 package dev.krud.shapeshift
 
-import dev.krud.shapeshift.resolver.Resolver
-import dev.krud.shapeshift.resolver.ShapeShiftAnnotationResolver
+import dev.krud.shapeshift.resolver.MappingResolver
+import dev.krud.shapeshift.resolver.annotation.ShapeShiftAnnotationMappingResolver
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 
 class ShapeShiftBuilder {
     private val transformers: MutableSet<TransformerRegistration<*, *>> = mutableSetOf()
-    private val resolvers: MutableSet<Resolver> = mutableSetOf()
+    private val resolvers: MutableSet<MappingResolver> = mutableSetOf()
 
     init {
-        withMappingResolver(ShapeShiftAnnotationResolver())
+        withMappingResolver(ShapeShiftAnnotationMappingResolver())
     }
 
     fun withTransformer(fieldTransformer: FieldTransformer<*, *>, default: Boolean = false, name: String? = null): ShapeShiftBuilder {
@@ -32,8 +32,8 @@ class ShapeShiftBuilder {
         return this
     }
 
-    fun withMappingResolver(resolver: Resolver): ShapeShiftBuilder {
-        resolvers.add(resolver)
+    fun withMappingResolver(mappingResolver: MappingResolver): ShapeShiftBuilder {
+        resolvers.add(mappingResolver)
         return this
     }
 

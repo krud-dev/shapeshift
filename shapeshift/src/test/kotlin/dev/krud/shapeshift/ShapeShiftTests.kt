@@ -10,8 +10,8 @@
 
 package dev.krud.shapeshift
 
-import dev.krud.shapeshift.annotation.DefaultMappingTarget
-import dev.krud.shapeshift.annotation.MappedField
+import dev.krud.shapeshift.resolver.annotation.DefaultMappingTarget
+import dev.krud.shapeshift.resolver.annotation.MappedField
 import dev.krud.shapeshift.transformer.DateToLongTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import org.junit.jupiter.api.BeforeEach
@@ -204,7 +204,7 @@ internal class ShapeShiftTests {
 
     @Test
     internal fun `supplying invalid from path should throw exception`() {
-        expectThrows<IllegalStateException> {
+        expectThrows<NoSuchFieldException> {
             shapeShift.map(
                 FromWithInvalidFromPath(), GenericTo::class.java
             )
@@ -213,7 +213,7 @@ internal class ShapeShiftTests {
 
     @Test
     internal fun `supplying invalid to path should throw exception`() {
-        expectThrows<IllegalStateException> {
+        expectThrows<NoSuchFieldException> {
             shapeShift.map(
                 FromWithInvalidToPath(), GenericTo::class.java
             )

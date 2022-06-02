@@ -10,11 +10,11 @@
 
 package dev.krud.shapeshift
 
-import dev.krud.shapeshift.dto.MappingStructure2
+import dev.krud.shapeshift.dto.MappingStructure
 import dev.krud.shapeshift.dto.ObjectFieldTrio
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
-import dev.krud.shapeshift.resolver.Resolver
+import dev.krud.shapeshift.resolver.MappingResolver
 import dev.krud.shapeshift.transformer.base.ClassPair
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer.Companion.id
@@ -25,14 +25,14 @@ import java.lang.reflect.Field
 
 class ShapeShift constructor(
     transformersRegistrations: Set<TransformerRegistration<out Any, out Any>> = emptySet(),
-    val resolvers: Set<Resolver> = setOf()
+    val mappingResolvers: Set<MappingResolver> = setOf()
 ) {
     internal val transformers: MutableList<TransformerRegistration<out Any, out Any>> = mutableListOf()
     internal val transformersByNameCache: MutableMap<String, TransformerRegistration<out Any, out Any>> = mutableMapOf()
     internal val transformersByTypeCache: MutableMap<Class<out FieldTransformer<*, *>>, TransformerRegistration<*, *>> =
         mutableMapOf()
     internal val defaultTransformers: MutableMap<ClassPair, TransformerRegistration<out Any, out Any>> = mutableMapOf()
-    private val mappingStructures: MutableMap<ClassPair, MappingStructure2> = mutableMapOf()
+    private val mappingStructures: MutableMap<ClassPair, MappingStructure> = mutableMapOf()
     private val entityFieldsCache: MutableMap<Class<*>, Map<String, Field>> = mutableMapOf()
 
     init {
@@ -66,8 +66,8 @@ class ShapeShift constructor(
         fromObject: From,
         toObject: To
     ) {
-        val fromPair = getFieldInstanceByNodes(resolvedMappedField.mapFrom, fromObject, SourceType.FROM) ?: return
-        val toPair = getFieldInstanceByNodes(resolvedMappedField.mapTo, toObject, SourceType.TO) ?: return
+        val fromPair = getFieldInstanceByNodes(resolvedMappedField.mapFromCoordinates, fromObject, SourceType.FROM) ?: return
+        val toPair = getFieldInstanceByNodes(resolvedMappedField.mapToCoordinates, toObject, SourceType.TO) ?: return
         val transformerRegistration = getTransformer(resolvedMappedField.transformerCoordinates, fromPair, toPair)
         mapField(fromPair, toPair, transformerRegistration)
     }
@@ -159,10 +159,10 @@ class ShapeShift constructor(
         }
     }
 
-    private fun getMappingStructure(fromClass: Class<*>, toClass: Class<*>): MappingStructure2 {
+    private fun getMappingStructure(fromClass: Class<*>, toClass: Class<*>): MappingStructure {
         val key = fromClass to toClass
         return mappingStructures.computeIfAbsent(key) {
-            MappingStructure2(fromClass, toClass, resolvers.flatMap { it.resolve(fromClass, toClass) })
+            MappingStructure(fromClass, toClass, mappingResolvers.flatMap { it.resolve(fromClass, toClass) })
         }
     }
 
@@ -229,8 +229,6 @@ class ShapeShift constructor(
 
     companion object {
         private val log = LoggerFactory.getLogger(ShapeShift::class.java)
-        const val NODE_DELIMITER = "."
-        val NODE_DELIMITER_REGEX = Regex("\\.")
 
         enum class SourceType {
             FROM,

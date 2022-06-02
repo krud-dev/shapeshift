@@ -8,21 +8,16 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package dev.krud.shapeshift.resolver
+package dev.krud.shapeshift.resolver.annotation
 
-import dev.krud.shapeshift.annotation.DefaultMappingTarget
-import dev.krud.shapeshift.annotation.MappedField
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
-import dev.krud.shapeshift.transformer.ToStringTransformer
+import dev.krud.shapeshift.resolver.MappingResolver
+import dev.krud.shapeshift.util.getDeclaredFieldRecursive
 import dev.krud.shapeshift.util.splitIgnoreEmpty
 import java.lang.reflect.Field
 
-interface Resolver {
-    fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): List<ResolvedMappedField>
-}
-
-class ShapeShiftAnnotationResolver : Resolver {
+class ShapeShiftAnnotationMappingResolver : MappingResolver {
     override fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): List<ResolvedMappedField> {
         val mappedFieldReferences = getMappedFields(sourceClazz, targetClazz)
 
@@ -36,7 +31,6 @@ class ShapeShiftAnnotationResolver : Resolver {
             }
 
             val mapFromCoordinates = resolveNodesToFields(mappedField.mapFrom.splitIgnoreEmpty(NODE_DELIMITER), field, sourceClazz)
-
 
             val effectiveMapTo = mappedField.mapTo.ifBlank {
                 mapFromCoordinates.last().name
@@ -61,14 +55,14 @@ class ShapeShiftAnnotationResolver : Resolver {
             if (nodes.isEmpty()) {
                 error("Field not specified and no field reference found")
             }
-            val realField = clazz.getDeclaredField(nodes.first())
+            val realField = clazz.getDeclaredFieldRecursive(nodes.first())
             return resolveNodesToFields(nodes.drop(1), realField, realField.type)
         }
 
         if (nodes.isEmpty()) {
             return listOf(field)
         }
-        val nextField = field.type.getDeclaredField(nodes.first())
+        val nextField = field.type.getDeclaredFieldRecursive(nodes.first())
         return listOf(field) + resolveNodesToFields(nodes.drop(1), nextField, nextField.type)
     }
 
@@ -122,28 +116,4 @@ class ShapeShiftAnnotationResolver : Resolver {
     companion object {
         private const val NODE_DELIMITER = "."
     }
-}
-
-@DefaultMappingTarget(UserRO::class)
-class User {
-    @MappedField(mapFrom = "city", mapTo = "cityName", transformer = ToStringTransformer::class)
-    val address: Address = Address()
-}
-
-class Address {
-    val city: String = "Ohio"
-}
-
-class UserRO {
-    val cityName: String = "New York"
-}
-
-fun main() {
-    val resolver = ShapeShiftAnnotationResolver()
-    val path = "city"
-    val path2 = "address.city"
-//    val resolved = resolver.resolveNodesToFields(path.split("."), User::address.javaField, User::class.java)
-//    val resolved2 = resolver.resolveNodesToFields(path2.split("."), null, User::class.java)
-    val structure = resolver.resolve(User::class.java, UserRO::class.java)
-    println()
 }

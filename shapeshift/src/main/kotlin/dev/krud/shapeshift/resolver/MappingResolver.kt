@@ -8,46 +8,10 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package dev.krud.shapeshift
+package dev.krud.shapeshift.resolver
 
-import dev.krud.shapeshift.resolver.annotation.DefaultMappingTarget
-import dev.krud.shapeshift.resolver.annotation.MappedField
-import dev.krud.shapeshift.transformer.base.FieldTransformer
-import java.lang.reflect.Field
-import java.util.*
+import dev.krud.shapeshift.dto.ResolvedMappedField
 
-class ExampleFieldTransformer : FieldTransformer<Long, Date> {
-    override val fromType: Class<Long> = Long::class.java
-
-    override val toType: Class<Date> = Date::class.java
-
-    override fun transform(
-        fromField: Field,
-        toField: Field,
-        originalValue: Long?,
-        fromObject: Any,
-        toObject: Any
-    ): Date? {
-        originalValue ?: return null
-        return Date(originalValue)
-    }
-}
-
-abstract class BaseEntity {
-    @MappedField(target = BaseRO::class)
-    val id: Long = 123L
-}
-
-abstract class BaseRO {
-    val id: Long = 321L
-}
-
-@DefaultMappingTarget(EntityRO::class)
-class Entity {
-    @MappedField
-    val birthDate = Date(1)
-}
-
-class EntityRO : BaseRO() {
-    val birthDate = Date(2)
+interface MappingResolver {
+    fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): List<ResolvedMappedField>
 }
