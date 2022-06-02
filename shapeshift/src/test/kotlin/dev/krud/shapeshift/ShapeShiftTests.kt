@@ -28,7 +28,7 @@ internal class ShapeShiftTests {
 
     @BeforeEach
     internal fun setUp() {
-        shapeShift = ShapeShift()
+        shapeShift = ShapeShiftBuilder().build()
     }
 
     @Nested

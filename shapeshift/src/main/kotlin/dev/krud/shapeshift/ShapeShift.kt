@@ -10,11 +10,11 @@
 
 package dev.krud.shapeshift
 
-import dev.krud.shapeshift.annotation.DefaultMappingTarget
-import dev.krud.shapeshift.annotation.MappedField
-import dev.krud.shapeshift.dto.MappingStructure
+import dev.krud.shapeshift.dto.MappingStructure2
 import dev.krud.shapeshift.dto.ObjectFieldTrio
-import dev.krud.shapeshift.transformer.EmptyTransformer
+import dev.krud.shapeshift.dto.ResolvedMappedField
+import dev.krud.shapeshift.dto.TransformerCoordinates
+import dev.krud.shapeshift.resolver.Resolver
 import dev.krud.shapeshift.transformer.base.ClassPair
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer.Companion.id
@@ -24,14 +24,15 @@ import org.slf4j.LoggerFactory
 import java.lang.reflect.Field
 
 class ShapeShift constructor(
-    transformersRegistrations: Set<TransformerRegistration<out Any, out Any>> = emptySet()
+    transformersRegistrations: Set<TransformerRegistration<out Any, out Any>> = emptySet(),
+    val resolvers: Set<Resolver> = setOf()
 ) {
     internal val transformers: MutableList<TransformerRegistration<out Any, out Any>> = mutableListOf()
     internal val transformersByNameCache: MutableMap<String, TransformerRegistration<out Any, out Any>> = mutableMapOf()
     internal val transformersByTypeCache: MutableMap<Class<out FieldTransformer<*, *>>, TransformerRegistration<*, *>> =
         mutableMapOf()
     internal val defaultTransformers: MutableMap<ClassPair, TransformerRegistration<out Any, out Any>> = mutableMapOf()
-    private val mappingStructures: MutableMap<ClassPair, MappingStructure> = mutableMapOf()
+    private val mappingStructures: MutableMap<ClassPair, MappingStructure2> = mutableMapOf()
     private val entityFieldsCache: MutableMap<Class<*>, Map<String, Field>> = mutableMapOf()
 
     init {
@@ -52,57 +53,22 @@ class ShapeShift constructor(
     private fun <To : Any> map(fromObject: Any, toObject: To): To {
         val toClazz = toObject::class.java
         val mappingStructure = getMappingStructure(fromObject::class.java, toClazz)
-        for (typeAnnotation in mappingStructure.typeAnnotations) {
-            if (typeAnnotation.mapFrom.isBlank()) {
-                error("mapFrom can not be empty when used at a type level")
-            }
-            var trueFromPath = typeAnnotation.mapFrom
 
-            if (trueFromPath.startsWith(fromObject::class.java.simpleName, ignoreCase = true)) {
-                trueFromPath = trueFromPath.substring(trueFromPath.indexOf(NODE_DELIMITER) + 1)
-            }
-
-            var trueToPath = typeAnnotation.mapTo
-            if (trueToPath.startsWith(toClazz.simpleName, ignoreCase = true)) {
-                trueToPath = trueToPath.substring(trueToPath.indexOf(NODE_DELIMITER) + 1)
-            }
-            processMappedField(typeAnnotation, fromObject, toObject, trueFromPath, trueToPath)
-        }
-
-        for ((field, annotations) in mappingStructure.annotations) {
-            for (annotation in annotations) {
-                val trueFromPath = if (annotation.mapFrom.isBlank()) {
-                    field.name
-                } else {
-                    if (!annotation.mapFrom.startsWith(field.name + NODE_DELIMITER)) {
-                        field.name + NODE_DELIMITER + annotation.mapFrom
-                    } else {
-                        annotation.mapFrom
-                    }
-                }
-
-                var trueToPath = annotation.mapTo
-                if (trueToPath.startsWith(toClazz.simpleName, ignoreCase = true)) {
-                    trueToPath = trueToPath.substring(trueToPath.indexOf(NODE_DELIMITER) + 1)
-                }
-                processMappedField(annotation, fromObject, toObject, trueFromPath, trueToPath)
-            }
+        for (resolvedMappedField in mappingStructure.resolvedMappedFields) {
+            processMappedField(resolvedMappedField, fromObject, toObject)
         }
 
         return toObject
     }
 
     private fun <To : Any, From : Any> processMappedField(
-        annotation: MappedField,
+        resolvedMappedField: ResolvedMappedField,
         fromObject: From,
-        toObject: To,
-        fromPath: String,
-        toPath: String
+        toObject: To
     ) {
-        val fromPair = getFieldByPath(fromPath, fromObject, SourceType.FROM) ?: return
-        val appliedToPath = toPath.ifBlank { fromPair.field.name }
-        val toPair = getFieldByPath(appliedToPath, toObject, SourceType.TO) ?: return
-        val transformerRegistration = getTransformer(annotation, fromPair, toPair)
+        val fromPair = getFieldInstanceByNodes(resolvedMappedField.mapFrom, fromObject, SourceType.FROM) ?: return
+        val toPair = getFieldInstanceByNodes(resolvedMappedField.mapTo, toObject, SourceType.TO) ?: return
+        val transformerRegistration = getTransformer(resolvedMappedField.transformerCoordinates, fromPair, toPair)
         mapField(fromPair, toPair, transformerRegistration)
     }
 
@@ -129,7 +95,7 @@ class ShapeShift constructor(
         }
     }
 
-    private fun getFieldByPath(path: String, target: Any?, type: SourceType): ObjectFieldTrio? {
+    private fun getFieldInstanceByNodes(nodes: List<Field>, target: Any?, type: SourceType): ObjectFieldTrio? {
         // This if only applies to recursive runs of this function
         // When target is null and type is from, don't attempt to instantiate the object
         if (target == null) {
@@ -137,22 +103,16 @@ class ShapeShift constructor(
                 return null
             } else {
                 // Impossible to reach
-                error("$path leads to a null target")
+                error("$nodes leads to a null target")
             }
         }
-
-        val nodes = path.split(NODE_DELIMITER_REGEX).toMutableList()
-
-        val field = getField(nodes.first(), target::class.java) ?: error(
-            "Field ${nodes.firstOrNull()} not found on class ${target::class.java}"
-        )
+        val field = nodes.first()
 
         val fieldType = field.type.kotlin.javaObjectType
 
         if (nodes.size == 1) {
             return ObjectFieldTrio(target, field, fieldType)
         }
-        nodes.removeFirst()
         field.isAccessible = true
         var subTarget = field.get(target)
 
@@ -161,7 +121,7 @@ class ShapeShift constructor(
             field.set(target, subTarget)
         }
 
-        return getFieldByPath(nodes.joinToString(NODE_DELIMITER), subTarget, type)
+        return getFieldInstanceByNodes(nodes.drop(1), subTarget, type)
     }
 
     private fun getFieldsMap(clazz: Class<*>): Map<String, Field> {
@@ -199,54 +159,15 @@ class ShapeShift constructor(
         }
     }
 
-    private fun getMappingStructure(fromClass: Class<*>, toClass: Class<*>): MappingStructure {
+    private fun getMappingStructure(fromClass: Class<*>, toClass: Class<*>): MappingStructure2 {
         val key = fromClass to toClass
         return mappingStructures.computeIfAbsent(key) {
-            val annotations: MutableMap<Field, List<MappedField>> = HashMap()
-            val typeAnnotations: MutableList<MappedField> = ArrayList()
-            var clazz: Class<*>? = fromClass
-            while (clazz != null) {
-                val fields = clazz.declaredFields
-                val defaultMappingTarget = clazz.getDeclaredAnnotation(DefaultMappingTarget::class.java)
-                val defaultFromClass: Class<*> = defaultMappingTarget?.value?.java ?: Nothing::class.java
-                typeAnnotations.addAll(
-                    clazz.getDeclaredAnnotationsByType(MappedField::class.java)
-                        .filter { mappedField ->
-                            try {
-                                return@filter isOfType(defaultFromClass, mappedField.target.java, toClass)
-                            } catch (e: IllegalStateException) {
-                                error("Could not create entity structure for <" + fromClass.simpleName + ", " + toClass.simpleName + ">: " + e.message)
-                            }
-                        }
-                )
-                for (field in fields) {
-                    val availableAnnotations = field.getDeclaredAnnotationsByType(MappedField::class.java)
-                        .filter { mappedField ->
-                            try {
-                                return@filter isOfType(defaultFromClass, mappedField.target.java, toClass)
-                            } catch (e: IllegalStateException) {
-                                throw IllegalStateException("Could not create entity structure for <" + fromClass.simpleName + ", " + toClass.simpleName + ">: " + e.message)
-                            }
-                        }
-                    annotations[field] = availableAnnotations
-                }
-                clazz = clazz.superclass
-            }
-            MappingStructure(typeAnnotations, annotations)
+            MappingStructure2(fromClass, toClass, resolvers.flatMap { it.resolve(fromClass, toClass) })
         }
-    }
-
-    private fun isOfType(defaultFromClass: Class<*>, fromClass: Class<*>, toClass: Class<*>): Boolean {
-        var trueFromClass: Class<*> = fromClass
-        if (trueFromClass == Nothing::class.java) {
-            check(defaultFromClass != Nothing::class.java) { "No mapping target or default mapping target specified" }
-            trueFromClass = defaultFromClass
-        }
-        return trueFromClass.isAssignableFrom(toClass)
     }
 
     private fun getTransformer(
-        annotation: MappedField,
+        coordinates: TransformerCoordinates,
         fromPair: ObjectFieldTrio,
         toPair: ObjectFieldTrio
     ): TransformerRegistration<*, *> {
@@ -254,19 +175,19 @@ class ShapeShift constructor(
         log.trace("Attempting to find transformer for transformation pair [ $transformationPair ]")
         var transformerRegistration: TransformerRegistration<*, *> = TransformerRegistration.EMPTY
         log.trace("Checking transformerRef field")
-        if (annotation.transformerRef.isNotBlank()) {
-            log.trace("transformerRef is not empty with value [ " + annotation.transformerRef + " ]")
-            transformerRegistration = getTransformerByName(annotation.transformerRef)
+        if (!coordinates.name.isNullOrBlank()) {
+            log.trace("transformerRef is not empty with value [ " + coordinates.name + " ]")
+            transformerRegistration = getTransformerByName(coordinates.name)
             if (transformerRegistration != TransformerRegistration.EMPTY) {
-                log.trace("Found transformer by ref [ ${annotation.transformerRef} ] of type [ " + transformerRegistration.transformer.javaClass.name + " ]")
+                log.trace("Found transformer by ref [ ${coordinates.name} ] of type [ " + transformerRegistration.transformer.javaClass.name + " ]")
             } else {
-                error("Could not find transformer by ref [ ${annotation.transformerRef} ] on $fromPair")
+                error("Could not find transformer by ref [ ${coordinates.name} ] on $fromPair")
             }
         }
         if (transformerRegistration == TransformerRegistration.EMPTY) {
             log.trace("Checking transformer field")
-            if (annotation.transformer == EmptyTransformer::class) {
-                log.trace("Transformer is Empty Transformer, attempting to find a default transformer")
+            if (coordinates.type == null) {
+                log.trace("Transformer is null, attempting to find a default transformer")
                 val key = fromPair.type to toPair.type
                 val defaultTransformerRegistration = defaultTransformers[key]
                 if (defaultTransformerRegistration != null) {
@@ -275,11 +196,11 @@ class ShapeShift constructor(
                 }
                 return TransformerRegistration.EMPTY
             } else {
-                transformerRegistration = getTransformerByType(annotation.transformer.java)
+                transformerRegistration = getTransformerByType(coordinates.type)
                 if (transformerRegistration != TransformerRegistration.EMPTY) {
-                    log.trace("Found transformer by type [ ${annotation.transformer.java} ]")
+                    log.trace("Found transformer by type [ ${coordinates.type} ]")
                 } else {
-                    error("Could not find transformer by type [ ${annotation.transformer.java} ] on $fromPair")
+                    error("Could not find transformer by type [ ${coordinates.type} ] on $fromPair")
                 }
             }
         }

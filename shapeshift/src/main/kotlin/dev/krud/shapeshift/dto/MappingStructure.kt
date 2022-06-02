@@ -34,4 +34,4 @@ data class TransformerCoordinates(
 
 data class ResolvedMappedField(val mapFrom: List<Field>, val mapTo: List<Field>, val transformerCoordinates: TransformerCoordinates = TransformerCoordinates.NONE)
 
-internal class MappingStructure2(var sourceClazz: Class<*>, var targetClazz: Class<*>, resolvedMappedField: List<ResolvedMappedField>)
+internal class MappingStructure2(var sourceClazz: Class<*>, var targetClazz: Class<*>, val resolvedMappedFields: List<ResolvedMappedField>)

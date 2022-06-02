@@ -12,11 +12,10 @@ package dev.krud.shapeshift.resolver
 
 import dev.krud.shapeshift.annotation.DefaultMappingTarget
 import dev.krud.shapeshift.annotation.MappedField
-import dev.krud.shapeshift.dto.MappingStructure
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
 import dev.krud.shapeshift.transformer.ToStringTransformer
-import dev.krud.shapeshift.transformer.base.ClassPair
+import dev.krud.shapeshift.util.splitIgnoreEmpty
 import java.lang.reflect.Field
 
 interface Resolver {
@@ -36,13 +35,18 @@ class ShapeShiftAnnotationResolver : Resolver {
                 TransformerCoordinates.ofName(mappedField.transformerRef)
             }
 
+            val mapFromCoordinates = resolveNodesToFields(mappedField.mapFrom.splitIgnoreEmpty(NODE_DELIMITER), field, sourceClazz)
+
+
             val effectiveMapTo = mappedField.mapTo.ifBlank {
-                mappedField.mapFrom
+                mapFromCoordinates.last().name
             }
 
+            val mapToCoordinates = resolveNodesToFields(effectiveMapTo.splitIgnoreEmpty(NODE_DELIMITER), null, targetClazz)
+
             resolvedMappedFields += ResolvedMappedField(
-                resolveNodesToFields(mappedField.mapFrom.split(NODE_DELIMITER), field, sourceClazz),
-                resolveNodesToFields(effectiveMapTo.split(NODE_DELIMITER), null, targetClazz),
+                mapFromCoordinates,
+                mapToCoordinates,
                 transformerCoordinates
             )
         }
