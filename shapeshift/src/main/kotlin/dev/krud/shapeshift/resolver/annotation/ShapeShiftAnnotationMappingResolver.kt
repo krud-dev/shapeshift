@@ -53,7 +53,7 @@ class ShapeShiftAnnotationMappingResolver : MappingResolver {
     fun resolveNodesToFields(nodes: List<String>, field: Field?, clazz: Class<*>): List<Field> {
         if (field == null) {
             if (nodes.isEmpty()) {
-                error("Field not specified and no field reference found")
+                error("Unable to determine mapped field for $clazz")
             }
             val realField = clazz.getDeclaredFieldRecursive(nodes.first())
             return resolveNodesToFields(nodes.drop(1), realField, realField.type)
