@@ -113,7 +113,6 @@ class Address {
     override fun toString(): String {
         return "Address(zip='$zip')"
     }
-
 }
 
 class User {
@@ -165,17 +164,27 @@ class ProgrammaticMappingResolver(
     }
 }
 
-fun main() {
-    val mapping = mapper<User, UserRO> {
-    }
-    val shapeshift = ShapeShiftBuilder()
-        .withTransformer(StringTransformer())
-        .withProgrammaticMapping<User, UserRO> {
-            User::id mappedTo UserRO::address..Address::zip withTransformer StringTransformer::class
-            User::id mappedTo UserRO::stringId withTransformer StringTransformer::class
-            User::address..Address::zip mappedTo UserRO::zip
-        }
-        .build()
-    println(shapeshift.map(User(), UserRO::class.java))
-}
-
+//fun main() {
+//    User(id, firstname, lastname, @Min(0) date)
+//    {
+//        firstname: "John",
+//        lastname: "Doe"
+//    }
+//
+//    // partial update
+//    {
+//        lastname: null
+//    }
+//
+//
+//    val shapeshift = ShapeShiftBuilder()
+//        .withTransformer(StringTransformer())
+//        .withProgrammaticMapping<User, UserRO> {
+//            User::id mappedTo UserRO::address..Address::zip withTransformer StringTransformer::class
+//            User::id mappedTo UserRO::stringId withTransformer StringTransformer::class withCondition { it > 0 }
+//            User::address..Address::zip mappedTo UserRO::zip
+//        }
+//        .build()
+//    println(shapeshift.map(User(), UserRO::class.java))
+//}
+//
