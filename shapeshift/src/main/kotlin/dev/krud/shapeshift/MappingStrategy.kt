@@ -7,8 +7,22 @@
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package dev.krud.shapeshift.dto
 
-import dev.krud.shapeshift.decorator.Decorator
+package dev.krud.shapeshift
 
-internal class MappingStructure(var sourceClazz: Class<*>, var targetClazz: Class<*>, val resolvedMappedFields: List<ResolvedMappedField>, val decorators: List<Decorator<out Any, out Any>>)
+enum class MappingStrategy {
+    /**
+     * A strategy that does nothing, used in override mapping strategies when there is no desire to override the default strategy
+     */
+    NONE,
+
+    /**
+     * A strategy that maps all values
+     */
+    MAP_ALL,
+
+    /**
+     * A strategy that maps only the values that are not null
+     */
+    MAP_NOT_NULL
+}

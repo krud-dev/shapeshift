@@ -133,38 +133,6 @@ internal class ShapeShiftTests {
         }
 
         @Test
-        internal fun `mapFrom with self field qualifier`() {
-            val result = shapeShift.map(FromWithMapFromSelfQualifier(), GenericTo::class.java)
-
-            expectThat(result.long)
-                .isEqualTo(1L)
-        }
-
-        @Test
-        internal fun `mapFrom with self field qualifier on type level`() {
-            val result = shapeShift.map(FromWithMapFromSelfQualifierOnType(), GenericTo::class.java)
-
-            expectThat(result.long)
-                .isEqualTo(1L)
-        }
-
-        @Test
-        internal fun `mapTo with self field qualifier`() {
-            val result = shapeShift.map(FromWithMapToSelfQualifier(), ToWithShallowPath::class.java)
-
-            expectThat(result.child?.long)
-                .isEqualTo(1L)
-        }
-
-        @Test
-        internal fun `mapTo with self field qualifier on type level`() {
-            val result = shapeShift.map(FromWithMapToSelfQualifierOnType(), ToWithShallowPath::class.java)
-
-            expectThat(result.child?.long)
-                .isEqualTo(1L)
-        }
-
-        @Test
         internal fun `nested class mapping`() {
             val result = shapeShift.map(
                 FromWithBase(),
@@ -334,8 +302,6 @@ internal class ShapeShiftTests {
     internal fun `type level mapped field throws exception if mapFrom is empty`() {
         expectThrows<IllegalStateException> {
             shapeShift.map(FromWithInvalidTypeAnnotation(), GenericTo::class.java)
-        }.and {
-            this.message.isEqualTo("mapFrom can not be empty when used at a type level")
         }
     }
 

@@ -17,12 +17,18 @@ import dev.krud.shapeshift.transformer.base.FieldTransformer
 class ShapeShiftBuilder {
     private val transformers: MutableSet<TransformerRegistration<*, *>> = mutableSetOf()
     private val resolvers: MutableSet<MappingResolver> = mutableSetOf()
+    private var defaultMappingStrategy: MappingStrategy = MappingStrategy.MAP_NOT_NULL
 
     init {
         withMappingResolver(ShapeShiftAnnotationMappingResolver())
     }
 
-    fun withTransformer(fieldTransformer: FieldTransformer<*, *>, default: Boolean = false, name: String? = null): ShapeShiftBuilder {
+    fun withDefaultMappingStrategy(defaultMappingStrategy: MappingStrategy): ShapeShiftBuilder {
+        this.defaultMappingStrategy = defaultMappingStrategy
+        return this
+    }
+
+    fun withTransformer(fieldTransformer: FieldTransformer<out Any, out Any>, default: Boolean = false, name: String? = null): ShapeShiftBuilder {
         transformers.add(TransformerRegistration(fieldTransformer, default, name))
         return this
     }
@@ -38,6 +44,6 @@ class ShapeShiftBuilder {
     }
 
     fun build(): ShapeShift {
-        return ShapeShift(transformers, resolvers)
+        return ShapeShift(transformers, resolvers, defaultMappingStrategy)
     }
 }

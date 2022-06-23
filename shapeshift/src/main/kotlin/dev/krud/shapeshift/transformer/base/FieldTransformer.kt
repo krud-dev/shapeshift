@@ -10,16 +10,14 @@
 
 package dev.krud.shapeshift.transformer.base
 
-import java.lang.reflect.Field
-
 typealias ClassPair = Pair<Class<out Any>, Class<out Any>>
 
-interface FieldTransformer<From : Any, To : Any> {
+interface FieldTransformer<From : Any?, Type : Any?> : BaseFieldTransformer<From, Type> {
     val fromType: Class<From>
-    val toType: Class<To>
-    fun transform(fromField: Field, toField: Field, originalValue: From?, fromObject: Any, toObject: Any): To?
+    val toType: Class<Type>
 
     companion object {
         val FieldTransformer<*, *>.id: ClassPair get() = fromType.kotlin.javaObjectType to toType.kotlin.javaObjectType
     }
 }
+

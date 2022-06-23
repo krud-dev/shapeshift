@@ -7,8 +7,15 @@
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package dev.krud.shapeshift.dto
+
+package dev.krud.shapeshift.resolver.dsl
 
 import dev.krud.shapeshift.decorator.Decorator
+import dev.krud.shapeshift.dto.ResolvedMappedField
 
-internal class MappingStructure(var sourceClazz: Class<*>, var targetClazz: Class<*>, val resolvedMappedFields: List<ResolvedMappedField>, val decorators: List<Decorator<out Any, out Any>>)
+class DslResult<From : Any, To : Any>(
+    val fromClazz: Class<From>,
+    val toClazz: Class<To>,
+    val resolvedMappedFields: List<ResolvedMappedField> = listOf(),
+    val decorator: Decorator<From, To>?
+)

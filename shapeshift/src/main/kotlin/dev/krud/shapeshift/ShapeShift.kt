@@ -11,11 +11,13 @@
 package dev.krud.shapeshift
 
 import dev.krud.shapeshift.condition.Condition
+import dev.krud.shapeshift.decorator.Decorator
 import dev.krud.shapeshift.dto.MappingStructure
 import dev.krud.shapeshift.dto.ObjectFieldTrio
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
 import dev.krud.shapeshift.resolver.MappingResolver
+import dev.krud.shapeshift.transformer.base.BaseFieldTransformer
 import dev.krud.shapeshift.transformer.base.ClassPair
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer.Companion.id
@@ -26,7 +28,8 @@ import java.lang.reflect.Field
 
 class ShapeShift constructor(
     transformersRegistrations: Set<TransformerRegistration<out Any, out Any>> = emptySet(),
-    val mappingResolvers: Set<MappingResolver> = setOf()
+    val mappingResolvers: Set<MappingResolver> = setOf(),
+    val defaultMappingStrategy: MappingStrategy
 ) {
     internal val transformers: MutableList<TransformerRegistration<out Any, out Any>> = mutableListOf()
     internal val transformersByNameCache: MutableMap<String, TransformerRegistration<out Any, out Any>> = mutableMapOf()
@@ -38,43 +41,43 @@ class ShapeShift constructor(
     private val conditionCache: MutableMap<Class<out Condition<*>>, Condition<*>> = mutableMapOf()
 
     init {
+        if (defaultMappingStrategy == MappingStrategy.NONE) {
+            error("Default mapping strategy cannot be NONE")
+        }
         for (registration in transformersRegistrations) {
             registerTransformer(registration)
         }
     }
 
-    inline fun <reified To : Any> map(fromObject: Any): To {
+    inline fun <reified To : Any, reified From : Any> map(fromObject: From): To {
         return map(fromObject, To::class.java)
     }
 
-    fun <To : Any> map(fromObject: Any, toClazz: Class<To>): To {
+    fun <From : Any, To : Any> map(fromObject: From, toClazz: Class<To>): To {
         val toObject = toClazz.newInstance()
         return map(fromObject, toObject)
     }
 
-    private fun <To : Any> map(fromObject: Any, toObject: To): To {
+    private fun <From : Any, To : Any> map(fromObject: From, toObject: To): To {
         val toClazz = toObject::class.java
         val mappingStructure = getMappingStructure(fromObject::class.java, toClazz)
 
         for (resolvedMappedField in mappingStructure.resolvedMappedFields) {
-            processMappedField(resolvedMappedField, fromObject, toObject)
+            mapField(fromObject, toObject, resolvedMappedField)
+        }
+
+        for (decorator in mappingStructure.decorators) {
+            decorator as Decorator<From, To>
+            decorator.decorate(fromObject, toObject)
         }
 
         return toObject
     }
 
-    private fun <To : Any, From : Any> processMappedField(
-        resolvedMappedField: ResolvedMappedField,
-        fromObject: From,
-        toObject: To
-    ) {
+    private fun <From : Any, To : Any> mapField(fromObject: From, toObject: To, resolvedMappedField: ResolvedMappedField) {
         val fromPair = getFieldInstanceByNodes(resolvedMappedField.mapFromCoordinates, fromObject, SourceType.FROM) ?: return
         val toPair = getFieldInstanceByNodes(resolvedMappedField.mapToCoordinates, toObject, SourceType.TO) ?: return
         val transformerRegistration = getTransformer(resolvedMappedField.transformerCoordinates, fromPair, toPair)
-        mapField(fromPair, toPair, transformerRegistration, resolvedMappedField)
-    }
-
-    private fun mapField(fromPair: ObjectFieldTrio, toPair: ObjectFieldTrio, transformerRegistration: TransformerRegistration<*, *>, resolvedMappedField: ResolvedMappedField) {
         fromPair.field.isAccessible = true
         toPair.field.isAccessible = true
         var value = fromPair.field.getValue(fromPair.target)
@@ -92,16 +95,38 @@ class ShapeShift constructor(
             }
         }
 
-        if (transformerRegistration != TransformerRegistration.EMPTY) {
+        if (resolvedMappedField.transformer != null) {
+            resolvedMappedField.transformer as BaseFieldTransformer<Any, Any>
+            value = resolvedMappedField.transformer.transform(fromPair.field, toPair.field, value, fromPair.target, toPair.target)
+        } else if (transformerRegistration != TransformerRegistration.EMPTY) {
             val transformer = transformerRegistration.transformer as FieldTransformer<Any, Any>
             value = transformer.transform(fromPair.field, toPair.field, value, fromPair.target, toPair.target)
         }
-        if (value != null) {
+
+        val mappingStrategy: MappingStrategy
+
+        if (resolvedMappedField.overrideMappingStrategy != null && resolvedMappedField.overrideMappingStrategy != MappingStrategy.NONE) {
+            mappingStrategy = resolvedMappedField.overrideMappingStrategy
+        } else {
+            mappingStrategy = defaultMappingStrategy
+        }
+
+        val shouldMap = when (mappingStrategy) {
+            MappingStrategy.NONE -> error("Mapping strategy is set to NONE")
+            MappingStrategy.MAP_ALL -> true
+            MappingStrategy.MAP_NOT_NULL -> value != null
+        }
+
+        if (shouldMap) {
             try {
-                if (!toPair.type.isAssignableFrom(value::class.java)) {
-                    error("Type mismatch: Expected ${toPair.type} but got ${value::class.java}")
+                if (value == null) {
+                    toPair.field.setValue(toPair.target, null)
+                } else {
+                    if (!toPair.type.isAssignableFrom(value::class.java)) {
+                        error("Type mismatch: Expected ${toPair.type} but got ${value::class.java}")
+                    }
+                    toPair.field.setValue(toPair.target, value)
                 }
-                toPair.field.setValue(toPair.target, value)
             } catch (e: Exception) {
                 val newException =
                     IllegalStateException("Could not map value ${fromPair.field.name} of class ${fromPair.target.javaClass.simpleName} to ${toPair.field.name} of class ${toPair.target.javaClass.simpleName}: ${e.message}")
@@ -178,7 +203,10 @@ class ShapeShift constructor(
     private fun getMappingStructure(fromClass: Class<*>, toClass: Class<*>): MappingStructure {
         val key = fromClass to toClass
         return mappingStructures.computeIfAbsent(key) {
-            MappingStructure(fromClass, toClass, mappingResolvers.flatMap { it.resolve(fromClass, toClass) })
+            val resolutions = mappingResolvers
+                .map { it.resolve(fromClass, toClass) }
+
+            MappingStructure(fromClass, toClass, resolutions.flatMap { it.resolvedMappedFields }, resolutions.flatMap { it.decorators })
         }
     }
 

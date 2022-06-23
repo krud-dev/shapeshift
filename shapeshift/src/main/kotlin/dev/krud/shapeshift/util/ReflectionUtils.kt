@@ -22,7 +22,7 @@ internal fun Field.setValue(target: Any, value: Any?) {
     this.set(target, value)
 }
 
-fun Class<*>.getDeclaredFieldRecursive(name: String): Field {
+internal fun Class<*>.getDeclaredFieldRecursive(name: String): Field {
     var clazz: Class<*>? = this
     while (clazz != null) {
         try {

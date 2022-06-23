@@ -10,8 +10,6 @@
 
 package dev.krud.shapeshift.resolver
 
-import dev.krud.shapeshift.dto.ResolvedMappedField
-
 interface MappingResolver {
-    fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): List<ResolvedMappedField>
+    fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): MappingResolverResolution
 }
