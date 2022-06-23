@@ -71,19 +71,27 @@ class ShapeShift constructor(
         val fromPair = getFieldInstanceByNodes(resolvedMappedField.mapFromCoordinates, fromObject, SourceType.FROM) ?: return
         val toPair = getFieldInstanceByNodes(resolvedMappedField.mapToCoordinates, toObject, SourceType.TO) ?: return
         val transformerRegistration = getTransformer(resolvedMappedField.transformerCoordinates, fromPair, toPair)
-        mapField(fromPair, toPair, transformerRegistration, resolvedMappedField.conditionClazz)
+        mapField(fromPair, toPair, transformerRegistration, resolvedMappedField)
     }
 
-    private fun mapField(fromPair: ObjectFieldTrio, toPair: ObjectFieldTrio, transformerRegistration: TransformerRegistration<*, *>, conditionClazz: Class<out Condition<*>>?) {
+    private fun mapField(fromPair: ObjectFieldTrio, toPair: ObjectFieldTrio, transformerRegistration: TransformerRegistration<*, *>, resolvedMappedField: ResolvedMappedField) {
         fromPair.field.isAccessible = true
         toPair.field.isAccessible = true
         var value = fromPair.field.getValue(fromPair.target)
-        if (conditionClazz != null) {
-            val condition = getConditionInstance(conditionClazz) as Condition<Any>
+        val condition = resolvedMappedField.condition
+            ?: if (resolvedMappedField.conditionClazz != null) {
+                getConditionInstance(resolvedMappedField.conditionClazz)
+            } else {
+                null
+            }
+
+        if (condition != null) {
+            condition as Condition<Any>
             if (!condition.isValid(value)) {
                 return
             }
         }
+
         if (transformerRegistration != TransformerRegistration.EMPTY) {
             val transformer = transformerRegistration.transformer as FieldTransformer<Any, Any>
             value = transformer.transform(fromPair.field, toPair.field, value, fromPair.target, toPair.target)

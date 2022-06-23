@@ -13,4 +13,10 @@ package dev.krud.shapeshift.dto
 import dev.krud.shapeshift.condition.Condition
 import java.lang.reflect.Field
 
-data class ResolvedMappedField(val mapFromCoordinates: List<Field>, val mapToCoordinates: List<Field>, val transformerCoordinates: TransformerCoordinates = TransformerCoordinates.NONE, val conditionClazz: Class<out Condition<*>>? = null)
+data class ResolvedMappedField(
+    val mapFromCoordinates: List<Field>,
+    val mapToCoordinates: List<Field>,
+    val transformerCoordinates: TransformerCoordinates = TransformerCoordinates.NONE,
+    val conditionClazz: Class<out Condition<*>>?,
+    val condition: Condition<*>?
+)

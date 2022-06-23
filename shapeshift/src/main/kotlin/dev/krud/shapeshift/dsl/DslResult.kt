@@ -38,7 +38,8 @@ class DslResultBuilder<From : Any, To : Any> {
         var fromField: FieldCoordinates<*, *, FromValueType>,
         var toField: FieldCoordinates<*, *, ToValueType>,
         var transformer: KClass<out FieldTransformer<FromValueType, ToValueType>>?,
-        var conditionClazz: KClass<out Condition<FromValueType>>?
+        var conditionClazz: KClass<out Condition<FromValueType>>?,
+        var condition: Condition<FromValueType>?
     )
     val fieldMappings = mutableListOf<FieldMapping<*, *>>()
 
@@ -68,6 +69,7 @@ class DslResultBuilder<From : Any, To : Any> {
             this,
             to,
             null,
+            null,
             null
         )
         fieldMappings.add(fieldMapping)
@@ -84,6 +86,11 @@ class DslResultBuilder<From : Any, To : Any> {
         return this
     }
 
+    infix fun <FromType : Any, ToType : Any>FieldMapping<FromType, out ToType>.withCondition(condition: Condition<FromType>): FieldMapping<FromType, out ToType> {
+        this.condition = condition
+        return this
+    }
+
     fun build(): DslResult<From, To> {
         return DslResult(
             fieldMappings.map { fieldMapping ->
@@ -95,7 +102,8 @@ class DslResultBuilder<From : Any, To : Any> {
                     } else {
                         TransformerCoordinates.ofType(fieldMapping.transformer!!.java)
                     },
-                    fieldMapping.conditionClazz?.java
+                    fieldMapping.conditionClazz?.java,
+                    fieldMapping.condition
                 )
             }
         )
@@ -123,7 +131,7 @@ class Address {
 }
 
 class User {
-    val id: Long = 0
+    val id: Long = 5L
     val address: Address = Address()
 }
 
@@ -181,8 +189,9 @@ fun main() {
     val shapeshift = ShapeShiftBuilder()
         .withTransformer(StringTransformer())
         .withProgrammaticMapping<User, UserRO> {
-            User::id mappedTo UserRO::address..Address::zip withTransformer StringTransformer::class
-            User::id mappedTo UserRO::stringId withCondition MyCondition::class withTransformer StringTransformer::class
+            User::id mappedTo UserRO::stringId withTransformer StringTransformer::class withCondition {
+                false
+            }
         }
         .build()
     println(shapeshift.map(User(), UserRO::class.java))
