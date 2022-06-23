@@ -10,6 +10,7 @@
 
 package dev.krud.shapeshift
 
+import dev.krud.shapeshift.condition.Condition
 import dev.krud.shapeshift.dto.MappingStructure
 import dev.krud.shapeshift.dto.ObjectFieldTrio
 import dev.krud.shapeshift.dto.ResolvedMappedField
@@ -34,6 +35,7 @@ class ShapeShift constructor(
     internal val defaultTransformers: MutableMap<ClassPair, TransformerRegistration<out Any, out Any>> = mutableMapOf()
     private val mappingStructures: MutableMap<ClassPair, MappingStructure> = mutableMapOf()
     private val entityFieldsCache: MutableMap<Class<*>, Map<String, Field>> = mutableMapOf()
+    private val conditionCache: MutableMap<Class<out Condition<*>>, Condition<*>> = mutableMapOf()
 
     init {
         for (registration in transformersRegistrations) {
@@ -69,13 +71,27 @@ class ShapeShift constructor(
         val fromPair = getFieldInstanceByNodes(resolvedMappedField.mapFromCoordinates, fromObject, SourceType.FROM) ?: return
         val toPair = getFieldInstanceByNodes(resolvedMappedField.mapToCoordinates, toObject, SourceType.TO) ?: return
         val transformerRegistration = getTransformer(resolvedMappedField.transformerCoordinates, fromPair, toPair)
-        mapField(fromPair, toPair, transformerRegistration)
+        mapField(fromPair, toPair, transformerRegistration, resolvedMappedField)
     }
 
-    private fun mapField(fromPair: ObjectFieldTrio, toPair: ObjectFieldTrio, transformerRegistration: TransformerRegistration<*, *>) {
+    private fun mapField(fromPair: ObjectFieldTrio, toPair: ObjectFieldTrio, transformerRegistration: TransformerRegistration<*, *>, resolvedMappedField: ResolvedMappedField) {
         fromPair.field.isAccessible = true
         toPair.field.isAccessible = true
         var value = fromPair.field.getValue(fromPair.target)
+        val condition = resolvedMappedField.condition
+            ?: if (resolvedMappedField.conditionClazz != null) {
+                getConditionInstance(resolvedMappedField.conditionClazz)
+            } else {
+                null
+            }
+
+        if (condition != null) {
+            condition as Condition<Any>
+            if (!condition.isValid(value)) {
+                return
+            }
+        }
+
         if (transformerRegistration != TransformerRegistration.EMPTY) {
             val transformer = transformerRegistration.transformer as FieldTransformer<Any, Any>
             value = transformer.transform(fromPair.field, toPair.field, value, fromPair.target, toPair.target)
@@ -207,6 +223,12 @@ class ShapeShift constructor(
         return transformerRegistration
     }
 
+    private fun getConditionInstance(conditionClazz: Class<out Condition<*>>): Condition<*> {
+        return conditionCache.computeIfAbsent(conditionClazz) {
+            conditionClazz.newInstance()
+        }
+    }
+
     private fun <From : Any, To : Any> registerTransformer(registration: TransformerRegistration<From, To>) {
         val name = registration.name ?: registration.transformer::class.simpleName!!
         val newRegistration = registration.copy(name = name)
@@ -236,4 +258,3 @@ class ShapeShift constructor(
         }
     }
 }
-

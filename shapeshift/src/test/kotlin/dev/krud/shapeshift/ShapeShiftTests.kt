@@ -10,6 +10,7 @@
 
 package dev.krud.shapeshift
 
+import dev.krud.shapeshift.condition.Condition
 import dev.krud.shapeshift.resolver.annotation.DefaultMappingTarget
 import dev.krud.shapeshift.resolver.annotation.MappedField
 import dev.krud.shapeshift.transformer.DateToLongTransformer
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.api.expectThrows
 import strikt.assertions.isEqualTo
+import strikt.assertions.isNull
 import strikt.assertions.message
 import java.lang.reflect.Field
 
@@ -189,6 +191,21 @@ internal class ShapeShiftTests {
 
             expectThat(result.long)
                 .isEqualTo(1L)
+        }
+
+        @Test
+        internal fun `mapped field with truthy condition`() {
+            val result = shapeShift.map(FromWithTruthyCondition(), GenericTo::class.java)
+            expectThat(result.long)
+                .isEqualTo(1L)
+        }
+
+        @Test
+        internal fun `mapped field with falsy condition`() {
+            val result = shapeShift.map(ToWithFalsyCondition(), GenericTo::class.java)
+
+            expectThat(result.long)
+                .isNull()
         }
     }
 
@@ -498,6 +515,28 @@ internal class ShapeShiftTests {
         class Child {
             val long: Long? = null
         }
+    }
+
+    internal class LongEqualsOneCondition : Condition<Long> {
+        override fun isValid(originalValue: Long?): Boolean {
+            return originalValue == 1L
+        }
+    }
+
+    internal class LongEqualsTwoCondition : Condition<Long> {
+        override fun isValid(originalValue: Long?): Boolean {
+            return originalValue == 2L
+        }
+    }
+
+    internal class FromWithTruthyCondition {
+        @MappedField(target = GenericTo::class, condition = LongEqualsOneCondition::class)
+        val long: Long = 1L
+    }
+
+    internal class ToWithFalsyCondition {
+        @MappedField(target = GenericTo::class, condition = LongEqualsTwoCondition::class)
+        val long: Long = 1L
     }
 
     internal class ToWithComplexPath {
