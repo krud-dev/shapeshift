@@ -16,6 +16,7 @@ import dev.krud.shapeshift.dto.ObjectFieldTrio
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
 import dev.krud.shapeshift.resolver.MappingResolver
+import dev.krud.shapeshift.transformer.base.BaseFieldTransformer
 import dev.krud.shapeshift.transformer.base.ClassPair
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer.Companion.id
@@ -92,7 +93,10 @@ class ShapeShift constructor(
             }
         }
 
-        if (transformerRegistration != TransformerRegistration.EMPTY) {
+        if (resolvedMappedField.transformer != null) {
+            resolvedMappedField.transformer as BaseFieldTransformer<Any, Any>
+            value = resolvedMappedField.transformer.transform(fromPair.field, toPair.field, value, fromPair.target, toPair.target)
+        } else if (transformerRegistration != TransformerRegistration.EMPTY) {
             val transformer = transformerRegistration.transformer as FieldTransformer<Any, Any>
             value = transformer.transform(fromPair.field, toPair.field, value, fromPair.target, toPair.target)
         }

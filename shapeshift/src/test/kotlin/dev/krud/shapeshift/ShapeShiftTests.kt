@@ -334,8 +334,6 @@ internal class ShapeShiftTests {
     internal fun `type level mapped field throws exception if mapFrom is empty`() {
         expectThrows<IllegalStateException> {
             shapeShift.map(FromWithInvalidTypeAnnotation(), GenericTo::class.java)
-        }.and {
-            this.message.isEqualTo("mapFrom can not be empty when used at a type level")
         }
     }
 

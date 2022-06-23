@@ -16,6 +16,7 @@ import dev.krud.shapeshift.dsl.ProgrammaticMappingResolver.Companion.withProgram
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
 import dev.krud.shapeshift.resolver.MappingResolver
+import dev.krud.shapeshift.transformer.base.BaseFieldTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import java.lang.reflect.Field
 import kotlin.reflect.KClass
@@ -37,7 +38,8 @@ class DslResultBuilder<From : Any, To : Any> {
     class FieldMapping<FromValueType : Any, ToValueType : Any>(
         var fromField: FieldCoordinates<*, *, FromValueType>,
         var toField: FieldCoordinates<*, *, ToValueType>,
-        var transformer: KClass<out FieldTransformer<FromValueType, ToValueType>>?,
+        var transformerClazz: KClass<out FieldTransformer<FromValueType, ToValueType>>?,
+        var transformer: BaseFieldTransformer<out FromValueType, out ToValueType>?,
         var conditionClazz: KClass<out Condition<FromValueType>>?,
         var condition: Condition<FromValueType>?
     )
@@ -70,6 +72,7 @@ class DslResultBuilder<From : Any, To : Any> {
             to,
             null,
             null,
+            null,
             null
         )
         fieldMappings.add(fieldMapping)
@@ -77,7 +80,12 @@ class DslResultBuilder<From : Any, To : Any> {
     }
 
     infix fun <FromType : Any, ToType : Any>FieldMapping<FromType, out ToType>.withTransformer(transformer: KClass<out FieldTransformer<out FromType, out ToType>>): FieldMapping<FromType, out ToType> {
-        this.transformer = transformer as KClass<Nothing>
+        this.transformerClazz = transformer as KClass<Nothing>
+        return this
+    }
+
+    infix fun <FromType : Any, ToType : Any>FieldMapping<FromType, ToType>.withTransformer(transformer: BaseFieldTransformer<out FromType, out ToType>): FieldMapping<FromType, out ToType> {
+        this.transformer = transformer
         return this
     }
 
@@ -97,11 +105,12 @@ class DslResultBuilder<From : Any, To : Any> {
                 ResolvedMappedField(
                     fieldMapping.fromField.fields.map { it.javaField!! },
                     fieldMapping.toField.fields.map { it.javaField!! },
-                    if (fieldMapping.transformer == null) {
+                    if (fieldMapping.transformerClazz == null) {
                         TransformerCoordinates.NONE
                     } else {
-                        TransformerCoordinates.ofType(fieldMapping.transformer!!.java)
+                        TransformerCoordinates.ofType(fieldMapping.transformerClazz!!.java)
                     },
+                    fieldMapping.transformer,
                     fieldMapping.conditionClazz?.java,
                     fieldMapping.condition
                 )
@@ -189,9 +198,7 @@ fun main() {
     val shapeshift = ShapeShiftBuilder()
         .withTransformer(StringTransformer())
         .withProgrammaticMapping<User, UserRO> {
-            User::id mappedTo UserRO::stringId withTransformer StringTransformer::class withCondition {
-                false
-            }
+            User::id mappedTo UserRO::stringId withTransformer { fromField, toField, originalValue, fromObject, toObject -> "hello" }
         }
         .build()
     println(shapeshift.map(User(), UserRO::class.java))

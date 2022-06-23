@@ -14,12 +14,15 @@ import java.lang.reflect.Field
 
 typealias ClassPair = Pair<Class<out Any>, Class<out Any>>
 
-interface FieldTransformer<From : Any, To : Any> {
-    val fromType: Class<From>
-    val toType: Class<To>
-    fun transform(fromField: Field, toField: Field, originalValue: From?, fromObject: Any, toObject: Any): To?
+interface FieldTransformer<FromValueType : Any, ToValueType : Any> : BaseFieldTransformer<FromValueType, ToValueType> {
+    val fromType: Class<FromValueType>
+    val toType: Class<ToValueType>
 
     companion object {
         val FieldTransformer<*, *>.id: ClassPair get() = fromType.kotlin.javaObjectType to toType.kotlin.javaObjectType
     }
+}
+
+fun interface BaseFieldTransformer<FromValueType : Any, ToValueType : Any> {
+    fun transform(fromField: Field, toField: Field, originalValue: FromValueType?, fromObject: Any, toObject: Any): ToValueType?
 }

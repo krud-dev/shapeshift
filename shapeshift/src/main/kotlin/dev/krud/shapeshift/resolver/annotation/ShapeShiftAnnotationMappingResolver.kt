@@ -37,12 +37,18 @@ class ShapeShiftAnnotationMappingResolver : MappingResolver {
             }
 
             val mapToCoordinates = resolveNodesToFields(effectiveMapTo.splitIgnoreEmpty(NODE_DELIMITER), null, targetClazz)
+            val conditionClazz = if(mappedField.condition != Nothing::class) {
+                mappedField.condition
+            } else {
+                null
+            }
 
             resolvedMappedFields += ResolvedMappedField(
                 mapFromCoordinates,
                 mapToCoordinates,
                 transformerCoordinates,
-                mappedField.condition.java,
+                null,
+                conditionClazz?.java,
                 null
             )
         }
