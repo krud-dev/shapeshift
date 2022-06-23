@@ -11,6 +11,7 @@
 package dev.krud.shapeshift.dsl
 
 import dev.krud.shapeshift.ShapeShiftBuilder
+import dev.krud.shapeshift.condition.Condition
 import dev.krud.shapeshift.dsl.ProgrammaticMappingResolver.Companion.withProgrammaticMapping
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
@@ -36,10 +37,9 @@ class DslResultBuilder<From : Any, To : Any> {
     class FieldMapping<FromValueType : Any, ToValueType : Any>(
         var fromField: FieldCoordinates<*, *, FromValueType>,
         var toField: FieldCoordinates<*, *, ToValueType>,
-        var transformer: KClass<out FieldTransformer<FromValueType, ToValueType>>?
+        var transformer: KClass<out FieldTransformer<FromValueType, ToValueType>>?,
+        var conditionClazz: KClass<out Condition<FromValueType>>?
     )
-
-
     val fieldMappings = mutableListOf<FieldMapping<*, *>>()
 
     operator fun <Parent : Any, Child : Any, ChildValue : Any> KProperty1<Parent, Child>.rangeTo(other: KProperty1<Child, ChildValue>): FieldCoordinates<Parent, Child, ChildValue> {
@@ -67,14 +67,20 @@ class DslResultBuilder<From : Any, To : Any> {
         val fieldMapping = FieldMapping(
             this,
             to,
+            null,
             null
         )
         fieldMappings.add(fieldMapping)
         return fieldMapping
     }
 
-    infix fun <FromType : Any, ToType : Any>FieldMapping<FromType, out ToType>.withTransformer(transformer: KClass<out FieldTransformer<out FromType, out ToType>>): FieldMapping<out FromType, out ToType> {
+    infix fun <FromType : Any, ToType : Any>FieldMapping<FromType, out ToType>.withTransformer(transformer: KClass<out FieldTransformer<out FromType, out ToType>>): FieldMapping<FromType, out ToType> {
         this.transformer = transformer as KClass<Nothing>
+        return this
+    }
+
+    infix fun <FromType : Any, ToType : Any>FieldMapping<FromType, out ToType>.withCondition(condition: KClass<out Condition<out FromType>>): FieldMapping<FromType, out ToType> {
+        this.conditionClazz = condition as KClass<Nothing>
         return this
     }
 
@@ -88,7 +94,8 @@ class DslResultBuilder<From : Any, To : Any> {
                         TransformerCoordinates.NONE
                     } else {
                         TransformerCoordinates.ofType(fieldMapping.transformer!!.java)
-                    }
+                    },
+                    fieldMapping.conditionClazz?.java
                 )
             }
         )
@@ -131,15 +138,6 @@ class UserRO {
     }
 }
 
-class StringTransformer : FieldTransformer<Long, String> {
-    override val fromType: Class<Long> = Long::class.java
-    override val toType: Class<String> = String::class.java
-
-    override fun transform(fromField: Field, toField: Field, originalValue: Long?, fromObject: Any, toObject: Any): String? {
-        return originalValue.toString()
-    }
-}
-
 class ProgrammaticMappingResolver(
     vararg val dslResults: DslResult<*, *>
 ) : MappingResolver {
@@ -164,27 +162,29 @@ class ProgrammaticMappingResolver(
     }
 }
 
-//fun main() {
-//    User(id, firstname, lastname, @Min(0) date)
-//    {
-//        firstname: "John",
-//        lastname: "Doe"
-//    }
-//
-//    // partial update
-//    {
-//        lastname: null
-//    }
-//
-//
-//    val shapeshift = ShapeShiftBuilder()
-//        .withTransformer(StringTransformer())
-//        .withProgrammaticMapping<User, UserRO> {
-//            User::id mappedTo UserRO::address..Address::zip withTransformer StringTransformer::class
-//            User::id mappedTo UserRO::stringId withTransformer StringTransformer::class withCondition { it > 0 }
-//            User::address..Address::zip mappedTo UserRO::zip
-//        }
-//        .build()
-//    println(shapeshift.map(User(), UserRO::class.java))
-//}
-//
+class MyCondition : Condition<Long> {
+    override fun isValid(originalValue: Long?): Boolean {
+        return originalValue == 0L
+    }
+}
+
+class StringTransformer : FieldTransformer<Long, String> {
+    override val fromType: Class<Long> = Long::class.java
+    override val toType: Class<String> = String::class.java
+
+    override fun transform(fromField: Field, toField: Field, originalValue: Long?, fromObject: Any, toObject: Any): String? {
+        return originalValue.toString()
+    }
+}
+
+fun main() {
+    val shapeshift = ShapeShiftBuilder()
+        .withTransformer(StringTransformer())
+        .withProgrammaticMapping<User, UserRO> {
+            User::id mappedTo UserRO::address..Address::zip withTransformer StringTransformer::class
+            User::id mappedTo UserRO::stringId withCondition MyCondition::class withTransformer StringTransformer::class
+        }
+        .build()
+    println(shapeshift.map(User(), UserRO::class.java))
+}
+

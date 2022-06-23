@@ -10,7 +10,6 @@
 
 package dev.krud.shapeshift.condition
 
-@FunctionalInterface
-fun interface Condition<FromType> {
+fun interface Condition<FromType : Any> {
     fun isValid(originalValue: FromType?): Boolean
 }

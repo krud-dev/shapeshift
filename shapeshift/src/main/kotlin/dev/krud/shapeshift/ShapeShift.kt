@@ -35,7 +35,7 @@ class ShapeShift constructor(
     internal val defaultTransformers: MutableMap<ClassPair, TransformerRegistration<out Any, out Any>> = mutableMapOf()
     private val mappingStructures: MutableMap<ClassPair, MappingStructure> = mutableMapOf()
     private val entityFieldsCache: MutableMap<Class<*>, Map<String, Field>> = mutableMapOf()
-    private val conditionCache: MutableMap<Class<Condition<Any>>, Condition<Any>> = mutableMapOf()
+    private val conditionCache: MutableMap<Class<out Condition<*>>, Condition<*>> = mutableMapOf()
 
     init {
         for (registration in transformersRegistrations) {
@@ -74,12 +74,12 @@ class ShapeShift constructor(
         mapField(fromPair, toPair, transformerRegistration, resolvedMappedField.conditionClazz)
     }
 
-    private fun mapField(fromPair: ObjectFieldTrio, toPair: ObjectFieldTrio, transformerRegistration: TransformerRegistration<*, *>, conditionClazz: Class<Condition<Any>>?) {
+    private fun mapField(fromPair: ObjectFieldTrio, toPair: ObjectFieldTrio, transformerRegistration: TransformerRegistration<*, *>, conditionClazz: Class<out Condition<*>>?) {
         fromPair.field.isAccessible = true
         toPair.field.isAccessible = true
         var value = fromPair.field.getValue(fromPair.target)
         if (conditionClazz != null) {
-            val condition = getConditionInstance(conditionClazz)
+            val condition = getConditionInstance(conditionClazz) as Condition<Any>
             if (!condition.isValid(value)) {
                 return
             }
@@ -215,7 +215,7 @@ class ShapeShift constructor(
         return transformerRegistration
     }
 
-    private fun getConditionInstance(conditionClazz: Class<Condition<Any>>): Condition<Any> {
+    private fun getConditionInstance(conditionClazz: Class<out Condition<*>>): Condition<*> {
         return conditionCache.computeIfAbsent(conditionClazz) {
             conditionClazz.newInstance()
         }

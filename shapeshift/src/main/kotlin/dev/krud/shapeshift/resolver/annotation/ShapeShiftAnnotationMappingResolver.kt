@@ -41,7 +41,8 @@ class ShapeShiftAnnotationMappingResolver : MappingResolver {
             resolvedMappedFields += ResolvedMappedField(
                 mapFromCoordinates,
                 mapToCoordinates,
-                transformerCoordinates
+                transformerCoordinates,
+                mappedField.condition.java
             )
         }
         return resolvedMappedFields

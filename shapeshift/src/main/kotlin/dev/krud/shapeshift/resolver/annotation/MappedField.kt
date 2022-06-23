@@ -9,10 +9,10 @@
  */
 package dev.krud.shapeshift.resolver.annotation
 
+import dev.krud.shapeshift.condition.Condition
 import dev.krud.shapeshift.transformer.EmptyTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import kotlin.reflect.KClass
-import kotlin.reflect.KProperty
 
 /**
  * Indicates that an annotated field should be mapped to a field on a different model by the [FieldMapper]
@@ -43,5 +43,10 @@ annotation class MappedField(
      * Bean name for a defined [FieldTransformer] bean to use on the value
      * Supersedes [MappedField.transformer] if specified
      */
-    val transformerRef: String = ""
+    val transformerRef: String = "",
+
+    /**
+     * The condition to use to determine if the field should be mapped
+     */
+    val condition: KClass<out Condition<*>> = Nothing::class,
 )
