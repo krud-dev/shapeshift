@@ -10,8 +10,10 @@
 
 package dev.krud.shapeshift.resolver
 
+import dev.krud.shapeshift.decorator.Decorator
 import dev.krud.shapeshift.dto.ResolvedMappedField
 
 interface MappingResolver {
     fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): List<ResolvedMappedField>
+    fun resolveDecorators(): List<Decorator<*, *>>
 }

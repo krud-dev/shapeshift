@@ -14,7 +14,7 @@ import java.lang.reflect.Field
 
 typealias ClassPair = Pair<Class<out Any>, Class<out Any>>
 
-interface FieldTransformer<FromValueType : Any, ToValueType : Any> : BaseFieldTransformer<FromValueType, ToValueType> {
+interface FieldTransformer<FromValueType : Any?, ToValueType : Any?> : BaseFieldTransformer<FromValueType, ToValueType> {
     val fromType: Class<FromValueType>
     val toType: Class<ToValueType>
 
@@ -23,6 +23,6 @@ interface FieldTransformer<FromValueType : Any, ToValueType : Any> : BaseFieldTr
     }
 }
 
-fun interface BaseFieldTransformer<FromValueType : Any, ToValueType : Any> {
+fun interface BaseFieldTransformer<FromValueType : Any?, ToValueType : Any?> {
     fun transform(fromField: Field, toField: Field, originalValue: FromValueType?, fromObject: Any, toObject: Any): ToValueType?
 }

@@ -26,21 +26,30 @@ import org.slf4j.LoggerFactory
 import java.lang.reflect.Field
 
 class ShapeShift constructor(
-    transformersRegistrations: Set<TransformerRegistration<out Any, out Any>> = emptySet(),
-    val mappingResolvers: Set<MappingResolver> = setOf()
+    transformersRegistrations: Set<TransformerRegistration<out Any?, out Any?>> = emptySet(),
+    val mappingResolvers: Set<MappingResolver> = setOf(),
+    val defaultMappingStrategy: MappingStrategy
 ) {
-    internal val transformers: MutableList<TransformerRegistration<out Any, out Any>> = mutableListOf()
-    internal val transformersByNameCache: MutableMap<String, TransformerRegistration<out Any, out Any>> = mutableMapOf()
+    internal val transformers: MutableList<TransformerRegistration<out Any?, out Any?>> = mutableListOf()
+    internal val transformersByNameCache: MutableMap<String, TransformerRegistration<out Any?, out Any?>> = mutableMapOf()
     internal val transformersByTypeCache: MutableMap<Class<out FieldTransformer<*, *>>, TransformerRegistration<*, *>> =
         mutableMapOf()
-    internal val defaultTransformers: MutableMap<ClassPair, TransformerRegistration<out Any, out Any>> = mutableMapOf()
+    internal val defaultTransformers: MutableMap<ClassPair, TransformerRegistration<out Any?, out Any?>> = mutableMapOf()
     private val mappingStructures: MutableMap<ClassPair, MappingStructure> = mutableMapOf()
     private val entityFieldsCache: MutableMap<Class<*>, Map<String, Field>> = mutableMapOf()
     private val conditionCache: MutableMap<Class<out Condition<*>>, Condition<*>> = mutableMapOf()
 
     init {
+        if (defaultMappingStrategy == MappingStrategy.NONE) {
+            error("Default mapping strategy cannot be NONE")
+        }
         for (registration in transformersRegistrations) {
             registerTransformer(registration)
+        }
+        for (mappingResolver in mappingResolvers) {
+            for (resolveDecorator in mappingResolver.resolveDecorators()) {
+                resolveddec
+            }
         }
     }
 
@@ -100,12 +109,31 @@ class ShapeShift constructor(
             val transformer = transformerRegistration.transformer as FieldTransformer<Any, Any>
             value = transformer.transform(fromPair.field, toPair.field, value, fromPair.target, toPair.target)
         }
-        if (value != null) {
+
+        val mappingStrategy: MappingStrategy
+
+        if (resolvedMappedField.overrideMappingStrategy != null && resolvedMappedField.overrideMappingStrategy != MappingStrategy.NONE) {
+            mappingStrategy = resolvedMappedField.overrideMappingStrategy
+        } else {
+            mappingStrategy = defaultMappingStrategy
+        }
+
+        val shouldMap = when (mappingStrategy) {
+            MappingStrategy.NONE -> error("Mapping strategy is set to NONE")
+            MappingStrategy.MAP_ALL -> true
+            MappingStrategy.MAP_NOT_NULL -> value != null
+        }
+
+        if (shouldMap) {
             try {
-                if (!toPair.type.isAssignableFrom(value::class.java)) {
-                    error("Type mismatch: Expected ${toPair.type} but got ${value::class.java}")
+                if (value == null) {
+                    toPair.field.setValue(toPair.target, null)
+                } else {
+                    if (!toPair.type.isAssignableFrom(value::class.java)) {
+                        error("Type mismatch: Expected ${toPair.type} but got ${value::class.java}")
+                    }
+                    toPair.field.setValue(toPair.target, value)
                 }
-                toPair.field.setValue(toPair.target, value)
             } catch (e: Exception) {
                 val newException =
                     IllegalStateException("Could not map value ${fromPair.field.name} of class ${fromPair.target.javaClass.simpleName} to ${toPair.field.name} of class ${toPair.target.javaClass.simpleName}: ${e.message}")
@@ -167,13 +195,13 @@ class ShapeShift constructor(
         return getFieldsMap(clazz)[name]
     }
 
-    private fun getTransformerByName(name: String): TransformerRegistration<out Any, out Any> {
+    private fun getTransformerByName(name: String): TransformerRegistration<out Any?, out Any?> {
         return transformersByNameCache.computeIfAbsent(name) { _ ->
             transformers.find { it.name == name } ?: TransformerRegistration.EMPTY
         }
     }
 
-    private fun getTransformerByType(type: Class<out FieldTransformer<*, *>>): TransformerRegistration<out Any, out Any> {
+    private fun getTransformerByType(type: Class<out FieldTransformer<*, *>>): TransformerRegistration<out Any?, out Any?> {
         return transformersByTypeCache.computeIfAbsent(type) { _ ->
             transformers.find { it.transformer::class.java == type } ?: TransformerRegistration.EMPTY
         }
@@ -233,7 +261,7 @@ class ShapeShift constructor(
         }
     }
 
-    private fun <From : Any, To : Any> registerTransformer(registration: TransformerRegistration<From, To>) {
+    private fun <From : Any?, To : Any?> registerTransformer(registration: TransformerRegistration<From, To>) {
         val name = registration.name ?: registration.transformer::class.simpleName!!
         val newRegistration = registration.copy(name = name)
         val existingTransformer = getTransformerByName(name)

@@ -49,7 +49,8 @@ class ShapeShiftAnnotationMappingResolver : MappingResolver {
                 transformerCoordinates,
                 null,
                 conditionClazz?.java,
-                null
+                null,
+                mappedField.overrideMappingStrategy
             )
         }
         return resolvedMappedFields

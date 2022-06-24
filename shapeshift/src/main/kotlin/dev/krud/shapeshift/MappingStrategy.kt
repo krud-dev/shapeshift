@@ -10,19 +10,19 @@
 
 package dev.krud.shapeshift
 
-import dev.krud.shapeshift.transformer.EmptyTransformer
-import dev.krud.shapeshift.transformer.base.FieldTransformer
+enum class MappingStrategy {
+    /**
+     * A strategy that does nothing, used in override mapping strategies when there is no desire to override the default strategy
+     */
+    NONE,
 
-data class TransformerRegistration<From : Any?, To : Any?>(
-    val transformer: FieldTransformer<From, To>,
-    val default: Boolean = false,
-    val name: String? = null
-) {
-    companion object {
-        val EMPTY = TransformerRegistration(
-            EmptyTransformer,
-            false,
-            "empty"
-        )
-    }
+    /**
+     * A strategy that maps all values
+     */
+    MAP_ALL,
+
+    /**
+     * A strategy that maps only the values that are not null
+     */
+    MAP_NOT_NULL
 }

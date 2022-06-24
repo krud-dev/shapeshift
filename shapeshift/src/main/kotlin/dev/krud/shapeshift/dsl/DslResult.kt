@@ -10,8 +10,10 @@
 
 package dev.krud.shapeshift.dsl
 
+import dev.krud.shapeshift.MappingStrategy
 import dev.krud.shapeshift.ShapeShiftBuilder
 import dev.krud.shapeshift.condition.Condition
+import dev.krud.shapeshift.decorator.Decorator
 import dev.krud.shapeshift.dsl.ProgrammaticMappingResolver.Companion.withProgrammaticMapping
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
@@ -31,19 +33,21 @@ class DslResult<From, To>(
 
 @MappedFieldDsl
 class DslResultBuilder<From : Any, To : Any> {
-    class FieldCoordinates<RootType, LastClassType : Any, LastValueType : Any>(
+    class FieldCoordinates<RootType, LastClassType : Any?, LastValueType : Any?>(
         val fields: MutableList<KProperty1<LastClassType, LastValueType>> = mutableListOf()
     )
 
-    class FieldMapping<FromValueType : Any, ToValueType : Any>(
+    class FieldMapping<FromValueType : Any?, ToValueType : Any?>(
         var fromField: FieldCoordinates<*, *, FromValueType>,
         var toField: FieldCoordinates<*, *, ToValueType>,
         var transformerClazz: KClass<out FieldTransformer<FromValueType, ToValueType>>?,
         var transformer: BaseFieldTransformer<out FromValueType, out ToValueType>?,
         var conditionClazz: KClass<out Condition<FromValueType>>?,
-        var condition: Condition<FromValueType>?
+        var condition: Condition<FromValueType>?,
+        var mappingStrategy: MappingStrategy?
     )
     val fieldMappings = mutableListOf<FieldMapping<*, *>>()
+    var decorator: Decorator<From, To>? = null
 
     operator fun <Parent : Any, Child : Any, ChildValue : Any> KProperty1<Parent, Child>.rangeTo(other: KProperty1<Child, ChildValue>): FieldCoordinates<Parent, Child, ChildValue> {
         return FieldCoordinates(mutableListOf(this, other) as MutableList<KProperty1<Child, ChildValue>>)
@@ -54,22 +58,23 @@ class DslResultBuilder<From : Any, To : Any> {
         return this as FieldCoordinates<RootType, Child, ChildValue>
     }
 
-    infix fun <FromClass : Any, FromValue : Any, ToClass : Any, ToValue : Any>KProperty1<FromClass, FromValue>.mappedTo(to: FieldCoordinates<To, ToClass, ToValue>): FieldMapping<FromValue, ToValue> {
+    infix fun <FromClass : Any, FromValue : Any?, ToClass : Any, ToValue : Any?>KProperty1<FromClass, FromValue>.mappedTo(to: FieldCoordinates<To, ToClass, ToValue>): FieldMapping<FromValue, ToValue> {
         return toFieldCoordinates<From, FromClass, FromValue>().mappedTo(to)
     }
 
-    infix fun <FromClass : Any, FromValue : Any, ToClass : Any, ToValue : Any>FieldCoordinates<From, FromClass, FromValue>.mappedTo(to: KProperty1<ToClass, ToValue>): FieldMapping<FromValue, ToValue> {
+    infix fun <FromClass : Any, FromValue : Any?, ToClass : Any, ToValue : Any?>FieldCoordinates<From, FromClass, FromValue>.mappedTo(to: KProperty1<ToClass, ToValue>): FieldMapping<FromValue, ToValue> {
         return this.mappedTo(to.toFieldCoordinates())
     }
 
-    infix fun <FromClass : Any, FromValue : Any, ToClass : Any, ToValue : Any>KProperty1<FromClass, FromValue>.mappedTo(to: KProperty1<ToClass, ToValue>): FieldMapping<FromValue, ToValue> {
-        return this.mappedTo(to.toFieldCoordinates())
+    infix fun <FromClass : Any, FromValue : Any?, ToClass : Any, ToValue : Any?>KProperty1<FromClass, FromValue>.mappedTo(to: KProperty1<ToClass, ToValue>): FieldMapping<FromValue, ToValue> {
+        return this.toFieldCoordinates<From, FromClass, FromValue>().mappedTo(to.toFieldCoordinates())
     }
 
-    infix fun <FromClass : Any, FromValue : Any, ToClass : Any, ToValue : Any>FieldCoordinates<From, FromClass, FromValue>.mappedTo(to: FieldCoordinates<To, ToClass, ToValue>): FieldMapping<FromValue, ToValue> {
+    infix fun <FromClass : Any, FromValue : Any?, ToClass : Any, ToValue : Any?>FieldCoordinates<From, FromClass, FromValue>.mappedTo(to: FieldCoordinates<To, ToClass, ToValue>): FieldMapping<FromValue, ToValue> {
         val fieldMapping = FieldMapping(
             this,
             to,
+            null,
             null,
             null,
             null,
@@ -77,6 +82,10 @@ class DslResultBuilder<From : Any, To : Any> {
         )
         fieldMappings.add(fieldMapping)
         return fieldMapping
+    }
+
+    fun decorate(decorator: Decorator<From, To>) {
+        this.decorator = decorator
     }
 
     infix fun <FromType : Any, ToType : Any>FieldMapping<FromType, out ToType>.withTransformer(transformer: KClass<out FieldTransformer<out FromType, out ToType>>): FieldMapping<FromType, out ToType> {
@@ -99,6 +108,11 @@ class DslResultBuilder<From : Any, To : Any> {
         return this
     }
 
+    infix fun <FromType : Any, ToType : Any>FieldMapping<FromType, out ToType>.overrideStrategy(mappingStrategy: MappingStrategy): FieldMapping<FromType, out ToType> {
+        this.mappingStrategy = mappingStrategy
+        return this
+    }
+
     fun build(): DslResult<From, To> {
         return DslResult(
             fieldMappings.map { fieldMapping ->
@@ -112,13 +126,14 @@ class DslResultBuilder<From : Any, To : Any> {
                     },
                     fieldMapping.transformer,
                     fieldMapping.conditionClazz?.java,
-                    fieldMapping.condition
+                    fieldMapping.condition,
+                    fieldMapping.mappingStrategy
                 )
             }
         )
     }
 
-    private fun <RootType : Any, ClassType : Any, ValueType : Any> KProperty1<ClassType, ValueType>.toFieldCoordinates(): FieldCoordinates<RootType, ClassType, ValueType> {
+    private fun <RootType : Any, ClassType : Any, ValueType : Any?> KProperty1<ClassType, ValueType>.toFieldCoordinates(): FieldCoordinates<RootType, ClassType, ValueType> {
         if (this is FieldCoordinates<*, *, *>) {
             return this as FieldCoordinates<RootType, ClassType, ValueType>
         }
@@ -141,6 +156,7 @@ class Address {
 
 class User {
     val id: Long = 5L
+    val name: String = "jhon"
     val address: Address = Address()
 }
 
@@ -194,13 +210,25 @@ class StringTransformer : FieldTransformer<Long, String> {
     }
 }
 
+class A {
+    val str: String? = null
+}
+class B {
+    var str: String? = "bla"
+}
+
 fun main() {
     val shapeshift = ShapeShiftBuilder()
         .withTransformer(StringTransformer())
+        .withProgrammaticMapping<A, B> {
+            A::str mappedTo B::str
+            decorate { a, b ->
+                b.str = "bla"
+            }
+        }
         .withProgrammaticMapping<User, UserRO> {
-            User::id mappedTo UserRO::stringId withTransformer { fromField, toField, originalValue, fromObject, toObject -> "hello" }
+            User::name mappedTo UserRO::stringId
         }
         .build()
     println(shapeshift.map(User(), UserRO::class.java))
 }
-
