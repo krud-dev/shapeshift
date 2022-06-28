@@ -10,6 +10,8 @@
 
 package dev.krud.shapeshift.resolver.annotation
 
+import dev.krud.shapeshift.ShapeShiftBuilder
+import dev.krud.shapeshift.decorator.Decorator
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
 import dev.krud.shapeshift.resolver.MappingResolver
@@ -17,10 +19,13 @@ import dev.krud.shapeshift.resolver.MappingResolverResolution
 import dev.krud.shapeshift.util.getDeclaredFieldRecursive
 import dev.krud.shapeshift.util.splitIgnoreEmpty
 import java.lang.reflect.Field
+import kotlin.reflect.full.createInstance
 
 class ShapeShiftAnnotationMappingResolver : MappingResolver {
     override fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): MappingResolverResolution {
-        val mappedFieldReferences = getMappedFields(sourceClazz, targetClazz)
+        val defaultMappingTarget = sourceClazz.getDeclaredAnnotation(DefaultMappingTarget::class.java)
+        val defaultToClass: Class<*> = defaultMappingTarget?.value?.java ?: Nothing::class.java
+        val mappedFieldReferences = getMappedFields(sourceClazz, targetClazz, defaultToClass)
 
         val resolvedMappedFields = mutableListOf<ResolvedMappedField>()
         for ((mappedField, field) in mappedFieldReferences) {
@@ -54,7 +59,11 @@ class ShapeShiftAnnotationMappingResolver : MappingResolver {
                 mappedField.overrideMappingStrategy
             )
         }
-        return MappingResolverResolution(resolvedMappedFields, emptyList())
+
+        val decorators = sourceClazz.getDeclaredAnnotationsByType(Decorate::class.java)
+            .filter { it.target == targetClazz || (defaultToClass != Nothing::class.java && it.target == Nothing::class && defaultToClass == targetClazz) }
+            .map { it.decorator.createInstance() }
+        return MappingResolverResolution(resolvedMappedFields, decorators)
     }
 
     /**
@@ -76,17 +85,15 @@ class ShapeShiftAnnotationMappingResolver : MappingResolver {
         return listOf(field) + resolveNodesToFields(nodes.drop(1), nextField, nextField.type)
     }
 
-    private fun getMappedFields(fromClass: Class<*>, toClass: Class<*>): List<MappedFieldReference> {
+    private fun getMappedFields(fromClass: Class<*>, toClass: Class<*>, defaultToClass: Class<*>): List<MappedFieldReference> {
         var clazz: Class<*>? = fromClass
         val result = mutableListOf<MappedFieldReference>()
         while (clazz != null) {
             val fields = clazz.declaredFields
-            val defaultMappingTarget = clazz.getDeclaredAnnotation(DefaultMappingTarget::class.java)
-            val defaultFromClass: Class<*> = defaultMappingTarget?.value?.java ?: Nothing::class.java
             result += clazz.getDeclaredAnnotationsByType(MappedField::class.java)
                 .filter { mappedField ->
                     try {
-                        return@filter isOfType(defaultFromClass, mappedField.target.java, toClass)
+                        return@filter isOfType(defaultToClass, mappedField.target.java, toClass)
                     } catch (e: IllegalStateException) {
                         error("Could not create entity structure for <" + fromClass.simpleName + ", " + toClass.simpleName + ">: " + e.message)
                     }
@@ -96,7 +103,7 @@ class ShapeShiftAnnotationMappingResolver : MappingResolver {
                 result += field.getDeclaredAnnotationsByType(MappedField::class.java)
                     .filter { mappedField ->
                         try {
-                            return@filter isOfType(defaultFromClass, mappedField.target.java, toClass)
+                            return@filter isOfType(defaultToClass, mappedField.target.java, toClass)
                         } catch (e: IllegalStateException) {
                             throw IllegalStateException("Could not create entity structure for <" + fromClass.simpleName + ", " + toClass.simpleName + ">: " + e.message)
                         }
@@ -109,11 +116,11 @@ class ShapeShiftAnnotationMappingResolver : MappingResolver {
         return result
     }
 
-    private fun isOfType(defaultFromClass: Class<*>, fromClass: Class<*>, toClass: Class<*>): Boolean {
+    private fun isOfType(defaultToClass: Class<*>, fromClass: Class<*>, toClass: Class<*>): Boolean {
         var trueFromClass: Class<*> = fromClass
         if (trueFromClass == Nothing::class.java) {
-            check(defaultFromClass != Nothing::class.java) { "No mapping target or default mapping target specified" }
-            trueFromClass = defaultFromClass
+            check(defaultToClass != Nothing::class.java) { "No mapping target or default mapping target specified" }
+            trueFromClass = defaultToClass
         }
         return trueFromClass.isAssignableFrom(toClass)
     }
@@ -126,4 +133,32 @@ class ShapeShiftAnnotationMappingResolver : MappingResolver {
     companion object {
         private const val NODE_DELIMITER = "."
     }
+}
+
+@DefaultMappingTarget(ExampleB::class)
+@Decorate(decorator = MyDec::class)
+class ExampleA {
+    var a = "aaa"
+}
+
+class ExampleB {
+    var b = "bbb"
+    override fun toString(): String {
+        return "ExampleB(b='$b')"
+    }
+
+}
+
+class MyDec : Decorator<ExampleA, ExampleB> {
+    override fun decorate(from: ExampleA, to: ExampleB) {
+        to.b = "xxx"
+    }
+}
+
+fun main() {
+    val shapeShift = ShapeShiftBuilder()
+        .withMappingResolver(ShapeShiftAnnotationMappingResolver())
+        .build()
+    val b: ExampleB = shapeShift.map(ExampleA())
+    println(b)
 }
