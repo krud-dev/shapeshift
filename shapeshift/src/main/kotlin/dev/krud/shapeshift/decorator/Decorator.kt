@@ -10,6 +10,6 @@
 
 package dev.krud.shapeshift.decorator
 
-fun interface Decorator<From : Any?, To : Any?> {
+fun interface Decorator<From : Any, To : Any> {
     fun decorate(from: From, to: To)
 }

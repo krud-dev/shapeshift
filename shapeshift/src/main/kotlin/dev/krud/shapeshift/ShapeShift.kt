@@ -11,6 +11,7 @@
 package dev.krud.shapeshift
 
 import dev.krud.shapeshift.condition.Condition
+import dev.krud.shapeshift.decorator.Decorator
 import dev.krud.shapeshift.dto.MappingStructure
 import dev.krud.shapeshift.dto.ObjectFieldTrio
 import dev.krud.shapeshift.dto.ResolvedMappedField
@@ -46,28 +47,28 @@ class ShapeShift constructor(
         for (registration in transformersRegistrations) {
             registerTransformer(registration)
         }
-        for (mappingResolver in mappingResolvers) {
-            for (resolveDecorator in mappingResolver.resolveDecorators()) {
-                resolveddec
-            }
-        }
     }
 
-    inline fun <reified To : Any> map(fromObject: Any): To {
+    inline fun <reified To : Any, reified From : Any> map(fromObject: From): To {
         return map(fromObject, To::class.java)
     }
 
-    fun <To : Any> map(fromObject: Any, toClazz: Class<To>): To {
+    fun <To : Any, From : Any> map(fromObject: From, toClazz: Class<To>): To {
         val toObject = toClazz.newInstance()
         return map(fromObject, toObject)
     }
 
-    private fun <To : Any> map(fromObject: Any, toObject: To): To {
+    private fun <To : Any, From : Any> map(fromObject: From, toObject: To): To {
         val toClazz = toObject::class.java
         val mappingStructure = getMappingStructure(fromObject::class.java, toClazz)
 
         for (resolvedMappedField in mappingStructure.resolvedMappedFields) {
             processMappedField(resolvedMappedField, fromObject, toObject)
+        }
+
+        for (decorator in mappingStructure.decorators) {
+            decorator as Decorator<From, To>
+            decorator.decorate(fromObject, toObject)
         }
 
         return toObject
@@ -210,7 +211,10 @@ class ShapeShift constructor(
     private fun getMappingStructure(fromClass: Class<*>, toClass: Class<*>): MappingStructure {
         val key = fromClass to toClass
         return mappingStructures.computeIfAbsent(key) {
-            MappingStructure(fromClass, toClass, mappingResolvers.flatMap { it.resolve(fromClass, toClass) })
+            val resolutions = mappingResolvers
+                .map { it.resolve(fromClass, toClass) }
+
+            MappingStructure(fromClass, toClass, resolutions.flatMap { it.resolvedMappedFields }, resolutions.flatMap { it.decorators })
         }
     }
 

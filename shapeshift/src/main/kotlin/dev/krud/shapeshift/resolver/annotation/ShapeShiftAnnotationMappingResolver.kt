@@ -13,12 +13,13 @@ package dev.krud.shapeshift.resolver.annotation
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
 import dev.krud.shapeshift.resolver.MappingResolver
+import dev.krud.shapeshift.resolver.MappingResolverResolution
 import dev.krud.shapeshift.util.getDeclaredFieldRecursive
 import dev.krud.shapeshift.util.splitIgnoreEmpty
 import java.lang.reflect.Field
 
 class ShapeShiftAnnotationMappingResolver : MappingResolver {
-    override fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): List<ResolvedMappedField> {
+    override fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): MappingResolverResolution {
         val mappedFieldReferences = getMappedFields(sourceClazz, targetClazz)
 
         val resolvedMappedFields = mutableListOf<ResolvedMappedField>()
@@ -53,7 +54,7 @@ class ShapeShiftAnnotationMappingResolver : MappingResolver {
                 mappedField.overrideMappingStrategy
             )
         }
-        return resolvedMappedFields
+        return MappingResolverResolution(resolvedMappedFields, emptyList())
     }
 
     /**

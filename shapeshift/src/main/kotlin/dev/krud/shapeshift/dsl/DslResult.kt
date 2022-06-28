@@ -18,6 +18,7 @@ import dev.krud.shapeshift.dsl.ProgrammaticMappingResolver.Companion.withProgram
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
 import dev.krud.shapeshift.resolver.MappingResolver
+import dev.krud.shapeshift.resolver.MappingResolverResolution
 import dev.krud.shapeshift.transformer.base.BaseFieldTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import java.lang.reflect.Field
@@ -25,14 +26,20 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.jvm.javaField
 
-class DslResult<From, To>(
-    val resolvedMappedFields: List<ResolvedMappedField> = listOf()
+class DslResult<From : Any, To : Any>(
+    val fromClazz: Class<From>,
+    val toClazz: Class<To>,
+    val resolvedMappedFields: List<ResolvedMappedField> = listOf(),
+    val decorator: Decorator<From, To>?
 )
 
 
 
 @MappedFieldDsl
-class DslResultBuilder<From : Any, To : Any> {
+class DslResultBuilder<From : Any, To : Any>(
+    private val fromClazz: Class<From>,
+    private val toClazz: Class<To>,
+) {
     class FieldCoordinates<RootType, LastClassType : Any?, LastValueType : Any?>(
         val fields: MutableList<KProperty1<LastClassType, LastValueType>> = mutableListOf()
     )
@@ -115,6 +122,8 @@ class DslResultBuilder<From : Any, To : Any> {
 
     fun build(): DslResult<From, To> {
         return DslResult(
+            fromClazz,
+            toClazz,
             fieldMappings.map { fieldMapping ->
                 ResolvedMappedField(
                     fieldMapping.fromField.fields.map { it.javaField!! },
@@ -129,7 +138,8 @@ class DslResultBuilder<From : Any, To : Any> {
                     fieldMapping.condition,
                     fieldMapping.mappingStrategy
                 )
-            }
+            },
+            decorator
         )
     }
 
@@ -139,12 +149,6 @@ class DslResultBuilder<From : Any, To : Any> {
         }
         return FieldCoordinates(mutableListOf(this))
     }
-}
-
-fun <From : Any, To : Any> mapper(block: DslResultBuilder<From, To>.() -> Unit): DslResult<From, To> {
-    val builder = DslResultBuilder<From, To>()
-    builder.block()
-    return builder.build()
 }
 
 class Address {
@@ -174,10 +178,16 @@ class UserRO {
 class ProgrammaticMappingResolver(
     vararg val dslResults: DslResult<*, *>
 ) : MappingResolver {
-    override fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): List<ResolvedMappedField> {
-        return dslResults.flatMap {
-            it.resolvedMappedFields
+    override fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): MappingResolverResolution {
+        val filteredDslResults = dslResults.filter {
+            it.fromClazz == sourceClazz && it.toClazz == targetClazz
         }
+        return MappingResolverResolution(
+            filteredDslResults.flatMap {
+                it.resolvedMappedFields
+            },
+            filteredDslResults.mapNotNull { it.decorator }
+        )
     }
 
     companion object {
@@ -186,8 +196,8 @@ class ProgrammaticMappingResolver(
             return this
         }
 
-        fun <From : Any, To : Any> ShapeShiftBuilder.withProgrammaticMapping(block: DslResultBuilder<From, To>.() -> Unit): ShapeShiftBuilder {
-            val builder = DslResultBuilder<From, To>()
+        inline fun <reified From : Any, reified To : Any> ShapeShiftBuilder.withProgrammaticMapping(block: DslResultBuilder<From, To>.() -> Unit): ShapeShiftBuilder {
+            val builder = DslResultBuilder(From::class.java, To::class.java)
             builder.block()
             withMappingResolver(ProgrammaticMappingResolver(builder.build()))
             return this
@@ -215,20 +225,23 @@ class A {
 }
 class B {
     var str: String? = "bla"
+    override fun toString(): String {
+        return "B(str=$str)"
+    }
+
 }
 
 fun main() {
     val shapeshift = ShapeShiftBuilder()
         .withTransformer(StringTransformer())
         .withProgrammaticMapping<A, B> {
-            A::str mappedTo B::str
             decorate { a, b ->
-                b.str = "bla"
+                b.str = "blasss"
             }
         }
-        .withProgrammaticMapping<User, UserRO> {
-            User::name mappedTo UserRO::stringId
-        }
+//        .withProgrammaticMapping<User, UserRO> {
+//            User::name mappedTo UserRO::stringId
+//        }
         .build()
-    println(shapeshift.map(User(), UserRO::class.java))
+    println(shapeshift.map(A(), B::class.java))
 }
