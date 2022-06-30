@@ -71,8 +71,7 @@ class ShapeShift internal constructor(
             mapField(fromObject, toObject, resolvedMappedField)
         }
 
-        for (decorator in mappingStructure.decorators + getDecorators(classPair)) {
-            decorator as MappingDecorator<From, To>
+        for (decorator in getDecorators<From, To>(classPair)) {
             decorator.decorate(fromObject, toObject)
         }
 
@@ -211,7 +210,7 @@ class ShapeShift internal constructor(
             val resolutions = mappingDefinitionResolvers
                 .mapNotNull { it.resolve(fromClass, toClass) }
 
-            MappingStructure(fromClass, toClass, resolutions.flatMap { it.resolvedMappedFields }, resolutions.flatMap { it.decorators })
+            MappingStructure(fromClass, toClass, resolutions.flatMap { it.resolvedMappedFields })
         }
     }
 

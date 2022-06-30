@@ -10,12 +10,10 @@
 
 package dev.krud.shapeshift.resolver
 
-import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.dto.ResolvedMappedField
 
 data class MappingDefinition(
     val fromClazz: Class<*>,
     val toClazz: Class<*>,
     val resolvedMappedFields: List<ResolvedMappedField>,
-    val decorators: List<MappingDecorator<out Any, out Any>>
 )

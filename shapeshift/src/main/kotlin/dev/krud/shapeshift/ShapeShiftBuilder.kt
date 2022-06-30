@@ -56,7 +56,9 @@ class ShapeShiftBuilder {
     inline fun <reified From : Any, reified To : Any> withMapping(block: KotlinDslMappingDefinitionBuilder<From, To>.() -> Unit): ShapeShiftBuilder {
         val builder = KotlinDslMappingDefinitionBuilder(From::class.java, To::class.java)
         builder.block()
-        withMapping(builder.build())
+        val (mappingDefinitions, decorators) = builder.build()
+        withMapping(mappingDefinitions)
+        decorators.forEach { withDecorator(it) }
         return this
     }
 
