@@ -21,12 +21,12 @@ import dev.krud.shapeshift.transformer.base.BaseFieldTransformer
 import dev.krud.shapeshift.transformer.base.ClassPair
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer.Companion.id
+import dev.krud.shapeshift.util.concurrentMapOf
 import dev.krud.shapeshift.util.getValue
 import dev.krud.shapeshift.util.setValue
 import net.jodah.typetools.TypeResolver
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Field
-import java.util.concurrent.ConcurrentHashMap
 
 class ShapeShift internal constructor(
     transformersRegistrations: Set<TransformerRegistration<out Any, out Any>>,
@@ -35,14 +35,14 @@ class ShapeShift internal constructor(
     val decorators: Set<MappingDecorator<out Any, out Any>>
 ) {
     internal val transformers: MutableList<TransformerRegistration<out Any, out Any>> = mutableListOf()
-    internal val transformersByNameCache: MutableMap<String, TransformerRegistration<out Any, out Any>> = mutableMapOf()
+    internal val transformersByNameCache: MutableMap<String, TransformerRegistration<out Any, out Any>> = concurrentMapOf()
     internal val transformersByTypeCache: MutableMap<Class<out FieldTransformer<*, *>>, TransformerRegistration<*, *>> =
-        mutableMapOf()
+        concurrentMapOf()
     internal val defaultTransformers: MutableMap<ClassPair, TransformerRegistration<out Any, out Any>> = mutableMapOf()
-    private val mappingStructures: MutableMap<ClassPair, MappingStructure> = ConcurrentHashMap()
-    private val entityFieldsCache: MutableMap<Class<*>, Map<String, Field>> = ConcurrentHashMap()
-    private val conditionCache: MutableMap<Class<out MappingCondition<*>>, MappingCondition<*>> = ConcurrentHashMap()
-    private val decoratorCache: MutableMap<ClassPair, List<MappingDecorator<*, *>>> = ConcurrentHashMap()
+    private val mappingStructures: MutableMap<ClassPair, MappingStructure> = concurrentMapOf()
+    private val entityFieldsCache: MutableMap<Class<*>, Map<String, Field>> = concurrentMapOf()
+    private val conditionCache: MutableMap<Class<out MappingCondition<*>>, MappingCondition<*>> = concurrentMapOf()
+    private val decoratorCache: MutableMap<ClassPair, List<MappingDecorator<*, *>>> = concurrentMapOf()
 
     init {
         if (defaultMappingStrategy == MappingStrategy.NONE) {
