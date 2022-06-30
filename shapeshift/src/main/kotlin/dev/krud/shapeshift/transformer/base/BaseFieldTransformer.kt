@@ -8,20 +8,10 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package dev.krud.shapeshift.resolver.annotation
+package dev.krud.shapeshift.transformer.base
 
-import dev.krud.shapeshift.decorator.Decorator
-import kotlin.reflect.KClass
+import java.lang.reflect.Field
 
-/**
- * Apply a decorator between the source and target classes
- */
-@Repeatable
-annotation class Decorate(
-    /**
-     * The target class to be decorated
-     * If omitted, will attempt to use DefaultMappingTarget
-     */
-    val target: KClass<*> = Nothing::class,
-    val decorator: KClass<out Decorator<*, *>>
-)
+fun interface BaseFieldTransformer<From : Any?, To : Any?> {
+    fun transform(fromField: Field, toField: Field, originalValue: From?, fromObject: Any, toObject: Any): To?
+}

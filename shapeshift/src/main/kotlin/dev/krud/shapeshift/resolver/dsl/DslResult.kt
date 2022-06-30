@@ -8,21 +8,14 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package dev.krud.shapeshift
+package dev.krud.shapeshift.resolver.dsl
 
-import dev.krud.shapeshift.transformer.EmptyTransformer
-import dev.krud.shapeshift.transformer.base.FieldTransformer
+import dev.krud.shapeshift.decorator.Decorator
+import dev.krud.shapeshift.dto.ResolvedMappedField
 
-data class TransformerRegistration<From : Any, To : Any>(
-    val transformer: FieldTransformer<From, To>,
-    val default: Boolean = false,
-    val name: String? = null
-) {
-    companion object {
-        val EMPTY = TransformerRegistration(
-            EmptyTransformer,
-            false,
-            "empty"
-        )
-    }
-}
+class DslResult<From : Any, To : Any>(
+    val fromClazz: Class<From>,
+    val toClazz: Class<To>,
+    val resolvedMappedFields: List<ResolvedMappedField> = listOf(),
+    val decorator: Decorator<From, To>?
+)

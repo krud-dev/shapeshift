@@ -19,7 +19,6 @@ import dev.krud.shapeshift.resolver.MappingResolverResolution
 import dev.krud.shapeshift.util.getDeclaredFieldRecursive
 import dev.krud.shapeshift.util.splitIgnoreEmpty
 import java.lang.reflect.Field
-import kotlin.reflect.full.createInstance
 
 class ShapeShiftAnnotationMappingResolver : MappingResolver {
     override fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): MappingResolverResolution {
@@ -59,11 +58,7 @@ class ShapeShiftAnnotationMappingResolver : MappingResolver {
                 mappedField.overrideMappingStrategy
             )
         }
-
-        val decorators = sourceClazz.getDeclaredAnnotationsByType(Decorate::class.java)
-            .filter { it.target == targetClazz || (defaultToClass != Nothing::class.java && it.target == Nothing::class && defaultToClass == targetClazz) }
-            .map { it.decorator.createInstance() }
-        return MappingResolverResolution(resolvedMappedFields, decorators)
+        return MappingResolverResolution(resolvedMappedFields, emptyList())
     }
 
     /**
@@ -136,7 +131,6 @@ class ShapeShiftAnnotationMappingResolver : MappingResolver {
 }
 
 @DefaultMappingTarget(ExampleB::class)
-@Decorate(decorator = MyDec::class)
 class ExampleA {
     var a = "aaa"
 }
@@ -146,7 +140,6 @@ class ExampleB {
     override fun toString(): String {
         return "ExampleB(b='$b')"
     }
-
 }
 
 class MyDec : Decorator<ExampleA, ExampleB> {

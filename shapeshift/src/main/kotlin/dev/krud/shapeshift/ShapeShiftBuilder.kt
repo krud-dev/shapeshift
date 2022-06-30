@@ -28,7 +28,7 @@ class ShapeShiftBuilder {
         return this
     }
 
-    fun withTransformer(fieldTransformer: FieldTransformer<*, *>, default: Boolean = false, name: String? = null): ShapeShiftBuilder {
+    fun withTransformer(fieldTransformer: FieldTransformer<out Any, out Any>, default: Boolean = false, name: String? = null): ShapeShiftBuilder {
         transformers.add(TransformerRegistration(fieldTransformer, default, name))
         return this
     }

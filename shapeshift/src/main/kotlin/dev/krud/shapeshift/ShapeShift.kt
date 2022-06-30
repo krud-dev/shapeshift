@@ -27,15 +27,15 @@ import org.slf4j.LoggerFactory
 import java.lang.reflect.Field
 
 class ShapeShift constructor(
-    transformersRegistrations: Set<TransformerRegistration<out Any?, out Any?>> = emptySet(),
+    transformersRegistrations: Set<TransformerRegistration<out Any, out Any>> = emptySet(),
     val mappingResolvers: Set<MappingResolver> = setOf(),
     val defaultMappingStrategy: MappingStrategy
 ) {
-    internal val transformers: MutableList<TransformerRegistration<out Any?, out Any?>> = mutableListOf()
-    internal val transformersByNameCache: MutableMap<String, TransformerRegistration<out Any?, out Any?>> = mutableMapOf()
+    internal val transformers: MutableList<TransformerRegistration<out Any, out Any>> = mutableListOf()
+    internal val transformersByNameCache: MutableMap<String, TransformerRegistration<out Any, out Any>> = mutableMapOf()
     internal val transformersByTypeCache: MutableMap<Class<out FieldTransformer<*, *>>, TransformerRegistration<*, *>> =
         mutableMapOf()
-    internal val defaultTransformers: MutableMap<ClassPair, TransformerRegistration<out Any?, out Any?>> = mutableMapOf()
+    internal val defaultTransformers: MutableMap<ClassPair, TransformerRegistration<out Any, out Any>> = mutableMapOf()
     private val mappingStructures: MutableMap<ClassPair, MappingStructure> = mutableMapOf()
     private val entityFieldsCache: MutableMap<Class<*>, Map<String, Field>> = mutableMapOf()
     private val conditionCache: MutableMap<Class<out Condition<*>>, Condition<*>> = mutableMapOf()
@@ -53,17 +53,17 @@ class ShapeShift constructor(
         return map(fromObject, To::class.java)
     }
 
-    fun <To : Any, From : Any> map(fromObject: From, toClazz: Class<To>): To {
+    fun <From : Any, To : Any> map(fromObject: From, toClazz: Class<To>): To {
         val toObject = toClazz.newInstance()
         return map(fromObject, toObject)
     }
 
-    private fun <To : Any, From : Any> map(fromObject: From, toObject: To): To {
+    private fun <From : Any, To : Any> map(fromObject: From, toObject: To): To {
         val toClazz = toObject::class.java
         val mappingStructure = getMappingStructure(fromObject::class.java, toClazz)
 
         for (resolvedMappedField in mappingStructure.resolvedMappedFields) {
-            processMappedField(resolvedMappedField, fromObject, toObject)
+            mapField(fromObject, toObject, resolvedMappedField)
         }
 
         for (decorator in mappingStructure.decorators) {
@@ -74,18 +74,10 @@ class ShapeShift constructor(
         return toObject
     }
 
-    private fun <To : Any, From : Any> processMappedField(
-        resolvedMappedField: ResolvedMappedField,
-        fromObject: From,
-        toObject: To
-    ) {
+    private fun <From : Any, To : Any> mapField(fromObject: From, toObject: To, resolvedMappedField: ResolvedMappedField) {
         val fromPair = getFieldInstanceByNodes(resolvedMappedField.mapFromCoordinates, fromObject, SourceType.FROM) ?: return
         val toPair = getFieldInstanceByNodes(resolvedMappedField.mapToCoordinates, toObject, SourceType.TO) ?: return
         val transformerRegistration = getTransformer(resolvedMappedField.transformerCoordinates, fromPair, toPair)
-        mapField(fromPair, toPair, transformerRegistration, resolvedMappedField)
-    }
-
-    private fun mapField(fromPair: ObjectFieldTrio, toPair: ObjectFieldTrio, transformerRegistration: TransformerRegistration<*, *>, resolvedMappedField: ResolvedMappedField) {
         fromPair.field.isAccessible = true
         toPair.field.isAccessible = true
         var value = fromPair.field.getValue(fromPair.target)
@@ -196,13 +188,13 @@ class ShapeShift constructor(
         return getFieldsMap(clazz)[name]
     }
 
-    private fun getTransformerByName(name: String): TransformerRegistration<out Any?, out Any?> {
+    private fun getTransformerByName(name: String): TransformerRegistration<out Any, out Any> {
         return transformersByNameCache.computeIfAbsent(name) { _ ->
             transformers.find { it.name == name } ?: TransformerRegistration.EMPTY
         }
     }
 
-    private fun getTransformerByType(type: Class<out FieldTransformer<*, *>>): TransformerRegistration<out Any?, out Any?> {
+    private fun getTransformerByType(type: Class<out FieldTransformer<*, *>>): TransformerRegistration<out Any, out Any> {
         return transformersByTypeCache.computeIfAbsent(type) { _ ->
             transformers.find { it.transformer::class.java == type } ?: TransformerRegistration.EMPTY
         }
@@ -265,7 +257,7 @@ class ShapeShift constructor(
         }
     }
 
-    private fun <From : Any?, To : Any?> registerTransformer(registration: TransformerRegistration<From, To>) {
+    private fun <From : Any, To : Any> registerTransformer(registration: TransformerRegistration<From, To>) {
         val name = registration.name ?: registration.transformer::class.simpleName!!
         val newRegistration = registration.copy(name = name)
         val existingTransformer = getTransformerByName(name)
