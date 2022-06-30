@@ -8,14 +8,9 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package dev.krud.shapeshift.dsl
+package dev.krud.shapeshift.util
 
-import dev.krud.shapeshift.decorator.MappingDecorator
-import dev.krud.shapeshift.dto.ResolvedMappedField
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentMap
 
-class DslResult<From : Any, To : Any>(
-    val fromClazz: Class<From>,
-    val toClazz: Class<To>,
-    val resolvedMappedFields: List<ResolvedMappedField> = listOf(),
-    val decorator: MappingDecorator<From, To>?
-)
+inline fun <K, V> concurrentMapOf(): ConcurrentMap<K, V> = ConcurrentHashMap()

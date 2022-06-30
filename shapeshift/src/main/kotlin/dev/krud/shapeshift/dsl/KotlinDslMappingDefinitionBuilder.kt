@@ -108,25 +108,27 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
         return this
     }
 
-    fun build(): MappingDefinition {
-        return MappingDefinition(
-            fromClazz,
-            toClazz,
-            fieldMappings.map { fieldMapping ->
-                ResolvedMappedField(
-                    fieldMapping.fromField.fields.map { it.javaField!! },
-                    fieldMapping.toField.fields.map { it.javaField!! },
-                    if (fieldMapping.transformerClazz == null) {
-                        TransformerCoordinates.NONE
-                    } else {
-                        TransformerCoordinates.ofType(fieldMapping.transformerClazz!!.java)
-                    },
-                    fieldMapping.transformer,
-                    fieldMapping.conditionClazz?.java,
-                    fieldMapping.condition,
-                    fieldMapping.mappingStrategy
-                )
-            },
+    fun build(): Result {
+        return Result(
+            MappingDefinition(
+                fromClazz,
+                toClazz,
+                fieldMappings.map { fieldMapping ->
+                    ResolvedMappedField(
+                        fieldMapping.fromField.fields.map { it.javaField!! },
+                        fieldMapping.toField.fields.map { it.javaField!! },
+                        if (fieldMapping.transformerClazz == null) {
+                            TransformerCoordinates.NONE
+                        } else {
+                            TransformerCoordinates.ofType(fieldMapping.transformerClazz!!.java)
+                        },
+                        fieldMapping.transformer,
+                        fieldMapping.conditionClazz?.java,
+                        fieldMapping.condition,
+                        fieldMapping.mappingStrategy
+                    )
+                }
+            ),
             decorators
         )
     }
@@ -138,8 +140,13 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
         return FieldCoordinates(mutableListOf(this))
     }
 
+    data class Result(
+        val mappingDefinition: MappingDefinition,
+        val decorators: List<MappingDecorator<*, *>>
+    )
+
     companion object {
-        inline fun <reified From : Any, reified To : Any> mapper(block: KotlinDslMappingDefinitionBuilder<From, To>.() -> Unit): MappingDefinition {
+        inline fun <reified From : Any, reified To : Any> mapper(block: KotlinDslMappingDefinitionBuilder<From, To>.() -> Unit): Result {
             val builder = KotlinDslMappingDefinitionBuilder(From::class.java, To::class.java)
             builder.block()
             return builder.build()
