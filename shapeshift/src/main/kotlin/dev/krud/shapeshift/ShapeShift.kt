@@ -23,22 +23,26 @@ import dev.krud.shapeshift.transformer.base.FieldTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer.Companion.id
 import dev.krud.shapeshift.util.getValue
 import dev.krud.shapeshift.util.setValue
+import net.jodah.typetools.TypeResolver
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Field
+import java.util.concurrent.ConcurrentHashMap
 
-class ShapeShift constructor(
-    transformersRegistrations: Set<TransformerRegistration<out Any, out Any>> = emptySet(),
-    val mappingDefinitionResolvers: Set<MappingDefinitionResolver> = setOf(),
-    val defaultMappingStrategy: MappingStrategy
+class ShapeShift internal constructor(
+    transformersRegistrations: Set<TransformerRegistration<out Any, out Any>>,
+    val mappingDefinitionResolvers: Set<MappingDefinitionResolver>,
+    val defaultMappingStrategy: MappingStrategy,
+    val decorators: Set<MappingDecorator<out Any, out Any>>
 ) {
     internal val transformers: MutableList<TransformerRegistration<out Any, out Any>> = mutableListOf()
     internal val transformersByNameCache: MutableMap<String, TransformerRegistration<out Any, out Any>> = mutableMapOf()
     internal val transformersByTypeCache: MutableMap<Class<out FieldTransformer<*, *>>, TransformerRegistration<*, *>> =
         mutableMapOf()
     internal val defaultTransformers: MutableMap<ClassPair, TransformerRegistration<out Any, out Any>> = mutableMapOf()
-    private val mappingStructures: MutableMap<ClassPair, MappingStructure> = mutableMapOf()
-    private val entityFieldsCache: MutableMap<Class<*>, Map<String, Field>> = mutableMapOf()
-    private val conditionCache: MutableMap<Class<out MappingCondition<*>>, MappingCondition<*>> = mutableMapOf()
+    private val mappingStructures: MutableMap<ClassPair, MappingStructure> = ConcurrentHashMap()
+    private val entityFieldsCache: MutableMap<Class<*>, Map<String, Field>> = ConcurrentHashMap()
+    private val conditionCache: MutableMap<Class<out MappingCondition<*>>, MappingCondition<*>> = ConcurrentHashMap()
+    private val decoratorCache: MutableMap<ClassPair, List<MappingDecorator<*, *>>> = ConcurrentHashMap()
 
     init {
         if (defaultMappingStrategy == MappingStrategy.NONE) {
@@ -58,15 +62,16 @@ class ShapeShift constructor(
         return map(fromObject, toObject)
     }
 
-    private fun <From : Any, To : Any> map(fromObject: From, toObject: To): To {
+    fun <From : Any, To : Any> map(fromObject: From, toObject: To): To {
         val toClazz = toObject::class.java
+        val classPair = ClassPair(fromObject::class.java, toClazz)
         val mappingStructure = getMappingStructure(fromObject::class.java, toClazz)
 
         for (resolvedMappedField in mappingStructure.resolvedMappedFields) {
             mapField(fromObject, toObject, resolvedMappedField)
         }
 
-        for (decorator in mappingStructure.decorators) {
+        for (decorator in mappingStructure.decorators + getDecorators(classPair)) {
             decorator as MappingDecorator<From, To>
             decorator.decorate(fromObject, toObject)
         }
@@ -208,6 +213,16 @@ class ShapeShift constructor(
 
             MappingStructure(fromClass, toClass, resolutions.flatMap { it.resolvedMappedFields }, resolutions.flatMap { it.decorators })
         }
+    }
+
+    private fun <From : Any, To : Any> getDecorators(classPair: ClassPair): List<MappingDecorator<From, To>> {
+        return decoratorCache.computeIfAbsent(classPair) {
+            decorators
+                .filter { decorator ->
+                    val rawTypes = TypeResolver.resolveRawArguments(MappingDecorator::class.java, decorator.javaClass)
+                    rawTypes[0] == classPair.first && rawTypes[1] == classPair.second
+                }
+        } as List<MappingDecorator<From, To>>
     }
 
     private fun getTransformer(

@@ -10,6 +10,7 @@
 
 package dev.krud.shapeshift
 
+import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.dsl.KotlinDslMappingDefinitionBuilder
 import dev.krud.shapeshift.resolver.MappingDefinition
 import dev.krud.shapeshift.resolver.MappingDefinitionResolver
@@ -18,6 +19,7 @@ import dev.krud.shapeshift.transformer.base.FieldTransformer
 
 class ShapeShiftBuilder {
     private val transformers: MutableSet<TransformerRegistration<*, *>> = mutableSetOf()
+    private val decorators: MutableSet<MappingDecorator<*, *>> = mutableSetOf()
     private val resolvers: MutableSet<MappingDefinitionResolver> = mutableSetOf()
     private var defaultMappingStrategy: MappingStrategy = MappingStrategy.MAP_NOT_NULL
     private val mappingDefinitions: MutableList<MappingDefinition> = mutableListOf()
@@ -31,8 +33,13 @@ class ShapeShiftBuilder {
         return this
     }
 
+    fun withDecorator(decorator: MappingDecorator<out Any, out Any>) : ShapeShiftBuilder {
+        decorators += decorator
+        return this
+    }
+
     fun withTransformer(fieldTransformer: FieldTransformer<out Any, out Any>, default: Boolean = false, name: String? = null): ShapeShiftBuilder {
-        transformers.add(TransformerRegistration(fieldTransformer, default, name))
+        transformers += TransformerRegistration(fieldTransformer, default, name)
         return this
     }
 
@@ -59,6 +66,6 @@ class ShapeShiftBuilder {
     }
 
     fun build(): ShapeShift {
-        return ShapeShift(transformers, resolvers, defaultMappingStrategy)
+        return ShapeShift(transformers, resolvers, defaultMappingStrategy, decorators)
     }
 }
