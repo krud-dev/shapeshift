@@ -204,7 +204,7 @@ class ShapeShift constructor(
         val key = fromClass to toClass
         return mappingStructures.computeIfAbsent(key) {
             val resolutions = mappingDefinitionResolvers
-                .map { it.resolve(fromClass, toClass) }
+                .mapNotNull { it.resolve(fromClass, toClass) }
 
             MappingStructure(fromClass, toClass, resolutions.flatMap { it.resolvedMappedFields }, resolutions.flatMap { it.decorators })
         }

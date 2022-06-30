@@ -11,5 +11,5 @@
 package dev.krud.shapeshift.resolver
 
 interface MappingDefinitionResolver {
-    fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): MappingDefinition
+    fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): MappingDefinition?
 }

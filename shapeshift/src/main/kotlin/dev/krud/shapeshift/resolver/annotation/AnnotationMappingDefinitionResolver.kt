@@ -56,7 +56,7 @@ class AnnotationMappingDefinitionResolver : MappingDefinitionResolver {
                 mappedField.overrideMappingStrategy
             )
         }
-        return MappingDefinition(resolvedMappedFields, emptyList())
+        return MappingDefinition(sourceClazz, targetClazz, resolvedMappedFields, emptyList())
     }
 
     /**

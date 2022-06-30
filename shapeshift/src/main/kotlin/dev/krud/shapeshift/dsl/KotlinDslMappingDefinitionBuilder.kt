@@ -8,13 +8,14 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package dev.krud.shapeshift.resolver.dsl
+package dev.krud.shapeshift.dsl
 
 import dev.krud.shapeshift.MappingStrategy
 import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
+import dev.krud.shapeshift.resolver.MappingDefinition
 import dev.krud.shapeshift.transformer.base.BaseFieldTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import kotlin.reflect.KClass
@@ -41,7 +42,7 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
     )
 
     val fieldMappings = mutableListOf<FieldMapping<*, *>>()
-    var decorator: MappingDecorator<RootFrom, RootTo>? = null
+    val decorators: MutableList<MappingDecorator<RootFrom, RootTo>> = mutableListOf()
 
     operator fun <Parent : Any, Child : Any, ChildValue : Any> KProperty1<Parent, Child>.rangeTo(other: KProperty1<Child, ChildValue>): FieldCoordinates<Parent, Child, ChildValue> {
         return FieldCoordinates(mutableListOf(this, other) as MutableList<KProperty1<Child, ChildValue>>)
@@ -79,7 +80,7 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
     }
 
     fun decorate(decorator: MappingDecorator<RootFrom, RootTo>) {
-        this.decorator = decorator
+        this.decorators += decorator
     }
 
     infix fun <From : Any, To : Any> FieldMapping<From, out To>.withTransformer(transformer: KClass<out FieldTransformer<out From, out To>>): FieldMapping<From, out To> {
@@ -107,8 +108,8 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
         return this
     }
 
-    fun build(): DslResult<RootFrom, RootTo> {
-        return DslResult(
+    fun build(): MappingDefinition {
+        return MappingDefinition(
             fromClazz,
             toClazz,
             fieldMappings.map { fieldMapping ->
@@ -126,7 +127,7 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
                     fieldMapping.mappingStrategy
                 )
             },
-            decorator
+            decorators
         )
     }
 
@@ -138,8 +139,8 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
     }
 
     companion object {
-        inline fun <reified From : Any, reified To : Any> mapper(block: KotlinDslMappingDefinitionBuilder<From, To>.() -> Unit): DslResult<From, To> {
-            val builder = KotlinDslMappingDefinitionBuilder<From, To>(From::class.java, To::class.java)
+        inline fun <reified From : Any, reified To : Any> mapper(block: KotlinDslMappingDefinitionBuilder<From, To>.() -> Unit): MappingDefinition {
+            val builder = KotlinDslMappingDefinitionBuilder(From::class.java, To::class.java)
             builder.block()
             return builder.build()
         }
