@@ -18,9 +18,9 @@ import dev.krud.shapeshift.dto.ObjectFieldTrio
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
 import dev.krud.shapeshift.resolver.MappingDefinitionResolver
-import dev.krud.shapeshift.util.ClassPair
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer.Companion.id
+import dev.krud.shapeshift.util.ClassPair
 import dev.krud.shapeshift.util.concurrentMapOf
 import dev.krud.shapeshift.util.getValue
 import dev.krud.shapeshift.util.setValue
