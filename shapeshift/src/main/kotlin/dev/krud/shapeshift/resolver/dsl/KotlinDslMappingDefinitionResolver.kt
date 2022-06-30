@@ -11,17 +11,17 @@
 package dev.krud.shapeshift.resolver.dsl
 
 import dev.krud.shapeshift.ShapeShiftBuilder
-import dev.krud.shapeshift.resolver.MappingResolver
-import dev.krud.shapeshift.resolver.MappingResolverResolution
+import dev.krud.shapeshift.resolver.MappingDefinitionResolver
+import dev.krud.shapeshift.resolver.MappingDefinition
 
-class ProgrammaticMappingResolver(
+class KotlinDslMappingDefinitionResolver(
     vararg val dslResults: DslResult<*, *>
-) : MappingResolver {
-    override fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): MappingResolverResolution {
+) : MappingDefinitionResolver {
+    override fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): MappingDefinition {
         val filteredDslResults = dslResults.filter {
             it.fromClazz == sourceClazz && it.toClazz == targetClazz
         }
-        return MappingResolverResolution(
+        return MappingDefinition(
             filteredDslResults.flatMap {
                 it.resolvedMappedFields
             },
@@ -30,15 +30,15 @@ class ProgrammaticMappingResolver(
     }
 
     companion object {
-        fun ShapeShiftBuilder.withProgrammaticMapping(vararg dslResults: DslResult<*, *>): ShapeShiftBuilder {
-            withMappingResolver(ProgrammaticMappingResolver(*dslResults))
+        fun ShapeShiftBuilder.withMapping(vararg dslResults: DslResult<*, *>): ShapeShiftBuilder {
+            withResolver(KotlinDslMappingDefinitionResolver(*dslResults))
             return this
         }
 
-        inline fun <reified From : Any, reified To : Any> ShapeShiftBuilder.withProgrammaticMapping(block: DslResultBuilder<From, To>.() -> Unit): ShapeShiftBuilder {
-            val builder = DslResultBuilder(From::class.java, To::class.java)
+        inline fun <reified From : Any, reified To : Any> ShapeShiftBuilder.withMapping(block: KotlinDslMappingDefinitionBuilder<From, To>.() -> Unit): ShapeShiftBuilder {
+            val builder = KotlinDslMappingDefinitionBuilder(From::class.java, To::class.java)
             builder.block()
-            withMappingResolver(ProgrammaticMappingResolver(builder.build()))
+            withResolver(KotlinDslMappingDefinitionResolver(builder.build()))
             return this
         }
     }

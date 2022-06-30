@@ -9,6 +9,6 @@
  */
 package dev.krud.shapeshift.dto
 
-import dev.krud.shapeshift.decorator.Decorator
+import dev.krud.shapeshift.decorator.MappingDecorator
 
-internal class MappingStructure(var sourceClazz: Class<*>, var targetClazz: Class<*>, val resolvedMappedFields: List<ResolvedMappedField>, val decorators: List<Decorator<out Any, out Any>>)
+internal class MappingStructure(var sourceClazz: Class<*>, var targetClazz: Class<*>, val resolvedMappedFields: List<ResolvedMappedField>, val decorators: List<MappingDecorator<out Any, out Any>>)

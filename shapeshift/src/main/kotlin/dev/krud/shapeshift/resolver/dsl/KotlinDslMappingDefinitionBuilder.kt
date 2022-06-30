@@ -11,8 +11,8 @@
 package dev.krud.shapeshift.resolver.dsl
 
 import dev.krud.shapeshift.MappingStrategy
-import dev.krud.shapeshift.condition.Condition
-import dev.krud.shapeshift.decorator.Decorator
+import dev.krud.shapeshift.condition.MappingCondition
+import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
 import dev.krud.shapeshift.transformer.base.BaseFieldTransformer
@@ -22,7 +22,7 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.jvm.javaField
 
 @MappedFieldDsl
-class DslResultBuilder<RootFrom : Any, RootTo : Any>(
+class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
     private val fromClazz: Class<RootFrom>,
     private val toClazz: Class<RootTo>,
 ) {
@@ -35,13 +35,13 @@ class DslResultBuilder<RootFrom : Any, RootTo : Any>(
         var toField: FieldCoordinates<*, *, ToValue>,
         var transformerClazz: KClass<out FieldTransformer<FromValue, ToValue>>?,
         var transformer: BaseFieldTransformer<out FromValue, out ToValue>?,
-        var conditionClazz: KClass<out Condition<FromValue>>?,
-        var condition: Condition<FromValue>?,
+        var conditionClazz: KClass<out MappingCondition<FromValue>>?,
+        var condition: MappingCondition<FromValue>?,
         var mappingStrategy: MappingStrategy?
     )
 
     val fieldMappings = mutableListOf<FieldMapping<*, *>>()
-    var decorator: Decorator<RootFrom, RootTo>? = null
+    var decorator: MappingDecorator<RootFrom, RootTo>? = null
 
     operator fun <Parent : Any, Child : Any, ChildValue : Any> KProperty1<Parent, Child>.rangeTo(other: KProperty1<Child, ChildValue>): FieldCoordinates<Parent, Child, ChildValue> {
         return FieldCoordinates(mutableListOf(this, other) as MutableList<KProperty1<Child, ChildValue>>)
@@ -78,7 +78,7 @@ class DslResultBuilder<RootFrom : Any, RootTo : Any>(
         return fieldMapping
     }
 
-    fun decorate(decorator: Decorator<RootFrom, RootTo>) {
+    fun decorate(decorator: MappingDecorator<RootFrom, RootTo>) {
         this.decorator = decorator
     }
 
@@ -92,12 +92,12 @@ class DslResultBuilder<RootFrom : Any, RootTo : Any>(
         return this
     }
 
-    infix fun <From : Any, To : Any> FieldMapping<From, out To>.withCondition(condition: KClass<out Condition<out From>>): FieldMapping<From, out To> {
+    infix fun <From : Any, To : Any> FieldMapping<From, out To>.withCondition(condition: KClass<out MappingCondition<out From>>): FieldMapping<From, out To> {
         this.conditionClazz = condition as KClass<Nothing>
         return this
     }
 
-    infix fun <From : Any, To : Any> FieldMapping<From, out To>.withCondition(condition: Condition<From>): FieldMapping<From, out To> {
+    infix fun <From : Any, To : Any> FieldMapping<From, out To>.withCondition(condition: MappingCondition<From>): FieldMapping<From, out To> {
         this.condition = condition
         return this
     }
@@ -138,8 +138,8 @@ class DslResultBuilder<RootFrom : Any, RootTo : Any>(
     }
 
     companion object {
-        inline fun <reified From : Any, reified To : Any> mapper(block: DslResultBuilder<From, To>.() -> Unit): DslResult<From, To> {
-            val builder = DslResultBuilder<From, To>(From::class.java, To::class.java)
+        inline fun <reified From : Any, reified To : Any> mapper(block: KotlinDslMappingDefinitionBuilder<From, To>.() -> Unit): DslResult<From, To> {
+            val builder = KotlinDslMappingDefinitionBuilder<From, To>(From::class.java, To::class.java)
             builder.block()
             return builder.build()
         }

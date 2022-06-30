@@ -10,7 +10,7 @@
 
 package dev.krud.shapeshift
 
-import dev.krud.shapeshift.condition.Condition
+import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.resolver.annotation.DefaultMappingTarget
 import dev.krud.shapeshift.resolver.annotation.MappedField
 import dev.krud.shapeshift.transformer.DateToLongTransformer
@@ -22,7 +22,6 @@ import strikt.api.expectThat
 import strikt.api.expectThrows
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNull
-import strikt.assertions.message
 import java.lang.reflect.Field
 
 internal class ShapeShiftTests {
@@ -483,13 +482,13 @@ internal class ShapeShiftTests {
         }
     }
 
-    internal class LongEqualsOneCondition : Condition<Long> {
+    internal class LongEqualsOneCondition : MappingCondition<Long> {
         override fun isValid(originalValue: Long?): Boolean {
             return originalValue == 1L
         }
     }
 
-    internal class LongEqualsTwoCondition : Condition<Long> {
+    internal class LongEqualsTwoCondition : MappingCondition<Long> {
         override fun isValid(originalValue: Long?): Boolean {
             return originalValue == 2L
         }

@@ -10,18 +10,16 @@
 
 package dev.krud.shapeshift.resolver.annotation
 
-import dev.krud.shapeshift.ShapeShiftBuilder
-import dev.krud.shapeshift.decorator.Decorator
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
-import dev.krud.shapeshift.resolver.MappingResolver
-import dev.krud.shapeshift.resolver.MappingResolverResolution
+import dev.krud.shapeshift.resolver.MappingDefinitionResolver
+import dev.krud.shapeshift.resolver.MappingDefinition
 import dev.krud.shapeshift.util.getDeclaredFieldRecursive
 import dev.krud.shapeshift.util.splitIgnoreEmpty
 import java.lang.reflect.Field
 
-class ShapeShiftAnnotationMappingResolver : MappingResolver {
-    override fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): MappingResolverResolution {
+class AnnotationMappingDefinitionResolver : MappingDefinitionResolver {
+    override fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): MappingDefinition {
         val defaultMappingTarget = sourceClazz.getDeclaredAnnotation(DefaultMappingTarget::class.java)
         val defaultToClass: Class<*> = defaultMappingTarget?.value?.java ?: Nothing::class.java
         val mappedFieldReferences = getMappedFields(sourceClazz, targetClazz, defaultToClass)
@@ -58,7 +56,7 @@ class ShapeShiftAnnotationMappingResolver : MappingResolver {
                 mappedField.overrideMappingStrategy
             )
         }
-        return MappingResolverResolution(resolvedMappedFields, emptyList())
+        return MappingDefinition(resolvedMappedFields, emptyList())
     }
 
     /**
@@ -128,30 +126,4 @@ class ShapeShiftAnnotationMappingResolver : MappingResolver {
     companion object {
         private const val NODE_DELIMITER = "."
     }
-}
-
-@DefaultMappingTarget(ExampleB::class)
-class ExampleA {
-    var a = "aaa"
-}
-
-class ExampleB {
-    var b = "bbb"
-    override fun toString(): String {
-        return "ExampleB(b='$b')"
-    }
-}
-
-class MyDec : Decorator<ExampleA, ExampleB> {
-    override fun decorate(from: ExampleA, to: ExampleB) {
-        to.b = "xxx"
-    }
-}
-
-fun main() {
-    val shapeShift = ShapeShiftBuilder()
-        .withMappingResolver(ShapeShiftAnnotationMappingResolver())
-        .build()
-    val b: ExampleB = shapeShift.map(ExampleA())
-    println(b)
 }

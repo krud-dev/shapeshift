@@ -11,7 +11,7 @@
 package dev.krud.shapeshift.dto
 
 import dev.krud.shapeshift.MappingStrategy
-import dev.krud.shapeshift.condition.Condition
+import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.transformer.base.BaseFieldTransformer
 import java.lang.reflect.Field
 
@@ -20,7 +20,7 @@ data class ResolvedMappedField(
     val mapToCoordinates: List<Field>,
     val transformerCoordinates: TransformerCoordinates = TransformerCoordinates.NONE,
     val transformer: BaseFieldTransformer<*, *>?,
-    val conditionClazz: Class<out Condition<*>>?,
-    val condition: Condition<*>?,
+    val conditionClazz: Class<out MappingCondition<*>>?,
+    val condition: MappingCondition<*>?,
     val overrideMappingStrategy: MappingStrategy?
 )

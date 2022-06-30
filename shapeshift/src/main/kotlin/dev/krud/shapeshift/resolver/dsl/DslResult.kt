@@ -10,12 +10,12 @@
 
 package dev.krud.shapeshift.resolver.dsl
 
-import dev.krud.shapeshift.decorator.Decorator
+import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.dto.ResolvedMappedField
 
 class DslResult<From : Any, To : Any>(
     val fromClazz: Class<From>,
     val toClazz: Class<To>,
     val resolvedMappedFields: List<ResolvedMappedField> = listOf(),
-    val decorator: Decorator<From, To>?
+    val decorator: MappingDecorator<From, To>?
 )
