@@ -10,7 +10,7 @@
 package dev.krud.shapeshift.resolver.annotation
 
 import dev.krud.shapeshift.MappingStrategy
-import dev.krud.shapeshift.condition.Condition
+import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.transformer.EmptyTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import kotlin.reflect.KClass
@@ -49,7 +49,7 @@ annotation class MappedField(
     /**
      * The condition to use to determine if the field should be mapped
      */
-    val condition: KClass<out Condition<*>> = Nothing::class,
+    val condition: KClass<out MappingCondition<*>> = Nothing::class,
 
     /**
      * An override mapping strategy to use in lieu of the default

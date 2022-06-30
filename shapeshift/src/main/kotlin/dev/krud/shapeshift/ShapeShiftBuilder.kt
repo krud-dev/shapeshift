@@ -10,17 +10,20 @@
 
 package dev.krud.shapeshift
 
-import dev.krud.shapeshift.resolver.MappingResolver
-import dev.krud.shapeshift.resolver.annotation.ShapeShiftAnnotationMappingResolver
+import dev.krud.shapeshift.dsl.KotlinDslMappingDefinitionBuilder
+import dev.krud.shapeshift.resolver.MappingDefinition
+import dev.krud.shapeshift.resolver.MappingDefinitionResolver
+import dev.krud.shapeshift.resolver.annotation.AnnotationMappingDefinitionResolver
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 
 class ShapeShiftBuilder {
     private val transformers: MutableSet<TransformerRegistration<*, *>> = mutableSetOf()
-    private val resolvers: MutableSet<MappingResolver> = mutableSetOf()
+    private val resolvers: MutableSet<MappingDefinitionResolver> = mutableSetOf()
     private var defaultMappingStrategy: MappingStrategy = MappingStrategy.MAP_NOT_NULL
+    private val mappingDefinitions: MutableList<MappingDefinition> = mutableListOf()
 
     init {
-        withMappingResolver(ShapeShiftAnnotationMappingResolver())
+        withResolver(AnnotationMappingDefinitionResolver())
     }
 
     fun withDefaultMappingStrategy(defaultMappingStrategy: MappingStrategy): ShapeShiftBuilder {
@@ -38,8 +41,20 @@ class ShapeShiftBuilder {
         return this
     }
 
-    fun withMappingResolver(mappingResolver: MappingResolver): ShapeShiftBuilder {
-        resolvers.add(mappingResolver)
+    fun withMapping(vararg mappingDefinitions: MappingDefinition): ShapeShiftBuilder {
+        this.mappingDefinitions.addAll(mappingDefinitions)
+        return this
+    }
+
+    inline fun <reified From : Any, reified To : Any> withMapping(block: KotlinDslMappingDefinitionBuilder<From, To>.() -> Unit): ShapeShiftBuilder {
+        val builder = KotlinDslMappingDefinitionBuilder(From::class.java, To::class.java)
+        builder.block()
+        withMapping(builder.build())
+        return this
+    }
+
+    fun withResolver(mappingDefinitionResolver: MappingDefinitionResolver): ShapeShiftBuilder {
+        resolvers.add(mappingDefinitionResolver)
         return this
     }
 

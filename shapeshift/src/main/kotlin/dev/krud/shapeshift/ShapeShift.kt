@@ -10,13 +10,13 @@
 
 package dev.krud.shapeshift
 
-import dev.krud.shapeshift.condition.Condition
-import dev.krud.shapeshift.decorator.Decorator
+import dev.krud.shapeshift.condition.MappingCondition
+import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.dto.MappingStructure
 import dev.krud.shapeshift.dto.ObjectFieldTrio
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
-import dev.krud.shapeshift.resolver.MappingResolver
+import dev.krud.shapeshift.resolver.MappingDefinitionResolver
 import dev.krud.shapeshift.transformer.base.BaseFieldTransformer
 import dev.krud.shapeshift.transformer.base.ClassPair
 import dev.krud.shapeshift.transformer.base.FieldTransformer
@@ -28,7 +28,7 @@ import java.lang.reflect.Field
 
 class ShapeShift constructor(
     transformersRegistrations: Set<TransformerRegistration<out Any, out Any>> = emptySet(),
-    val mappingResolvers: Set<MappingResolver> = setOf(),
+    val mappingDefinitionResolvers: Set<MappingDefinitionResolver> = setOf(),
     val defaultMappingStrategy: MappingStrategy
 ) {
     internal val transformers: MutableList<TransformerRegistration<out Any, out Any>> = mutableListOf()
@@ -38,7 +38,7 @@ class ShapeShift constructor(
     internal val defaultTransformers: MutableMap<ClassPair, TransformerRegistration<out Any, out Any>> = mutableMapOf()
     private val mappingStructures: MutableMap<ClassPair, MappingStructure> = mutableMapOf()
     private val entityFieldsCache: MutableMap<Class<*>, Map<String, Field>> = mutableMapOf()
-    private val conditionCache: MutableMap<Class<out Condition<*>>, Condition<*>> = mutableMapOf()
+    private val conditionCache: MutableMap<Class<out MappingCondition<*>>, MappingCondition<*>> = mutableMapOf()
 
     init {
         if (defaultMappingStrategy == MappingStrategy.NONE) {
@@ -67,7 +67,7 @@ class ShapeShift constructor(
         }
 
         for (decorator in mappingStructure.decorators) {
-            decorator as Decorator<From, To>
+            decorator as MappingDecorator<From, To>
             decorator.decorate(fromObject, toObject)
         }
 
@@ -89,7 +89,7 @@ class ShapeShift constructor(
             }
 
         if (condition != null) {
-            condition as Condition<Any>
+            condition as MappingCondition<Any>
             if (!condition.isValid(value)) {
                 return
             }
@@ -203,8 +203,8 @@ class ShapeShift constructor(
     private fun getMappingStructure(fromClass: Class<*>, toClass: Class<*>): MappingStructure {
         val key = fromClass to toClass
         return mappingStructures.computeIfAbsent(key) {
-            val resolutions = mappingResolvers
-                .map { it.resolve(fromClass, toClass) }
+            val resolutions = mappingDefinitionResolvers
+                .mapNotNull { it.resolve(fromClass, toClass) }
 
             MappingStructure(fromClass, toClass, resolutions.flatMap { it.resolvedMappedFields }, resolutions.flatMap { it.decorators })
         }
@@ -251,7 +251,7 @@ class ShapeShift constructor(
         return transformerRegistration
     }
 
-    private fun getConditionInstance(conditionClazz: Class<out Condition<*>>): Condition<*> {
+    private fun getConditionInstance(conditionClazz: Class<out MappingCondition<*>>): MappingCondition<*> {
         return conditionCache.computeIfAbsent(conditionClazz) {
             conditionClazz.newInstance()
         }
