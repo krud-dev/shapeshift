@@ -10,16 +10,24 @@
 
 package dev.krud.shapeshift.spring
 
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.Configuration
+import dev.krud.shapeshift.decorator.MappingDecorator
+import dev.krud.shapeshift.transformer.base.FieldTransformer
+import java.lang.reflect.Field
 
-@Configuration
-class TestConfiguration {
-    @Bean
-    fun exampleTransformer(): ExampleTransformer {
-        return ExampleTransformer()
+class ExampleClass
+
+class SecondExampleClass
+
+class ExampleDecorator : MappingDecorator<ExampleClass, SecondExampleClass> {
+    override fun decorate(from: ExampleClass, to: SecondExampleClass) {
     }
+}
 
-    @Bean
-    fun exampleDecorator() = ExampleDecorator()
+class ExampleTransformer : FieldTransformer<String, String> {
+    override val fromType: Class<String> = String::class.java
+    override val toType: Class<String> = String::class.java
+
+    override fun transform(fromField: Field, toField: Field, originalValue: String?, fromObject: Any, toObject: Any): String? {
+        return originalValue
+    }
 }
