@@ -8,34 +8,29 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package dev.krud.shapeshift.spring
+package dev.krud.shapeshift.spring.customizer
 
-import dev.krud.shapeshift.ShapeShift
 import dev.krud.shapeshift.ShapeShiftBuilder
-import dev.krud.shapeshift.spring.customizer.ShapeShiftDecoratorCustomizer
-import dev.krud.shapeshift.spring.customizer.ShapeShiftTransformerCustomizer
+import dev.krud.shapeshift.TransformerRegistration
+import dev.krud.shapeshift.spring.ShapeShiftBuilderCustomizer
+import dev.krud.shapeshift.transformer.base.FieldTransformer
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-@ConditionalOnClass(ShapeShift::class)
-class ShapeShiftAutoConfiguration {
-    @Bean
-    @ConditionalOnMissingBean(ShapeShift::class)
-    fun shapeShift(@Autowired(required = false) customizers: List<ShapeShiftBuilderCustomizer>?): ShapeShift {
-        val builder = ShapeShiftBuilder()
-        customizers?.forEach { customizer ->
-            customizer.customize(builder)
+class ShapeShiftTransformerCustomizer : ShapeShiftBuilderCustomizer {
+    @Autowired(required = false)
+    private val fieldTransformers: Map<String, FieldTransformer<out Any, out Any>>? = null
+
+    override fun customize(builder: ShapeShiftBuilder) {
+        fieldTransformers?.forEach { (name, fieldTransformer) ->
+            builder.withTransformer(
+                TransformerRegistration(
+                    fieldTransformer,
+                    false,
+                    name
+                )
+            )
         }
-        return builder.build()
     }
-
-    @Bean
-    fun shapeShiftTransformerCustomizer() = ShapeShiftTransformerCustomizer()
-
-    @Bean
-    fun shapeShiftDecoratorCustomizer() = ShapeShiftDecoratorCustomizer()
 }

@@ -12,8 +12,8 @@ package dev.krud.shapeshift.resolver.annotation
 
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
-import dev.krud.shapeshift.resolver.MappingDefinitionResolver
 import dev.krud.shapeshift.resolver.MappingDefinition
+import dev.krud.shapeshift.resolver.MappingDefinitionResolver
 import dev.krud.shapeshift.util.getDeclaredFieldRecursive
 import dev.krud.shapeshift.util.splitIgnoreEmpty
 import java.lang.reflect.Field
@@ -56,7 +56,7 @@ class AnnotationMappingDefinitionResolver : MappingDefinitionResolver {
                 mappedField.overrideMappingStrategy
             )
         }
-        return MappingDefinition(sourceClazz, targetClazz, resolvedMappedFields, emptyList())
+        return MappingDefinition(sourceClazz, targetClazz, resolvedMappedFields)
     }
 
     /**

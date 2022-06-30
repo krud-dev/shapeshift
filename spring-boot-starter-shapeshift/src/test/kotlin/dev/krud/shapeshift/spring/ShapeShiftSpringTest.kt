@@ -16,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import strikt.api.expectThat
+import strikt.assertions.contains
 
 @ExtendWith(SpringExtension::class)
 @ContextConfiguration(classes = [ShapeShiftAutoConfiguration::class, TestConfiguration::class])
@@ -23,7 +25,26 @@ internal class ShapeShiftSpringTest {
     @Autowired
     private lateinit var shapeShift: ShapeShift
 
+    @Autowired
+    private lateinit var exampleDecorator: ExampleDecorator
+
+    @Autowired
+    private lateinit var exampleTransformer: ExampleTransformer
+
     @Test
     internal fun `context loads`() {
+        println()
+    }
+
+    @Test
+    internal fun `bean transformer is loaded`() {
+        expectThat(shapeShift.transformers.map { it.transformer })
+            .contains(exampleTransformer)
+    }
+
+    @Test
+    internal fun `bean decorator is loaded`() {
+        expectThat(shapeShift.decorators)
+            .contains(exampleDecorator)
     }
 }

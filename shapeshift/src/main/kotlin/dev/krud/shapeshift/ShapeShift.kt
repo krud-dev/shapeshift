@@ -34,7 +34,7 @@ class ShapeShift internal constructor(
     val defaultMappingStrategy: MappingStrategy,
     val decorators: Set<MappingDecorator<out Any, out Any>>
 ) {
-    internal val transformers: MutableList<TransformerRegistration<out Any, out Any>> = mutableListOf()
+    val transformers: MutableList<TransformerRegistration<out Any, out Any>> = mutableListOf()
     internal val transformersByNameCache: MutableMap<String, TransformerRegistration<out Any, out Any>> = concurrentMapOf()
     internal val transformersByTypeCache: MutableMap<Class<out FieldTransformer<*, *>>, TransformerRegistration<*, *>> =
         concurrentMapOf()
