@@ -10,6 +10,15 @@
 
 package dev.krud.shapeshift.decorator
 
+import dev.krud.shapeshift.util.ClassPair
+import net.jodah.typetools.TypeResolver
+
 fun interface MappingDecorator<From : Any, To : Any> {
     fun decorate(from: From, to: To)
+    companion object {
+        val MappingDecorator<*, *>.id: ClassPair get() {
+            val rawArguments = TypeResolver.resolveRawArguments(MappingDecorator::class.java, this::class.java)
+            return rawArguments[0] to rawArguments[1]
+        }
+    }
 }

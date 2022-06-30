@@ -529,10 +529,6 @@ internal class ShapeShiftTests {
     }
 
     internal class LongToStringTransformer : FieldTransformer<Long, String> {
-        override val fromType: Class<Long> = Long::class.java
-
-        override val toType: Class<String> = String::class.java
-
         override fun transform(
             fromField: Field,
             toField: Field,
