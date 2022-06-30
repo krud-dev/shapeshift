@@ -17,10 +17,6 @@ import java.lang.reflect.Field
 import java.util.*
 
 class ExampleFieldTransformer : FieldTransformer<Long, Date> {
-    override val fromType: Class<Long> = Long::class.java
-
-    override val toType: Class<Date> = Date::class.java
-
     override fun transform(
         fromField: Field,
         toField: Field,

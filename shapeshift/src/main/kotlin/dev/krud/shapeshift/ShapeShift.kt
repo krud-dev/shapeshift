@@ -12,19 +12,18 @@ package dev.krud.shapeshift
 
 import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.decorator.MappingDecorator
+import dev.krud.shapeshift.decorator.MappingDecorator.Companion.id
 import dev.krud.shapeshift.dto.MappingStructure
 import dev.krud.shapeshift.dto.ObjectFieldTrio
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
 import dev.krud.shapeshift.resolver.MappingDefinitionResolver
-import dev.krud.shapeshift.transformer.base.BaseFieldTransformer
-import dev.krud.shapeshift.transformer.base.ClassPair
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer.Companion.id
+import dev.krud.shapeshift.util.ClassPair
 import dev.krud.shapeshift.util.concurrentMapOf
 import dev.krud.shapeshift.util.getValue
 import dev.krud.shapeshift.util.setValue
-import net.jodah.typetools.TypeResolver
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Field
 
@@ -84,28 +83,6 @@ class ShapeShift internal constructor(
         val transformerRegistration = getTransformer(resolvedMappedField.transformerCoordinates, fromPair, toPair)
         fromPair.field.isAccessible = true
         toPair.field.isAccessible = true
-        var value = fromPair.field.getValue(fromPair.target)
-        val condition = resolvedMappedField.condition
-            ?: if (resolvedMappedField.conditionClazz != null) {
-                getConditionInstance(resolvedMappedField.conditionClazz)
-            } else {
-                null
-            }
-
-        if (condition != null) {
-            condition as MappingCondition<Any>
-            if (!condition.isValid(value)) {
-                return
-            }
-        }
-
-        if (resolvedMappedField.transformer != null) {
-            resolvedMappedField.transformer as BaseFieldTransformer<Any, Any>
-            value = resolvedMappedField.transformer.transform(fromPair.field, toPair.field, value, fromPair.target, toPair.target)
-        } else if (transformerRegistration != TransformerRegistration.EMPTY) {
-            val transformer = transformerRegistration.transformer as FieldTransformer<Any, Any>
-            value = transformer.transform(fromPair.field, toPair.field, value, fromPair.target, toPair.target)
-        }
 
         val mappingStrategy: MappingStrategy
 
@@ -114,22 +91,47 @@ class ShapeShift internal constructor(
         } else {
             mappingStrategy = defaultMappingStrategy
         }
+        val fromValue = fromPair.field.getValue(fromPair.target)
 
         val shouldMap = when (mappingStrategy) {
             MappingStrategy.NONE -> error("Mapping strategy is set to NONE")
             MappingStrategy.MAP_ALL -> true
-            MappingStrategy.MAP_NOT_NULL -> value != null
+            MappingStrategy.MAP_NOT_NULL -> fromValue != null
         }
 
         if (shouldMap) {
             try {
-                if (value == null) {
+                val condition = resolvedMappedField.condition
+                    ?: if (resolvedMappedField.conditionClazz != null) {
+                        getConditionInstance(resolvedMappedField.conditionClazz)
+                    } else {
+                        null
+                    }
+
+                if (condition != null) {
+                    condition as MappingCondition<Any>
+                    if (!condition.isValid(fromValue)) {
+                        return
+                    }
+                }
+
+                val valueToSet = if (resolvedMappedField.transformer != null) {
+                    val transformer = resolvedMappedField.transformer as FieldTransformer<Any, Any>
+                    transformer.transform(fromPair.field, toPair.field, fromValue, fromPair.target, toPair.target)
+                } else if (transformerRegistration != TransformerRegistration.EMPTY) {
+                    val transformer = transformerRegistration.transformer as FieldTransformer<Any, Any>
+                    transformer.transform(fromPair.field, toPair.field, fromValue, fromPair.target, toPair.target)
+                } else {
+                    fromValue
+                }
+
+                if (valueToSet == null) {
                     toPair.field.setValue(toPair.target, null)
                 } else {
-                    if (!toPair.type.isAssignableFrom(value::class.java)) {
-                        error("Type mismatch: Expected ${toPair.type} but got ${value::class.java}")
+                    if (!toPair.type.isAssignableFrom(valueToSet::class.java)) {
+                        error("Type mismatch: Expected ${toPair.type} but got ${valueToSet::class.java}")
                     }
-                    toPair.field.setValue(toPair.target, value)
+                    toPair.field.setValue(toPair.target, valueToSet)
                 }
             } catch (e: Exception) {
                 val newException =
@@ -188,10 +190,6 @@ class ShapeShift internal constructor(
         return fieldsMap
     }
 
-    private fun getField(name: String, clazz: Class<*>): Field? {
-        return getFieldsMap(clazz)[name]
-    }
-
     private fun getTransformerByName(name: String): TransformerRegistration<out Any, out Any> {
         return transformersByNameCache.computeIfAbsent(name) { _ ->
             transformers.find { it.name == name } ?: TransformerRegistration.EMPTY
@@ -217,10 +215,7 @@ class ShapeShift internal constructor(
     private fun <From : Any, To : Any> getDecorators(classPair: ClassPair): List<MappingDecorator<From, To>> {
         return decoratorCache.computeIfAbsent(classPair) {
             decorators
-                .filter { decorator ->
-                    val rawTypes = TypeResolver.resolveRawArguments(MappingDecorator::class.java, decorator.javaClass)
-                    rawTypes[0] == classPair.first && rawTypes[1] == classPair.second
-                }
+                .filter { decorator -> decorator.id == classPair }
         } as List<MappingDecorator<From, To>>
     }
 

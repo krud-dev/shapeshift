@@ -13,4 +13,4 @@ package dev.krud.shapeshift.util
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
-inline fun <K, V> concurrentMapOf(): ConcurrentMap<K, V> = ConcurrentHashMap()
+internal inline fun <K, V> concurrentMapOf(): ConcurrentMap<K, V> = ConcurrentHashMap()

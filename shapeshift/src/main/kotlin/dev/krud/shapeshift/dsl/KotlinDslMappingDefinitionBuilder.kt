@@ -16,7 +16,6 @@ import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
 import dev.krud.shapeshift.resolver.MappingDefinition
-import dev.krud.shapeshift.transformer.base.BaseFieldTransformer
 import dev.krud.shapeshift.transformer.base.FieldTransformer
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
@@ -35,7 +34,7 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
         var fromField: FieldCoordinates<*, *, FromValue>,
         var toField: FieldCoordinates<*, *, ToValue>,
         var transformerClazz: KClass<out FieldTransformer<FromValue, ToValue>>?,
-        var transformer: BaseFieldTransformer<out FromValue, out ToValue>?,
+        var transformer: FieldTransformer<out FromValue, out ToValue>?,
         var conditionClazz: KClass<out MappingCondition<FromValue>>?,
         var condition: MappingCondition<FromValue>?,
         var mappingStrategy: MappingStrategy?
@@ -88,7 +87,7 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
         return this
     }
 
-    infix fun <From : Any, To : Any> FieldMapping<From, To>.withTransformer(transformer: BaseFieldTransformer<out From, out To>): FieldMapping<From, out To> {
+    infix fun <From : Any, To : Any> FieldMapping<From, To>.withTransformer(transformer: FieldTransformer<out From, out To>): FieldMapping<From, out To> {
         this.transformer = transformer
         return this
     }

@@ -14,6 +14,8 @@ package dev.krud.shapeshift.util
 
 import java.lang.reflect.Field
 
+internal typealias ClassPair = Pair<Class<out Any>, Class<out Any>>
+
 internal fun Field.getValue(target: Any): Any? {
     return this.get(target)
 }
