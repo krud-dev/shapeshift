@@ -11,10 +11,10 @@
 package dev.krud.shapeshift
 
 import dev.krud.shapeshift.transformer.EmptyTransformer
-import dev.krud.shapeshift.transformer.base.FieldTransformer
+import dev.krud.shapeshift.transformer.base.MappingTransformer
 
 data class TransformerRegistration<From : Any, To : Any>(
-    val transformer: FieldTransformer<From, To>,
+    val transformer: MappingTransformer<From, To>,
     val default: Boolean = false,
     val name: String? = null
 ) {

@@ -16,7 +16,7 @@ import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
 import dev.krud.shapeshift.resolver.MappingDefinition
-import dev.krud.shapeshift.transformer.base.FieldTransformer
+import dev.krud.shapeshift.transformer.base.MappingTransformer
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.jvm.javaField
@@ -31,13 +31,13 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
     )
 
     class FieldMapping<FromValue : Any?, ToValue : Any?>(
-        var fromField: FieldCoordinates<*, *, FromValue>,
-        var toField: FieldCoordinates<*, *, ToValue>,
-        var transformerClazz: KClass<out FieldTransformer<FromValue, ToValue>>?,
-        var transformer: FieldTransformer<out FromValue, out ToValue>?,
-        var conditionClazz: KClass<out MappingCondition<FromValue>>?,
-        var condition: MappingCondition<FromValue>?,
-        var mappingStrategy: MappingStrategy?
+            var fromField: FieldCoordinates<*, *, FromValue>,
+            var toField: FieldCoordinates<*, *, ToValue>,
+            var transformerClazz: KClass<out MappingTransformer<FromValue, ToValue>>?,
+            var transformer: MappingTransformer<out FromValue, out ToValue>?,
+            var conditionClazz: KClass<out MappingCondition<FromValue>>?,
+            var condition: MappingCondition<FromValue>?,
+            var mappingStrategy: MappingStrategy?
     )
 
     val fieldMappings = mutableListOf<FieldMapping<*, *>>()
@@ -82,12 +82,12 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
         this.decorators += decorator
     }
 
-    infix fun <From : Any, To : Any> FieldMapping<From, out To>.withTransformer(transformer: KClass<out FieldTransformer<out From, out To>>): FieldMapping<From, out To> {
+    infix fun <From : Any, To : Any> FieldMapping<From, out To>.withTransformer(transformer: KClass<out MappingTransformer<out From, out To>>): FieldMapping<From, out To> {
         this.transformerClazz = transformer as KClass<Nothing>
         return this
     }
 
-    infix fun <From : Any, To : Any> FieldMapping<From, To>.withTransformer(transformer: FieldTransformer<out From, out To>): FieldMapping<From, out To> {
+    infix fun <From : Any, To : Any> FieldMapping<From, To>.withTransformer(transformer: MappingTransformer<out From, out To>): FieldMapping<From, out To> {
         this.transformer = transformer
         return this
     }

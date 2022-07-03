@@ -8,21 +8,19 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package dev.krud.shapeshift.transformer
+package dev.krud.shapeshift.transformer.base
 
-import dev.krud.shapeshift.transformer.base.FieldTransformer
-import java.lang.reflect.Field
+import dev.krud.shapeshift.util.ClassPair
+import net.jodah.typetools.TypeResolver
 
-class CommaDelimitedStringToListTransformer : FieldTransformer<String, List<*>> {
-    override fun transform(
-        fromField: Field,
-        toField: Field,
-        originalValue: String?,
-        fromObject: Any,
-        toObject: Any
-    ): List<*>? {
-        originalValue ?: return null
-        return originalValue
-            .split(",")
+fun interface MappingTransformer<From : Any?, To : Any?> {
+    fun transform(context: MappingTransformerContext<From>): To?
+
+    companion object {
+        val MappingTransformer<*, *>.id: ClassPair
+            get() {
+                val rawArguments = TypeResolver.resolveRawArguments(MappingTransformer::class.java, this::class.java)
+                return rawArguments[0] to rawArguments[1]
+            }
     }
 }

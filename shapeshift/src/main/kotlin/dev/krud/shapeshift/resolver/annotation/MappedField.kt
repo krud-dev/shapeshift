@@ -12,7 +12,7 @@ package dev.krud.shapeshift.resolver.annotation
 import dev.krud.shapeshift.MappingStrategy
 import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.transformer.EmptyTransformer
-import dev.krud.shapeshift.transformer.base.FieldTransformer
+import dev.krud.shapeshift.transformer.base.MappingTransformer
 import kotlin.reflect.KClass
 
 /**
@@ -21,37 +21,37 @@ import kotlin.reflect.KClass
 @Target(AnnotationTarget.FIELD, AnnotationTarget.CLASS)
 @Repeatable
 annotation class MappedField(
-    /**
+        /**
      * The target class to map the field to
      */
     val target: KClass<*> = Nothing::class,
-    /**
+        /**
      * (Optional) The field name to map the value from.
      * When used  at the field level, allows for mapping of nested values
      * If left empty at the type level, an exception will be thrown. Otherwise, the name of the field will be used.
      */
     val mapFrom: String = "",
-    /**
+        /**
      * (Optional) The field name to map the value to.
      * If left empty, the name of the field will be used.
      */
     val mapTo: String = "",
-    /**
-     * The [FieldTransformer] to use on the value
+        /**
+     * The [MappingTransformer] to use on the value
      */
-    val transformer: KClass<out FieldTransformer<*, *>> = EmptyTransformer::class,
-    /**
-     * Bean name for a defined [FieldTransformer] bean to use on the value
+    val transformer: KClass<out MappingTransformer<*, *>> = EmptyTransformer::class,
+        /**
+     * Bean name for a defined [MappingTransformer] bean to use on the value
      * Supersedes [MappedField.transformer] if specified
      */
     val transformerRef: String = "",
 
-    /**
+        /**
      * The condition to use to determine if the field should be mapped
      */
     val condition: KClass<out MappingCondition<*>> = Nothing::class,
 
-    /**
+        /**
      * An override mapping strategy to use in lieu of the default
      */
     val overrideMappingStrategy: MappingStrategy = MappingStrategy.NONE

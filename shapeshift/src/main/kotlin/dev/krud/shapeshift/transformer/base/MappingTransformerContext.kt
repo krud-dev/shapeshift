@@ -10,17 +10,12 @@
 
 package dev.krud.shapeshift.transformer.base
 
-import dev.krud.shapeshift.util.ClassPair
-import net.jodah.typetools.TypeResolver
 import java.lang.reflect.Field
 
-interface FieldTransformer<From : Any?, To : Any?> {
-    fun transform(fromField: Field, toField: Field, originalValue: From?, fromObject: Any, toObject: Any): To?
-    companion object {
-        val FieldTransformer<*, *>.id: ClassPair get() {
-            val rawArguments = TypeResolver.resolveRawArguments(FieldTransformer::class.java, this::class.java)
-            return rawArguments[0] to rawArguments[1]
-        }
-    }
-}
-
+data class MappingTransformerContext<From : Any?>(
+    val fromObject: Any,
+    val toObject: Any,
+    val fromField: Field,
+    val toField: Field,
+    val originalValue: From?
+)

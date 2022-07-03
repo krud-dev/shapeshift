@@ -13,17 +13,17 @@ package dev.krud.shapeshift.spring.customizer
 import dev.krud.shapeshift.ShapeShiftBuilder
 import dev.krud.shapeshift.TransformerRegistration
 import dev.krud.shapeshift.spring.ShapeShiftBuilderCustomizer
-import dev.krud.shapeshift.transformer.base.FieldTransformer
+import dev.krud.shapeshift.transformer.base.MappingTransformer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 
 @Configuration
 class ShapeShiftTransformerCustomizer : ShapeShiftBuilderCustomizer {
     @Autowired(required = false)
-    private val fieldTransformers: Map<String, FieldTransformer<out Any, out Any>>? = null
+    private val mappingTransformers: Map<String, MappingTransformer<out Any, out Any>>? = null
 
     override fun customize(builder: ShapeShiftBuilder) {
-        fieldTransformers?.forEach { (name, fieldTransformer) ->
+        mappingTransformers?.forEach { (name, fieldTransformer) ->
             builder.withTransformer(
                 TransformerRegistration(
                     fieldTransformer,

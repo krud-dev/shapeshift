@@ -11,16 +11,16 @@
 package dev.krud.shapeshift.dto
 
 import dev.krud.shapeshift.transformer.EmptyTransformer
-import dev.krud.shapeshift.transformer.base.FieldTransformer
+import dev.krud.shapeshift.transformer.base.MappingTransformer
 
 data class TransformerCoordinates(
     val name: String? = null,
-    val type: Class<out FieldTransformer<*, *>>? = null
+    val type: Class<out MappingTransformer<*, *>>? = null
 ) {
     companion object {
         val NONE = TransformerCoordinates()
         fun ofName(name: String) = TransformerCoordinates(name)
-        fun ofType(type: Class<out FieldTransformer<*, *>>): TransformerCoordinates {
+        fun ofType(type: Class<out MappingTransformer<*, *>>): TransformerCoordinates {
             if (type == EmptyTransformer::class.java) {
                 return NONE
             }
