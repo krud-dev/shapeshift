@@ -13,8 +13,8 @@ package dev.krud.shapeshift
 import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.resolver.annotation.DefaultMappingTarget
 import dev.krud.shapeshift.resolver.annotation.MappedField
-import dev.krud.shapeshift.transformer.DateToLongTransformer
-import dev.krud.shapeshift.transformer.base.FieldTransformer
+import dev.krud.shapeshift.transformer.base.MappingTransformer
+import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -22,7 +22,6 @@ import strikt.api.expectThat
 import strikt.api.expectThrows
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNull
-import java.lang.reflect.Field
 
 internal class ShapeShiftTests {
     internal lateinit var shapeShift: ShapeShift
@@ -269,7 +268,7 @@ internal class ShapeShiftTests {
         )
 
         val secondRegistration = TransformerRegistration(
-            DateToLongTransformer(),
+            ExampleFieldTransformer(),
             false,
             "first"
         )
@@ -528,15 +527,9 @@ internal class ShapeShiftTests {
         val long: Long? = null
     }
 
-    internal class LongToStringTransformer : FieldTransformer<Long, String> {
-        override fun transform(
-            fromField: Field,
-            toField: Field,
-            originalValue: Long?,
-            fromObject: Any,
-            toObject: Any
-        ): String? {
-            return originalValue?.toString()
+    internal class LongToStringTransformer : MappingTransformer<Long, String> {
+        override fun transform(context: MappingTransformerContext<Long>): String? {
+            return context.originalValue?.toString()
         }
     }
 }

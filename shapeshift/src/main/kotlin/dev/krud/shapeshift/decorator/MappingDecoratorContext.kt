@@ -8,19 +8,6 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package dev.krud.shapeshift.transformer
+package dev.krud.shapeshift.decorator
 
-import dev.krud.shapeshift.transformer.base.FieldTransformer
-import java.lang.reflect.Field
-
-class StringListToCommaDelimitedStringTransformer : FieldTransformer<List<*>, String> {
-    override fun transform(
-        fromField: Field,
-        toField: Field,
-        originalValue: List<*>?,
-        fromObject: Any,
-        toObject: Any
-    ): String? {
-        return originalValue?.joinToString(",")
-    }
-}
+data class MappingDecoratorContext<From : Any, To : Any>(val from: From, val to: To)

@@ -11,7 +11,7 @@
 package dev.krud.shapeshift.spring
 
 import dev.krud.shapeshift.decorator.MappingDecorator
-import dev.krud.shapeshift.transformer.base.FieldTransformer
+import dev.krud.shapeshift.transformer.base.MappingTransformer
 import java.lang.reflect.Field
 
 class ExampleClass
@@ -23,7 +23,7 @@ class ExampleDecorator : MappingDecorator<ExampleClass, SecondExampleClass> {
     }
 }
 
-class ExampleTransformer : FieldTransformer<String, String> {
+class ExampleTransformer : MappingTransformer<String, String> {
     override val fromType: Class<String> = String::class.java
     override val toType: Class<String> = String::class.java
 

@@ -10,17 +10,12 @@
 
 package dev.krud.shapeshift.transformer
 
-import dev.krud.shapeshift.transformer.base.FieldTransformer
+import dev.krud.shapeshift.transformer.base.MappingTransformer
+import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 import java.lang.reflect.Field
 
-object EmptyTransformer : FieldTransformer<Any, Any> {
-    override fun transform(
-        fromField: Field,
-        toField: Field,
-        originalValue: Any?,
-        fromObject: Any,
-        toObject: Any
-    ): Any? {
-        return originalValue
+object EmptyTransformer : MappingTransformer<Any, Any> {
+    override fun transform(context: MappingTransformerContext<Any>): Any? {
+        return context.originalValue
     }
 }
