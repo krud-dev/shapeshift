@@ -14,7 +14,7 @@ import dev.krud.shapeshift.transformer.base.MappingTransformer
 import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 
 class StringToBooleanMappingTransformer : MappingTransformer<String, Boolean> {
-    override fun transform(context: MappingTransformerContext<String>): Boolean? {
-        return context.originalValue?.toBoolean()
+    override fun transform(context: MappingTransformerContext<out String>): Boolean? {
+        return context.originalValue?.toBooleanStrict()
     }
 }

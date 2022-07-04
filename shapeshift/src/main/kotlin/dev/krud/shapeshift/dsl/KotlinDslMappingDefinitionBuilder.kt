@@ -97,7 +97,7 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
     /**
      * Specify a transformer class to use for the given maping
      */
-    infix fun <From : Any, To : Any> FieldMapping<From, out To>.withTransformer(transformer: KClass<out MappingTransformer<out From, out To>>): FieldMapping<From, out To> {
+    infix fun <From : Any?, To : Any?> FieldMapping<From, out To>.withTransformer(transformer: KClass<out MappingTransformer<out From, out To>>): FieldMapping<From, out To> {
         this.transformerClazz = transformer as KClass<Nothing>
         return this
     }
@@ -105,7 +105,7 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
     /**
      * Define a transformer to use for the given mapping
      */
-    infix fun <From : Any, To : Any> FieldMapping<From, To>.withTransformer(transformer: MappingTransformer<out From, out To>): FieldMapping<From, out To> {
+    infix fun <From : Any?, To : Any?> FieldMapping<From, To>.withTransformer(transformer: MappingTransformer<out From, out To>): FieldMapping<From, out To> {
         this.transformer = transformer
         return this
     }
@@ -113,7 +113,7 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
     /**
      * Specify a condition class to use for the given mapping
      */
-    infix fun <From : Any, To : Any> FieldMapping<From, out To>.withCondition(condition: KClass<out MappingCondition<out From>>): FieldMapping<From, out To> {
+    infix fun <From : Any?, To : Any?> FieldMapping<From, out To>.withCondition(condition: KClass<out MappingCondition<out From>>): FieldMapping<From, out To> {
         this.conditionClazz = condition
         return this
     }
@@ -121,7 +121,7 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
     /**
      * Define a condition to use for the given mapping
      */
-    infix fun <From : Any, To : Any> FieldMapping<From, out To>.withCondition(condition: MappingCondition<From>): FieldMapping<From, out To> {
+    infix fun <From : Any?, To : Any?> FieldMapping<From, out To>.withCondition(condition: MappingCondition<From>): FieldMapping<From, out To> {
         this.condition = condition
         return this
     }
@@ -129,7 +129,7 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
     /**
      * Specify a mapping strategy to use for the given mapping.
      */
-    infix fun <From : Any, To : Any> FieldMapping<From, out To>.overrideStrategy(mappingStrategy: MappingStrategy): FieldMapping<From, out To> {
+    infix fun <From : Any?, To : Any?> FieldMapping<From, out To>.overrideStrategy(mappingStrategy: MappingStrategy): FieldMapping<From, out To> {
         this.mappingStrategy = mappingStrategy
         return this
     }

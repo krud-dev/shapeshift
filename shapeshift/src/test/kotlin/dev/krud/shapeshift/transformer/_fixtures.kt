@@ -10,11 +10,19 @@
 
 package dev.krud.shapeshift.transformer
 
-import dev.krud.shapeshift.transformer.base.MappingTransformer
 import dev.krud.shapeshift.transformer.base.MappingTransformerContext
+import kotlin.reflect.jvm.javaField
 
-class StringToDoubleMappingTransformer : MappingTransformer<String, Double> {
-    override fun transform(context: MappingTransformerContext<out String>): Double? {
-        return context.originalValue?.toDouble()
-    }
+class ExampleObject {
+    var name: String? = null
+}
+
+fun <From : Any?> mockMappingTransformerContext(value: From?): MappingTransformerContext<From> {
+    return MappingTransformerContext(
+        ExampleObject(),
+        ExampleObject(),
+        ExampleObject::name.javaField!!,
+        ExampleObject::name.javaField!!,
+        value
+    )
 }

@@ -14,7 +14,7 @@ import dev.krud.shapeshift.transformer.base.MappingTransformer
 import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 
 class StringToShortMappingTransformer : MappingTransformer<String, Short> {
-    override fun transform(context: MappingTransformerContext<String>): Short? {
+    override fun transform(context: MappingTransformerContext<out String>): Short? {
         return context.originalValue?.toShort()
     }
 }

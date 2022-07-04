@@ -14,6 +14,7 @@ import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.dsl.KotlinDslMappingDefinitionBuilder
 import dev.krud.shapeshift.resolver.MappingDefinition
 import dev.krud.shapeshift.resolver.MappingDefinitionResolver
+import dev.krud.shapeshift.resolver.StaticMappingDefinitionResolver
 import dev.krud.shapeshift.resolver.annotation.AnnotationMappingDefinitionResolver
 import dev.krud.shapeshift.transformer.AnyToStringMappingTransformer
 import dev.krud.shapeshift.transformer.DateToLongMappingTransformer
@@ -124,6 +125,14 @@ class ShapeShiftBuilder {
      * Return the ShapeShift instance
      */
     fun build(): ShapeShift {
+        if (defaultMappingStrategy == MappingStrategy.NONE) {
+            throw IllegalArgumentException("Default mapping strategy cannot be NONE")
+        }
+
+        if (mappingDefinitions.isNotEmpty()) {
+            resolvers += StaticMappingDefinitionResolver(mappingDefinitions)
+        }
+
         return ShapeShift(transformers, resolvers, defaultMappingStrategy, decorators)
     }
 

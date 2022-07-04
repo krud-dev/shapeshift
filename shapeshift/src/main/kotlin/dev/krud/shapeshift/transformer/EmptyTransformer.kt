@@ -14,7 +14,7 @@ import dev.krud.shapeshift.transformer.base.MappingTransformer
 import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 
 object EmptyTransformer : MappingTransformer<Any, Any> {
-    override fun transform(context: MappingTransformerContext<Any>): Any? {
+    override fun transform(context: MappingTransformerContext<out Any>): Any? {
         return context.originalValue
     }
 }

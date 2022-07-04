@@ -14,7 +14,7 @@ import dev.krud.shapeshift.transformer.base.MappingTransformer
 import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 
 class NumberToLongMappingTransformer : MappingTransformer<Number, Long> {
-    override fun transform(context: MappingTransformerContext<Number>): Long? {
+    override fun transform(context: MappingTransformerContext<out Number>): Long? {
         return context.originalValue?.toLong()
     }
 }

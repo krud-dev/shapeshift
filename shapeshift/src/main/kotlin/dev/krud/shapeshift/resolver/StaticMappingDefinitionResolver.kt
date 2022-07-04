@@ -8,13 +8,12 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package dev.krud.shapeshift.transformer
+package dev.krud.shapeshift.resolver
 
-import dev.krud.shapeshift.transformer.base.MappingTransformer
-import dev.krud.shapeshift.transformer.base.MappingTransformerContext
-
-class StringToDoubleMappingTransformer : MappingTransformer<String, Double> {
-    override fun transform(context: MappingTransformerContext<out String>): Double? {
-        return context.originalValue?.toDouble()
+class StaticMappingDefinitionResolver(
+    private val mappingDefinitions: List<MappingDefinition>
+) : MappingDefinitionResolver {
+    override fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): MappingDefinition? {
+        return mappingDefinitions.find { it.fromClazz == sourceClazz && it.toClazz == targetClazz }
     }
 }

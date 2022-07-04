@@ -55,7 +55,7 @@ class ShapeShift internal constructor(
         }
     }
 
-    inline fun <reified To : Any, reified From : Any> map(fromObject: From): To {
+    inline fun <From : Any, reified To : Any> map(fromObject: From): To {
         return map(fromObject, To::class.java)
     }
 
@@ -188,25 +188,6 @@ class ShapeShift internal constructor(
         return getFieldInstanceByNodes(nodes.drop(1), subTarget, type)
     }
 
-    private fun getFieldsMap(clazz: Class<*>): Map<String, Field> {
-        val existingInCache = entityFieldsCache[clazz]
-        if (existingInCache != null) {
-            return existingInCache
-        }
-
-        val fieldsMap = mutableMapOf<String, Field>()
-        var classToGetFields: Class<*>? = clazz
-        while (classToGetFields != null) {
-            val fields = classToGetFields.declaredFields
-            for (field in fields) {
-                fieldsMap[field.name] = field
-            }
-            classToGetFields = classToGetFields.superclass
-        }
-        entityFieldsCache[clazz] = fieldsMap
-        return fieldsMap
-    }
-
     private fun getTransformerByName(name: String): TransformerRegistration<out Any, out Any> {
         return transformersByNameCache.computeIfAbsent(name) { _ ->
             transformers.find { it.name == name } ?: TransformerRegistration.EMPTY
@@ -231,8 +212,12 @@ class ShapeShift internal constructor(
 
     private fun <From : Any, To : Any> getDecorators(classPair: ClassPair): List<MappingDecorator<From, To>> {
         return decoratorCache.computeIfAbsent(classPair) {
-            decorators
-                .filter { decorator -> decorator.id == classPair }
+            val decks = decorators
+                .filter { decorator ->
+                    val id = decorator.id
+                    id == classPair
+                }
+            decks
         } as List<MappingDecorator<From, To>>
     }
 

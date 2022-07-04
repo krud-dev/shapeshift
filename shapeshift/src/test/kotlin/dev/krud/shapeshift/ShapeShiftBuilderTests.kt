@@ -8,13 +8,19 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package dev.krud.shapeshift.transformer
+package dev.krud.shapeshift
 
-import dev.krud.shapeshift.transformer.base.MappingTransformer
-import dev.krud.shapeshift.transformer.base.MappingTransformerContext
+import org.junit.jupiter.api.Test
+import strikt.api.expectThrows
 
-class StringToDoubleMappingTransformer : MappingTransformer<String, Double> {
-    override fun transform(context: MappingTransformerContext<out String>): Double? {
-        return context.originalValue?.toDouble()
+class ShapeShiftBuilderTests {
+    @Test
+    internal fun `ShapeShiftBuilder should throw exception if default mapping strategy is NONE`() {
+        val shapeShiftBuilder = ShapeShiftBuilder()
+            .withDefaultMappingStrategy(MappingStrategy.NONE)
+
+        expectThrows<IllegalArgumentException> {
+            shapeShiftBuilder.build()
+        }
     }
 }

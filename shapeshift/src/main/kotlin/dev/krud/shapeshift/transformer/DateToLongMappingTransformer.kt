@@ -15,7 +15,7 @@ import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 import java.util.*
 
 class DateToLongMappingTransformer : MappingTransformer<Date, Long> {
-    override fun transform(context: MappingTransformerContext<Date>): Long? {
+    override fun transform(context: MappingTransformerContext<out Date>): Long? {
         return context.originalValue?.time
     }
 }

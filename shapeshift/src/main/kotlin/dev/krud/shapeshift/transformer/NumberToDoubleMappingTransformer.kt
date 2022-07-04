@@ -14,7 +14,7 @@ import dev.krud.shapeshift.transformer.base.MappingTransformer
 import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 
 class NumberToDoubleMappingTransformer : MappingTransformer<Number, Double> {
-    override fun transform(context: MappingTransformerContext<Number>): Double? {
+    override fun transform(context: MappingTransformerContext<out Number>): Double? {
         return context.originalValue?.toDouble()
     }
 }
