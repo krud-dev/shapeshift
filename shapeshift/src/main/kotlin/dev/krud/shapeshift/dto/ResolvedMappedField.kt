@@ -16,11 +16,11 @@ import dev.krud.shapeshift.transformer.base.MappingTransformer
 import java.lang.reflect.Field
 
 data class ResolvedMappedField(
-        val mapFromCoordinates: List<Field>,
-        val mapToCoordinates: List<Field>,
-        val transformerCoordinates: TransformerCoordinates = TransformerCoordinates.NONE,
-        val transformer: MappingTransformer<*, *>?,
-        val conditionClazz: Class<out MappingCondition<*>>?,
-        val condition: MappingCondition<*>?,
-        val overrideMappingStrategy: MappingStrategy?
+    val mapFromCoordinates: List<Field>,
+    val mapToCoordinates: List<Field>,
+    val transformerCoordinates: TransformerCoordinates = TransformerCoordinates.NONE,
+    val transformer: MappingTransformer<*, *>?,
+    val conditionClazz: Class<out MappingCondition<*>>?,
+    val condition: MappingCondition<*>?,
+    val overrideMappingStrategy: MappingStrategy?
 )

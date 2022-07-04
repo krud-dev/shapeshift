@@ -80,7 +80,6 @@ class ShapeShift internal constructor(
             }
         }
 
-
         return toObject
     }
 
@@ -303,14 +302,4 @@ class ShapeShift internal constructor(
             TO
         }
     }
-}
-
-fun main() {
-    val shapeShift = ShapeShiftBuilder()
-        .withMapping<String, String> {
-            String::length mappedTo String::length withTransformer {
-                it.originalValue
-            }
-        }
-        .build()
 }

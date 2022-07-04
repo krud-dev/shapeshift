@@ -11,4 +11,4 @@
 package dev.krud.shapeshift.dsl
 
 @DslMarker
-annotation class MappedFieldDsl
+internal annotation class KotlinMappingDsl

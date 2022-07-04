@@ -40,7 +40,7 @@ class AnnotationMappingDefinitionResolver : MappingDefinitionResolver {
             }
 
             val mapToCoordinates = resolveNodesToFields(effectiveMapTo.splitIgnoreEmpty(NODE_DELIMITER), null, targetClazz)
-            val conditionClazz = if(mappedField.condition != Nothing::class) {
+            val conditionClazz = if (mappedField.condition != Nothing::class) {
                 mappedField.condition
             } else {
                 null

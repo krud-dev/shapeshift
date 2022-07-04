@@ -21,7 +21,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.jvm.javaField
 
-@MappedFieldDsl
+@KotlinMappingDsl
 class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
     private val fromClazz: Class<RootFrom>,
     private val toClazz: Class<RootTo>,
@@ -31,13 +31,13 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
     )
 
     class FieldMapping<FromValue : Any?, ToValue : Any?>(
-            var fromField: FieldCoordinates<*, *, FromValue>,
-            var toField: FieldCoordinates<*, *, ToValue>,
-            var transformerClazz: KClass<out MappingTransformer<FromValue, ToValue>>?,
-            var transformer: MappingTransformer<out FromValue, out ToValue>?,
-            var conditionClazz: KClass<out MappingCondition<FromValue>>?,
-            var condition: MappingCondition<FromValue>?,
-            var mappingStrategy: MappingStrategy?
+        var fromField: FieldCoordinates<*, *, FromValue>,
+        var toField: FieldCoordinates<*, *, ToValue>,
+        var transformerClazz: KClass<out MappingTransformer<FromValue, ToValue>>?,
+        var transformer: MappingTransformer<out FromValue, out ToValue>?,
+        var conditionClazz: KClass<out MappingCondition<FromValue>>?,
+        var condition: MappingCondition<FromValue>?,
+        var mappingStrategy: MappingStrategy?
     )
 
     val fieldMappings = mutableListOf<FieldMapping<*, *>>()
