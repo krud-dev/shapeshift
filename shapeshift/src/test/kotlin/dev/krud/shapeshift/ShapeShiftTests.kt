@@ -531,7 +531,7 @@ internal class ShapeShiftTests {
     }
 
     internal class LongToStringTransformer : MappingTransformer<Long, String> {
-        override fun transform(context: MappingTransformerContext<Long>): String? {
+        override fun transform(context: MappingTransformerContext<out Long>): String? {
             return context.originalValue?.toString()
         }
     }

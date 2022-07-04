@@ -14,7 +14,12 @@ import dev.krud.shapeshift.transformer.base.MappingTransformer
 import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 
 class StringToCharMappingTransformer : MappingTransformer<String, Char> {
-    override fun transform(context: MappingTransformerContext<String>): Char? {
-        return context.originalValue?.toCharArray()?.firstOrNull()
+    override fun transform(context: MappingTransformerContext<out String>): Char? {
+        context.originalValue ?: return null
+        val charArray = context.originalValue.toCharArray()
+        if (charArray.size != 1) {
+            throw IllegalArgumentException("String must be of size 1")
+        }
+        return context.originalValue?.toCharArray()?.first()
     }
 }

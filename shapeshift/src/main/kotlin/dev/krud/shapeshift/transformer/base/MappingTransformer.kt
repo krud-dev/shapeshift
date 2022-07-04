@@ -14,7 +14,7 @@ import dev.krud.shapeshift.util.ClassPair
 import net.jodah.typetools.TypeResolver
 
 fun interface MappingTransformer<From : Any?, To : Any?> {
-    fun transform(context: MappingTransformerContext<From>): To?
+    fun transform(context: MappingTransformerContext<out From>): To?
 
     companion object {
         val MappingTransformer<*, *>.id: ClassPair

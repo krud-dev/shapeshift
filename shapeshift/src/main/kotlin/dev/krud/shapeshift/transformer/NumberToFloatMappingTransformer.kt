@@ -14,7 +14,7 @@ import dev.krud.shapeshift.transformer.base.MappingTransformer
 import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 
 class NumberToFloatMappingTransformer : MappingTransformer<Number, Float> {
-    override fun transform(context: MappingTransformerContext<Number>): Float? {
+    override fun transform(context: MappingTransformerContext<out Number>): Float? {
         return context.originalValue?.toFloat()
     }
 }

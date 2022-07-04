@@ -188,25 +188,6 @@ class ShapeShift internal constructor(
         return getFieldInstanceByNodes(nodes.drop(1), subTarget, type)
     }
 
-    private fun getFieldsMap(clazz: Class<*>): Map<String, Field> {
-        val existingInCache = entityFieldsCache[clazz]
-        if (existingInCache != null) {
-            return existingInCache
-        }
-
-        val fieldsMap = mutableMapOf<String, Field>()
-        var classToGetFields: Class<*>? = clazz
-        while (classToGetFields != null) {
-            val fields = classToGetFields.declaredFields
-            for (field in fields) {
-                fieldsMap[field.name] = field
-            }
-            classToGetFields = classToGetFields.superclass
-        }
-        entityFieldsCache[clazz] = fieldsMap
-        return fieldsMap
-    }
-
     private fun getTransformerByName(name: String): TransformerRegistration<out Any, out Any> {
         return transformersByNameCache.computeIfAbsent(name) { _ ->
             transformers.find { it.name == name } ?: TransformerRegistration.EMPTY

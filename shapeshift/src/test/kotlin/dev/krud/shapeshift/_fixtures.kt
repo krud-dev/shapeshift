@@ -17,7 +17,7 @@ import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 import java.util.*
 
 class ExampleFieldTransformer : MappingTransformer<Long, Date> {
-    override fun transform(context: MappingTransformerContext<Long>): Date? {
+    override fun transform(context: MappingTransformerContext<out Long>): Date? {
         context.originalValue ?: return null
         return Date(context.originalValue!!)
     }
