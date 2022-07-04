@@ -32,5 +32,4 @@ fun main() {
     // Map the AdvancedEntity to a ReducedAdvancedEntityDisplay using ShapeShift
     val reducedAdvancedEntityDisplay = shapeShift.map<ReducedAdvancedEntityDisplay>(advancedEntity)
     println("ReducedAdvancedEntityDisplay: $reducedAdvancedEntityDisplay")
-
 }

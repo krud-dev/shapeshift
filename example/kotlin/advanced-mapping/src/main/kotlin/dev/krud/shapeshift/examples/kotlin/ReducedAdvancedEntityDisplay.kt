@@ -14,4 +14,3 @@ data class ReducedAdvancedEntityDisplay(
     val name: String = "",
     val firstChildName: String = ""
 )
-

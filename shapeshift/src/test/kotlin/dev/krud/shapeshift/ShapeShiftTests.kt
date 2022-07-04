@@ -11,6 +11,7 @@
 package dev.krud.shapeshift
 
 import dev.krud.shapeshift.condition.MappingCondition
+import dev.krud.shapeshift.condition.MappingConditionContext
 import dev.krud.shapeshift.resolver.annotation.DefaultMappingTarget
 import dev.krud.shapeshift.resolver.annotation.MappedField
 import dev.krud.shapeshift.transformer.base.MappingTransformer
@@ -484,14 +485,14 @@ internal class ShapeShiftTests {
     }
 
     internal class LongEqualsOneCondition : MappingCondition<Long> {
-        override fun isValid(originalValue: Long?): Boolean {
-            return originalValue == 1L
+        override fun isValid(context: MappingConditionContext<Long>): Boolean {
+            return context.originalValue == 1L
         }
     }
 
     internal class LongEqualsTwoCondition : MappingCondition<Long> {
-        override fun isValid(originalValue: Long?): Boolean {
-            return originalValue == 2L
+        override fun isValid(context: MappingConditionContext<Long>): Boolean {
+            return context.originalValue == 2L
         }
     }
 

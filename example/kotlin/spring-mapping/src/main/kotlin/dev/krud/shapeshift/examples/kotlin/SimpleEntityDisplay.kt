@@ -13,4 +13,3 @@ package dev.krud.shapeshift.examples.kotlin
 data class SimpleEntityDisplay(
     val name: String = ""
 )
-

@@ -27,4 +27,3 @@ data class AdvancedEntity(
     // This field will not be mapped to ReducdedAdvancedEntityDisplay because it is missing the @MappedField annotation with the corresponding target class
     val secondChild: AdvancedChildEntity
 )
-

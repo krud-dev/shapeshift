@@ -14,4 +14,3 @@ data class SimpleEntityDisplay(
     val name: String = "",
     val description: String = ""
 )
-

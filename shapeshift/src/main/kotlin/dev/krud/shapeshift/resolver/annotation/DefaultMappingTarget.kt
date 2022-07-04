@@ -12,5 +12,14 @@ package dev.krud.shapeshift.resolver.annotation
 
 import kotlin.reflect.KClass
 
+/**
+ * Defines a default mapping target for the given type.
+ * Doing so will make it possible to use [MappedField] without specifying the `target`
+ */
 @Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.CLASS)
-annotation class DefaultMappingTarget(val value: KClass<*>)
+annotation class DefaultMappingTarget(
+    /**
+     * The target type to map to
+     */
+    val value: KClass<*>
+)

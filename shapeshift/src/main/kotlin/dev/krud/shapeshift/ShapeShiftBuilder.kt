@@ -33,6 +33,11 @@ import dev.krud.shapeshift.transformer.StringToLongMappingTransformer
 import dev.krud.shapeshift.transformer.StringToShortMappingTransformer
 import dev.krud.shapeshift.transformer.base.MappingTransformer
 
+/**
+ * A builder used to create a new ShapeShift instance.
+ * By default, the builder will add all default transformers, and the [AnnotationMappingDefinitionResolver] as a resolver
+ * for mapping definitions.
+ */
 class ShapeShiftBuilder {
     private val transformers: MutableSet<TransformerRegistration<*, *>> = mutableSetOf()
     private val decorators: MutableSet<MappingDecorator<*, *>> = mutableSetOf()
@@ -48,31 +53,48 @@ class ShapeShiftBuilder {
         DEFAULT_TRANSFORMERS.forEach { withTransformer(it, true) }
     }
 
+    /**
+     * Set the default mapping strategy for the ShapeShift instance
+     */
     fun withDefaultMappingStrategy(defaultMappingStrategy: MappingStrategy): ShapeShiftBuilder {
         this.defaultMappingStrategy = defaultMappingStrategy
         return this
     }
 
+    /**
+     * Add a decorator to the ShapeShift instance
+     */
     fun withDecorator(decorator: MappingDecorator<out Any, out Any>): ShapeShiftBuilder {
         decorators += decorator
         return this
     }
 
+    /**
+     * Add a transformer to the ShapeShift instance
+     */
     fun withTransformer(mappingTransformer: MappingTransformer<out Any, out Any>, default: Boolean = false, name: String? = null): ShapeShiftBuilder {
-        transformers += TransformerRegistration(mappingTransformer, default, name)
-        return this
+        return withTransformer(TransformerRegistration(mappingTransformer, default, name))
     }
 
+    /**
+     * Add a resolver to the ShapeShift instance
+     */
     fun withTransformer(transformerRegistration: TransformerRegistration<*, *>): ShapeShiftBuilder {
         transformers += transformerRegistration
         return this
     }
 
+    /**
+     * Add new mapping definitions to the ShapeShift instance
+     */
     fun withMapping(vararg mappingDefinitions: MappingDefinition): ShapeShiftBuilder {
         this.mappingDefinitions.addAll(mappingDefinitions)
         return this
     }
 
+    /**
+     * Add a new mapping definition to the ShapeShift instance using the Kotlin DSL
+     */
     inline fun <reified From : Any, reified To : Any> withMapping(block: KotlinDslMappingDefinitionBuilder<From, To>.() -> Unit): ShapeShiftBuilder {
         val builder = KotlinDslMappingDefinitionBuilder(From::class.java, To::class.java)
         builder.block()
@@ -82,16 +104,25 @@ class ShapeShiftBuilder {
         return this
     }
 
+    /**
+     * Add a new mapping definition resolver to the ShapeShift instance
+     */
     fun withResolver(mappingDefinitionResolver: MappingDefinitionResolver): ShapeShiftBuilder {
         resolvers.add(mappingDefinitionResolver)
         return this
     }
 
+    /**
+     * Remove all default transformers from the ShapeShift instance
+     */
     fun excludeDefaultTransformers(): ShapeShiftBuilder {
-        transformers.removeAll() { it.transformer in DEFAULT_TRANSFORMERS }
+        transformers.removeAll { it.transformer in DEFAULT_TRANSFORMERS }
         return this
     }
 
+    /**
+     * Return the ShapeShift instance
+     */
     fun build(): ShapeShift {
         return ShapeShift(transformers, resolvers, defaultMappingStrategy, decorators)
     }

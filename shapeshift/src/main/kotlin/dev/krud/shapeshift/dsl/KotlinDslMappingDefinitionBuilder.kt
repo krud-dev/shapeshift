@@ -21,49 +21,58 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.jvm.javaField
 
-@MappedFieldDsl
+/**
+ * The builder powering the Kotlin Mapping DSL
+ */
+@KotlinMappingDsl
 class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
     private val fromClazz: Class<RootFrom>,
     private val toClazz: Class<RootTo>,
 ) {
-    class FieldCoordinates<Root, LastField : Any?, LastValue : Any?>(
-        val fields: MutableList<KProperty1<LastField, LastValue>> = mutableListOf()
-    )
+    private val fieldMappings = mutableListOf<FieldMapping<*, *>>()
+    private val decorators: MutableList<MappingDecorator<RootFrom, RootTo>> = mutableListOf()
 
-    class FieldMapping<FromValue : Any?, ToValue : Any?>(
-            var fromField: FieldCoordinates<*, *, FromValue>,
-            var toField: FieldCoordinates<*, *, ToValue>,
-            var transformerClazz: KClass<out MappingTransformer<FromValue, ToValue>>?,
-            var transformer: MappingTransformer<out FromValue, out ToValue>?,
-            var conditionClazz: KClass<out MappingCondition<FromValue>>?,
-            var condition: MappingCondition<FromValue>?,
-            var mappingStrategy: MappingStrategy?
-    )
-
-    val fieldMappings = mutableListOf<FieldMapping<*, *>>()
-    val decorators: MutableList<MappingDecorator<RootFrom, RootTo>> = mutableListOf()
-
+    /**
+     * Helper operator function to access sub-fields of a field.
+     * For example: `House::person..Person::name`
+     */
     operator fun <Parent : Any, Child : Any, ChildValue : Any> KProperty1<Parent, Child>.rangeTo(other: KProperty1<Child, ChildValue>): FieldCoordinates<Parent, Child, ChildValue> {
         return FieldCoordinates(mutableListOf(this, other) as MutableList<KProperty1<Child, ChildValue>>)
     }
 
+    /**
+     * Helper operator function to access sub-fields of a field.
+     * For example: `House::person..Person::name`
+     */
     operator fun <Root : Any, Parent : Any, Child : Any, ChildValue : Any> FieldCoordinates<Root, Parent, Child>.rangeTo(other: KProperty1<Child, ChildValue>): FieldCoordinates<Root, Child, ChildValue> {
         this.fields.add(other as KProperty1<Parent, Child>)
         return this as FieldCoordinates<Root, Child, ChildValue>
     }
 
+    /**
+     * Creates a mapping between two fields
+     */
     infix fun <From : Any, FromValue : Any?, To : Any, ToValue : Any?> KProperty1<From, FromValue>.mappedTo(to: FieldCoordinates<RootTo, To, ToValue>): FieldMapping<FromValue, ToValue> {
         return toFieldCoordinates<RootFrom, From, FromValue>().mappedTo(to)
     }
 
+    /**
+     * Creates a mapping between two fields
+     */
     infix fun <From : Any, FromValue : Any?, To : Any, ToValue : Any?> FieldCoordinates<RootFrom, From, FromValue>.mappedTo(to: KProperty1<To, ToValue>): FieldMapping<FromValue, ToValue> {
         return this.mappedTo(to.toFieldCoordinates())
     }
 
+    /**
+     * Creates a mapping between two fields
+     */
     infix fun <From : Any, FromValue : Any?, To : Any, ToValue : Any?> KProperty1<From, FromValue>.mappedTo(to: KProperty1<To, ToValue>): FieldMapping<FromValue, ToValue> {
         return this.toFieldCoordinates<RootFrom, From, FromValue>().mappedTo(to.toFieldCoordinates())
     }
 
+    /**
+     * Creates a mapping between two fields
+     */
     infix fun <From : Any, FromValue : Any?, To : Any, ToValue : Any?> FieldCoordinates<RootFrom, From, FromValue>.mappedTo(to: FieldCoordinates<RootTo, To, ToValue>): FieldMapping<FromValue, ToValue> {
         val fieldMapping = FieldMapping(
             this,
@@ -78,30 +87,48 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
         return fieldMapping
     }
 
+    /**
+     * Defines a decorator for the given pair of classes.
+     */
     fun decorate(decorator: MappingDecorator<RootFrom, RootTo>) {
         this.decorators += decorator
     }
 
+    /**
+     * Specify a transformer class to use for the given maping
+     */
     infix fun <From : Any, To : Any> FieldMapping<From, out To>.withTransformer(transformer: KClass<out MappingTransformer<out From, out To>>): FieldMapping<From, out To> {
         this.transformerClazz = transformer as KClass<Nothing>
         return this
     }
 
+    /**
+     * Define a transformer to use for the given mapping
+     */
     infix fun <From : Any, To : Any> FieldMapping<From, To>.withTransformer(transformer: MappingTransformer<out From, out To>): FieldMapping<From, out To> {
         this.transformer = transformer
         return this
     }
 
+    /**
+     * Specify a condition class to use for the given mapping
+     */
     infix fun <From : Any, To : Any> FieldMapping<From, out To>.withCondition(condition: KClass<out MappingCondition<out From>>): FieldMapping<From, out To> {
-        this.conditionClazz = condition as KClass<Nothing>
+        this.conditionClazz = condition
         return this
     }
 
+    /**
+     * Define a condition to use for the given mapping
+     */
     infix fun <From : Any, To : Any> FieldMapping<From, out To>.withCondition(condition: MappingCondition<From>): FieldMapping<From, out To> {
         this.condition = condition
         return this
     }
 
+    /**
+     * Specify a mapping strategy to use for the given mapping.
+     */
     infix fun <From : Any, To : Any> FieldMapping<From, out To>.overrideStrategy(mappingStrategy: MappingStrategy): FieldMapping<From, out To> {
         this.mappingStrategy = mappingStrategy
         return this
@@ -139,16 +166,30 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
         return FieldCoordinates(mutableListOf(this))
     }
 
-    data class Result(
-        val mappingDefinition: MappingDefinition,
-        val decorators: List<MappingDecorator<*, *>>
-    )
-
     companion object {
         inline fun <reified From : Any, reified To : Any> mapper(block: KotlinDslMappingDefinitionBuilder<From, To>.() -> Unit): Result {
             val builder = KotlinDslMappingDefinitionBuilder(From::class.java, To::class.java)
             builder.block()
             return builder.build()
         }
+
+        class FieldCoordinates<Root, LastField : Any?, LastValue : Any?>(
+            val fields: MutableList<KProperty1<LastField, LastValue>> = mutableListOf()
+        )
+
+        class FieldMapping<FromValue : Any?, ToValue : Any?>(
+            var fromField: FieldCoordinates<*, *, FromValue>,
+            var toField: FieldCoordinates<*, *, ToValue>,
+            var transformerClazz: KClass<out MappingTransformer<FromValue, ToValue>>?,
+            var transformer: MappingTransformer<out FromValue, out ToValue>?,
+            var conditionClazz: KClass<out MappingCondition<out FromValue>>?,
+            var condition: MappingCondition<out FromValue>?,
+            var mappingStrategy: MappingStrategy?
+        )
+
+        data class Result(
+            val mappingDefinition: MappingDefinition,
+            val decorators: List<MappingDecorator<*, *>>
+        )
     }
 }
