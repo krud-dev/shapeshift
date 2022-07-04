@@ -10,6 +10,16 @@
 
 package dev.krud.shapeshift.condition
 
-fun interface MappingCondition<From : Any?> {
-    fun isValid(originalValue: From?): Boolean
+/**
+ * Represents a mapping condition that can be applied to ShapeShift
+ * If the condition is not met, the mapping will not be applied
+ * @param Value the type of the value to be checked
+ */
+fun interface MappingCondition<Value : Any?> {
+    /**
+     * Checks if the condition is met
+     * @param context The context for the condition
+     * @return true if the condition is met, false otherwise
+     */
+    fun isValid(context: MappingConditionContext<Value>): Boolean
 }

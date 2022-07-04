@@ -15,4 +15,3 @@ data class AdvancedEntityDisplay(
     val firstChildName: String = "",
     val secondChildName: String = ""
 )
-

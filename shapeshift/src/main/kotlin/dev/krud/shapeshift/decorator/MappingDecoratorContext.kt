@@ -10,4 +10,16 @@
 
 package dev.krud.shapeshift.decorator
 
-data class MappingDecoratorContext<From : Any, To : Any>(val from: From, val to: To)
+/**
+ * The context payload used for [MappingDecorator]
+ */
+data class MappingDecoratorContext<From : Any, To : Any>(
+    /**
+     * The from (source) object of the mapping
+     */
+    val from: From,
+    /**
+     * The to (target) object of the mapping
+     */
+    val to: To
+)

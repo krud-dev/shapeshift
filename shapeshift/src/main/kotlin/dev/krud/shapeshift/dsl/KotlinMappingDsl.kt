@@ -10,5 +10,8 @@
 
 package dev.krud.shapeshift.dsl
 
+/**
+ * DSL marker for the Kotlin Mapping DSL
+ */
 @DslMarker
 internal annotation class KotlinMappingDsl

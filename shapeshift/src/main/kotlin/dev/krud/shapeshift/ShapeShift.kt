@@ -11,6 +11,7 @@
 package dev.krud.shapeshift
 
 import dev.krud.shapeshift.condition.MappingCondition
+import dev.krud.shapeshift.condition.MappingConditionContext
 import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.decorator.MappingDecorator.Companion.id
 import dev.krud.shapeshift.decorator.MappingDecoratorContext
@@ -58,11 +59,18 @@ class ShapeShift internal constructor(
         return map(fromObject, To::class.java)
     }
 
+    /**
+     * Map between the [fromObject] and a new instance of [toClazz]
+     * [toClazz] MUST have a no-arg constructor when using this override
+     */
     fun <From : Any, To : Any> map(fromObject: From, toClazz: Class<To>): To {
         val toObject = toClazz.newInstance()
         return map(fromObject, toObject)
     }
 
+    /**
+     * Map between the [fromObject] and [toObject] objects
+     */
     fun <From : Any, To : Any> map(fromObject: From, toObject: To): To {
         val toClazz = toObject::class.java
         val classPair = ClassPair(fromObject::class.java, toClazz)
@@ -116,7 +124,8 @@ class ShapeShift internal constructor(
 
                 if (condition != null) {
                     condition as MappingCondition<Any>
-                    if (!condition.isValid(fromValue)) {
+                    val context = MappingConditionContext(fromValue)
+                    if (!condition.isValid(context)) {
                         return
                     }
                 }
