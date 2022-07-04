@@ -55,7 +55,7 @@ class ShapeShift internal constructor(
         }
     }
 
-    inline fun <reified To : Any, reified From : Any> map(fromObject: From): To {
+    inline fun <From : Any, reified To : Any> map(fromObject: From): To {
         return map(fromObject, To::class.java)
     }
 
@@ -212,8 +212,12 @@ class ShapeShift internal constructor(
 
     private fun <From : Any, To : Any> getDecorators(classPair: ClassPair): List<MappingDecorator<From, To>> {
         return decoratorCache.computeIfAbsent(classPair) {
-            decorators
-                .filter { decorator -> decorator.id == classPair }
+            val decks = decorators
+                .filter { decorator ->
+                    val id = decorator.id
+                    id == classPair
+                }
+            decks
         } as List<MappingDecorator<From, To>>
     }
 
