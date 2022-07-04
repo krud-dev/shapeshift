@@ -15,6 +15,22 @@ import dev.krud.shapeshift.dsl.KotlinDslMappingDefinitionBuilder
 import dev.krud.shapeshift.resolver.MappingDefinition
 import dev.krud.shapeshift.resolver.MappingDefinitionResolver
 import dev.krud.shapeshift.resolver.annotation.AnnotationMappingDefinitionResolver
+import dev.krud.shapeshift.transformer.AnyToStringMappingTransformer
+import dev.krud.shapeshift.transformer.DateToLongMappingTransformer
+import dev.krud.shapeshift.transformer.LongToDateMappingTransformer
+import dev.krud.shapeshift.transformer.NumberToCharMappingTransformer
+import dev.krud.shapeshift.transformer.NumberToDoubleMappingTransformer
+import dev.krud.shapeshift.transformer.NumberToFloatMappingTransformer
+import dev.krud.shapeshift.transformer.NumberToIntMappingTransformer
+import dev.krud.shapeshift.transformer.NumberToLongMappingTransformer
+import dev.krud.shapeshift.transformer.NumberToShortMappingTransformer
+import dev.krud.shapeshift.transformer.StringToBooleanMappingTransformer
+import dev.krud.shapeshift.transformer.StringToCharMappingTransformer
+import dev.krud.shapeshift.transformer.StringToDoubleMappingTransformer
+import dev.krud.shapeshift.transformer.StringToFloatMappingTransformer
+import dev.krud.shapeshift.transformer.StringToIntMappingTransformer
+import dev.krud.shapeshift.transformer.StringToLongMappingTransformer
+import dev.krud.shapeshift.transformer.StringToShortMappingTransformer
 import dev.krud.shapeshift.transformer.base.MappingTransformer
 
 class ShapeShiftBuilder {
@@ -25,7 +41,11 @@ class ShapeShiftBuilder {
     private val mappingDefinitions: MutableList<MappingDefinition> = mutableListOf()
 
     init {
+        // Add default annotation resolver
         withResolver(AnnotationMappingDefinitionResolver())
+
+        // Add default transformers
+        DEFAULT_TRANSFORMERS.forEach { withTransformer(it, true) }
     }
 
     fun withDefaultMappingStrategy(defaultMappingStrategy: MappingStrategy): ShapeShiftBuilder {
@@ -33,7 +53,7 @@ class ShapeShiftBuilder {
         return this
     }
 
-    fun withDecorator(decorator: MappingDecorator<out Any, out Any>) : ShapeShiftBuilder {
+    fun withDecorator(decorator: MappingDecorator<out Any, out Any>): ShapeShiftBuilder {
         decorators += decorator
         return this
     }
@@ -67,7 +87,33 @@ class ShapeShiftBuilder {
         return this
     }
 
+    fun excludeDefaultTransformers(): ShapeShiftBuilder {
+        transformers.removeAll() { it.transformer in DEFAULT_TRANSFORMERS }
+        return this
+    }
+
     fun build(): ShapeShift {
         return ShapeShift(transformers, resolvers, defaultMappingStrategy, decorators)
+    }
+
+    companion object {
+        private val DEFAULT_TRANSFORMERS = setOf<MappingTransformer<out Any, out Any>>(
+            AnyToStringMappingTransformer(),
+            StringToBooleanMappingTransformer(),
+            StringToCharMappingTransformer(),
+            StringToDoubleMappingTransformer(),
+            StringToFloatMappingTransformer(),
+            StringToIntMappingTransformer(),
+            StringToLongMappingTransformer(),
+            StringToShortMappingTransformer(),
+            LongToDateMappingTransformer(),
+            DateToLongMappingTransformer(),
+            NumberToCharMappingTransformer(),
+            NumberToDoubleMappingTransformer(),
+            NumberToFloatMappingTransformer(),
+            NumberToLongMappingTransformer(),
+            NumberToShortMappingTransformer(),
+            NumberToIntMappingTransformer()
+        )
     }
 }

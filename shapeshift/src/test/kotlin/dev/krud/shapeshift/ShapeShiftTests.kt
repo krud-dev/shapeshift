@@ -234,6 +234,7 @@ internal class ShapeShiftTests {
             null
         )
         shapeShift = ShapeShiftBuilder()
+            .excludeDefaultTransformers()
             .withTransformer(registration)
             .build()
         expectThat(shapeShift.transformers.first().name)
@@ -251,6 +252,7 @@ internal class ShapeShiftTests {
         )
 
         val builder = ShapeShiftBuilder()
+            .excludeDefaultTransformers()
             .withTransformer(registration)
             .withTransformer(registration)
 
