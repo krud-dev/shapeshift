@@ -10,13 +10,7 @@
 
 package dev.krud.shapeshift
 
-import dev.krud.shapeshift.TransformerRegistration.Companion.toRegistration
-import dev.krud.shapeshift.condition.MappingCondition
-import dev.krud.shapeshift.condition.MappingConditionContext
-import dev.krud.shapeshift.resolver.annotation.DefaultMappingTarget
-import dev.krud.shapeshift.resolver.annotation.MappedField
-import dev.krud.shapeshift.transformer.base.MappingTransformer
-import dev.krud.shapeshift.transformer.base.MappingTransformerContext
+import dev.krud.shapeshift.MappingTransformerRegistration.Companion.toRegistration
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
