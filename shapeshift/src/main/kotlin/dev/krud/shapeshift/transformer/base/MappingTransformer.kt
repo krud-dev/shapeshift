@@ -17,10 +17,10 @@ fun interface MappingTransformer<From : Any?, To : Any?> {
     fun transform(context: MappingTransformerContext<out From>): To?
 
     companion object {
-        val MappingTransformer<*, *>.id: ClassPair
+        val <From : Any?, To : Any?> MappingTransformer<From, To>.id: ClassPair<From, To>
             get() {
                 val rawArguments = TypeResolver.resolveRawArguments(MappingTransformer::class.java, this::class.java)
-                return rawArguments[0] to rawArguments[1]
+                return ClassPair(rawArguments[0], rawArguments[1]) as ClassPair<From, To>
             }
     }
 }
