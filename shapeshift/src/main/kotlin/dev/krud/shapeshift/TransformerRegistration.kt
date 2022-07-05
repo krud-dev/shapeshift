@@ -12,17 +12,35 @@ package dev.krud.shapeshift
 
 import dev.krud.shapeshift.transformer.EmptyTransformer
 import dev.krud.shapeshift.transformer.base.MappingTransformer
+import dev.krud.shapeshift.util.ClassPair
+import net.jodah.typetools.TypeResolver
 
-data class TransformerRegistration<From : Any, To : Any>(
+data class TransformerRegistration<From : Any?, To : Any?>(
+    val fromClazz: Class<From>,
+    val toClazz: Class<To>,
     val transformer: MappingTransformer<From, To>,
     val default: Boolean = false,
     val name: String? = null
 ) {
     companion object {
         val EMPTY = TransformerRegistration(
+            Any::class.java,
+            Any::class.java,
             EmptyTransformer,
             false,
             "empty"
         )
+
+        val <From : Any?, To : Any?> TransformerRegistration<From, To>.id: ClassPair<From, To> get() = ClassPair(fromClazz, toClazz)
+
+        inline fun <reified From : Any, reified To : Any> MappingTransformer<From, To>.toRegistration(default: Boolean = false, name: String? = null): TransformerRegistration<From, To> {
+            return TransformerRegistration(
+                From::class.java,
+                To::class.java,
+                this,
+                default,
+                name
+            )
+        }
     }
 }

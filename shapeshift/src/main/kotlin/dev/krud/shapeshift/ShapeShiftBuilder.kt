@@ -10,6 +10,7 @@
 
 package dev.krud.shapeshift
 
+import dev.krud.shapeshift.TransformerRegistration.Companion.toRegistration
 import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.dsl.KotlinDslMappingDefinitionBuilder
 import dev.krud.shapeshift.resolver.MappingDefinition
@@ -40,7 +41,7 @@ import dev.krud.shapeshift.transformer.base.MappingTransformer
  * for mapping definitions.
  */
 class ShapeShiftBuilder {
-    private val transformers: MutableSet<TransformerRegistration<*, *>> = mutableSetOf()
+    private val transformers: MutableSet<TransformerRegistration<out Any, out Any>> = mutableSetOf()
     private val decorators: MutableSet<MappingDecorator<*, *>> = mutableSetOf()
     private val resolvers: MutableSet<MappingDefinitionResolver> = mutableSetOf()
     private var defaultMappingStrategy: MappingStrategy = MappingStrategy.MAP_NOT_NULL
@@ -51,7 +52,9 @@ class ShapeShiftBuilder {
         withResolver(AnnotationMappingDefinitionResolver())
 
         // Add default transformers
-        DEFAULT_TRANSFORMERS.forEach { withTransformer(it, true) }
+        DEFAULT_TRANSFORMERS.forEach {
+            withTransformer(it)
+        }
     }
 
     /**
@@ -73,14 +76,14 @@ class ShapeShiftBuilder {
     /**
      * Add a transformer to the ShapeShift instance
      */
-    fun withTransformer(mappingTransformer: MappingTransformer<out Any, out Any>, default: Boolean = false, name: String? = null): ShapeShiftBuilder {
-        return withTransformer(TransformerRegistration(mappingTransformer, default, name))
+    inline fun <reified From : Any, reified To : Any> withTransformer(mappingTransformer: MappingTransformer<From, To>, default: Boolean = false, name: String? = null): ShapeShiftBuilder {
+        return withTransformer(mappingTransformer.toRegistration(default, name))
     }
 
     /**
      * Add a resolver to the ShapeShift instance
      */
-    fun withTransformer(transformerRegistration: TransformerRegistration<*, *>): ShapeShiftBuilder {
+    fun withTransformer(transformerRegistration: TransformerRegistration<out Any, out Any>): ShapeShiftBuilder {
         transformers += transformerRegistration
         return this
     }
@@ -117,7 +120,7 @@ class ShapeShiftBuilder {
      * Remove all default transformers from the ShapeShift instance
      */
     fun excludeDefaultTransformers(): ShapeShiftBuilder {
-        transformers.removeAll { it.transformer in DEFAULT_TRANSFORMERS }
+        transformers.removeAll { it in DEFAULT_TRANSFORMERS }
         return this
     }
 
@@ -137,23 +140,23 @@ class ShapeShiftBuilder {
     }
 
     companion object {
-        private val DEFAULT_TRANSFORMERS = setOf<MappingTransformer<out Any, out Any>>(
-            AnyToStringMappingTransformer(),
-            StringToBooleanMappingTransformer(),
-            StringToCharMappingTransformer(),
-            StringToDoubleMappingTransformer(),
-            StringToFloatMappingTransformer(),
-            StringToIntMappingTransformer(),
-            StringToLongMappingTransformer(),
-            StringToShortMappingTransformer(),
-            LongToDateMappingTransformer(),
-            DateToLongMappingTransformer(),
-            NumberToCharMappingTransformer(),
-            NumberToDoubleMappingTransformer(),
-            NumberToFloatMappingTransformer(),
-            NumberToLongMappingTransformer(),
-            NumberToShortMappingTransformer(),
-            NumberToIntMappingTransformer()
+        private val DEFAULT_TRANSFORMERS = setOf<TransformerRegistration<out Any, out Any>>(
+            AnyToStringMappingTransformer().toRegistration(true),
+            StringToBooleanMappingTransformer().toRegistration(true),
+            StringToCharMappingTransformer().toRegistration(true),
+            StringToDoubleMappingTransformer().toRegistration(true),
+            StringToFloatMappingTransformer().toRegistration(true),
+            StringToIntMappingTransformer().toRegistration(true),
+            StringToLongMappingTransformer().toRegistration(true),
+            StringToShortMappingTransformer().toRegistration(true),
+            LongToDateMappingTransformer().toRegistration(true),
+            DateToLongMappingTransformer().toRegistration(true),
+            NumberToCharMappingTransformer().toRegistration(true),
+            NumberToDoubleMappingTransformer().toRegistration(true),
+            NumberToFloatMappingTransformer().toRegistration(true),
+            NumberToLongMappingTransformer().toRegistration(true),
+            NumberToShortMappingTransformer().toRegistration(true),
+            NumberToIntMappingTransformer().toRegistration(true)
         )
     }
 }

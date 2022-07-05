@@ -10,17 +10,6 @@
 
 package dev.krud.shapeshift.transformer.base
 
-import dev.krud.shapeshift.util.ClassPair
-import net.jodah.typetools.TypeResolver
-
 fun interface MappingTransformer<From : Any?, To : Any?> {
     fun transform(context: MappingTransformerContext<out From>): To?
-
-    companion object {
-        val <From : Any?, To : Any?> MappingTransformer<From, To>.id: ClassPair<From, To>
-            get() {
-                val rawArguments = TypeResolver.resolveRawArguments(MappingTransformer::class.java, this::class.java)
-                return ClassPair(rawArguments[0], rawArguments[1]) as ClassPair<From, To>
-            }
-    }
 }
