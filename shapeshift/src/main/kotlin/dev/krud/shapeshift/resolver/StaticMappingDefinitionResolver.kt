@@ -13,7 +13,7 @@ package dev.krud.shapeshift.resolver
 class StaticMappingDefinitionResolver(
     private val mappingDefinitions: List<MappingDefinition>
 ) : MappingDefinitionResolver {
-    override fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): MappingDefinition? {
-        return mappingDefinitions.find { it.fromClazz == sourceClazz && it.toClazz == targetClazz }
+    override fun resolve(fromClazz: Class<*>, toClazz: Class<*>): MappingDefinition? {
+        return mappingDefinitions.find { it.fromClazz == fromClazz && it.toClazz == toClazz }
     }
 }
