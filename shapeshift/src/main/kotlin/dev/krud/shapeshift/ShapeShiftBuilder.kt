@@ -10,7 +10,7 @@
 
 package dev.krud.shapeshift
 
-import dev.krud.shapeshift.TransformerRegistration.Companion.toRegistration
+import dev.krud.shapeshift.MappingTransformerRegistration.Companion.toRegistration
 import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.dsl.KotlinDslMappingDefinitionBuilder
 import dev.krud.shapeshift.resolver.MappingDefinition
@@ -41,7 +41,7 @@ import dev.krud.shapeshift.transformer.base.MappingTransformer
  * for mapping definitions.
  */
 class ShapeShiftBuilder {
-    private val transformers: MutableSet<TransformerRegistration<out Any, out Any>> = mutableSetOf()
+    private val transformers: MutableSet<MappingTransformerRegistration<out Any, out Any>> = mutableSetOf()
     private val decorators: MutableSet<MappingDecorator<*, *>> = mutableSetOf()
     private val resolvers: MutableSet<MappingDefinitionResolver> = mutableSetOf()
     private var defaultMappingStrategy: MappingStrategy = MappingStrategy.MAP_NOT_NULL
@@ -83,7 +83,7 @@ class ShapeShiftBuilder {
     /**
      * Add a resolver to the ShapeShift instance
      */
-    fun withTransformer(transformerRegistration: TransformerRegistration<out Any, out Any>): ShapeShiftBuilder {
+    fun withTransformer(transformerRegistration: MappingTransformerRegistration<out Any, out Any>): ShapeShiftBuilder {
         transformers += transformerRegistration
         return this
     }
@@ -140,7 +140,7 @@ class ShapeShiftBuilder {
     }
 
     companion object {
-        private val DEFAULT_TRANSFORMERS = setOf<TransformerRegistration<out Any, out Any>>(
+        private val DEFAULT_TRANSFORMERS = setOf<MappingTransformerRegistration<out Any, out Any>>(
             AnyToStringMappingTransformer().toRegistration(true),
             StringToBooleanMappingTransformer().toRegistration(true),
             StringToCharMappingTransformer().toRegistration(true),
