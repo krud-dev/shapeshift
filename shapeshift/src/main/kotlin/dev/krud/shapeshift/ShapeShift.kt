@@ -10,6 +10,7 @@
 
 package dev.krud.shapeshift
 
+import dev.krud.shapeshift.TransformerRegistration.Companion.id
 import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.condition.MappingConditionContext
 import dev.krud.shapeshift.decorator.MappingDecorator
@@ -21,7 +22,6 @@ import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
 import dev.krud.shapeshift.resolver.MappingDefinitionResolver
 import dev.krud.shapeshift.transformer.base.MappingTransformer
-import dev.krud.shapeshift.transformer.base.MappingTransformer.Companion.id
 import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 import dev.krud.shapeshift.util.ClassPair
 import dev.krud.shapeshift.util.concurrentMapOf
@@ -38,7 +38,7 @@ class ShapeShift internal constructor(
 ) {
     val transformers: MutableList<TransformerRegistration<out Any, out Any>> = mutableListOf()
     internal val transformersByNameCache: MutableMap<String, TransformerRegistration<out Any, out Any>> = concurrentMapOf()
-    internal val transformersByTypeCache: MutableMap<Class<out MappingTransformer<*, *>>, TransformerRegistration<*, *>> =
+    internal val transformersByTypeCache: MutableMap<Class<out MappingTransformer<out Any?, out Any?>>, TransformerRegistration<out Any?, out Any?>> =
         concurrentMapOf()
     internal val defaultTransformers: MutableMap<ClassPair<out Any, out Any>, TransformerRegistration<out Any, out Any>> = mutableMapOf()
     private val mappingStructures: MutableMap<ClassPair<out Any, out Any>, MappingStructure> = concurrentMapOf()
@@ -193,7 +193,7 @@ class ShapeShift internal constructor(
         }
     }
 
-    private fun getTransformerByType(type: Class<out MappingTransformer<*, *>>): TransformerRegistration<out Any, out Any> {
+    private fun getTransformerByType(type: Class<out MappingTransformer<out Any?, out Any?>>): TransformerRegistration<out Any?, out Any?> {
         return transformersByTypeCache.computeIfAbsent(type) { _ ->
             transformers.find { it.transformer::class.java == type } ?: TransformerRegistration.EMPTY
         }
@@ -275,11 +275,11 @@ class ShapeShift internal constructor(
             error("Transformer with name $name already exists with type ${existingTransformer.transformer::class}")
         }
         if (newRegistration.default) {
-            val existingDefaultTransformer = defaultTransformers[newRegistration.transformer.id]
+            val existingDefaultTransformer = defaultTransformers[newRegistration.id]
             if (existingDefaultTransformer != null) {
-                error("Default transformer with pair ${newRegistration.transformer.id} already exists")
+                error("Default transformer with pair ${newRegistration.id} already exists")
             }
-            defaultTransformers[newRegistration.transformer.id] = newRegistration
+            defaultTransformers[newRegistration.id] = newRegistration
         }
 
         transformers.add(newRegistration)

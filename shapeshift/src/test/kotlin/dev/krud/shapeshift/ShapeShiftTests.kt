@@ -10,6 +10,7 @@
 
 package dev.krud.shapeshift
 
+import dev.krud.shapeshift.TransformerRegistration.Companion.toRegistration
 import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.condition.MappingConditionContext
 import dev.krud.shapeshift.resolver.annotation.DefaultMappingTarget
@@ -55,9 +56,7 @@ internal class ShapeShiftTests {
         internal fun `simple mapping with transformer by type`() {
             shapeShift = ShapeShiftBuilder()
                 .withTransformer(
-                    TransformerRegistration(
-                        LongToStringTransformer()
-                    )
+                    LongToStringTransformer().toRegistration()
                 )
                 .build()
 
@@ -71,10 +70,7 @@ internal class ShapeShiftTests {
         internal fun `simple mapping with transformer by name`() {
             shapeShift = ShapeShiftBuilder()
                 .withTransformer(
-                    TransformerRegistration(
-                        LongToStringTransformer(),
-                        name = "myTransformer"
-                    )
+                    LongToStringTransformer().toRegistration(name = "myTransformer")
                 )
                 .build()
             val result = shapeShift.map(NameTransformerFrom(), StringTo::class.java)
@@ -87,10 +83,7 @@ internal class ShapeShiftTests {
         internal fun `simple mapping with default transformer`() {
             shapeShift = ShapeShiftBuilder()
                 .withTransformer(
-                    TransformerRegistration(
-                        LongToStringTransformer(),
-                        default = true
-                    )
+                    LongToStringTransformer().toRegistration(true)
                 )
                 .build()
             val result = shapeShift.map(DefaultTransformerFrom(), StringTo::class.java)
@@ -239,17 +232,9 @@ internal class ShapeShiftTests {
 
     @Test
     internal fun `registering default transformer twice with same pair should throw exception`() {
-        val firstRegistration = TransformerRegistration(
-            ExampleFieldTransformer(),
-            true,
-            "first"
-        )
+        val firstRegistration = ExampleFieldTransformer().toRegistration(true)
 
-        val secondRegistration = TransformerRegistration(
-            ExampleFieldTransformer(),
-            true,
-            "second"
-        )
+        val secondRegistration = ExampleFieldTransformer().toRegistration(true)
 
         val builder = ShapeShiftBuilder()
             .withTransformer(firstRegistration)
@@ -262,11 +247,7 @@ internal class ShapeShiftTests {
 
     @Test
     internal fun `registering transformer with null name should use simple class name when registering`() {
-        val registration = TransformerRegistration(
-            ExampleFieldTransformer(),
-            false,
-            null
-        )
+        val registration = ExampleFieldTransformer().toRegistration()
         shapeShift = ShapeShiftBuilder()
             .excludeDefaultTransformers()
             .withTransformer(registration)
@@ -279,11 +260,7 @@ internal class ShapeShiftTests {
 
     @Test
     internal fun `registering same transformer twice should result in 1 transformer`() {
-        val registration = TransformerRegistration(
-            ExampleFieldTransformer(),
-            false,
-            "first"
-        )
+        val registration = ExampleFieldTransformer().toRegistration(name = "first")
 
         val builder = ShapeShiftBuilder()
             .excludeDefaultTransformers()
@@ -297,17 +274,9 @@ internal class ShapeShiftTests {
 
     @Test
     internal fun `registering transformer with an existing name twice should throw exception`() {
-        val registration = TransformerRegistration(
-            ExampleFieldTransformer(),
-            false,
-            "first"
-        )
+        val registration = ExampleFieldTransformer().toRegistration(name = "first")
 
-        val secondRegistration = TransformerRegistration(
-            ExampleFieldTransformer(),
-            false,
-            "first"
-        )
+        val secondRegistration = ExampleFieldTransformer().toRegistration(name = "first")
 
         val builder = ShapeShiftBuilder()
             .withTransformer(registration)
