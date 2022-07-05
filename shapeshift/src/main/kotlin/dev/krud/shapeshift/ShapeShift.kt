@@ -40,11 +40,10 @@ class ShapeShift internal constructor(
     internal val transformersByNameCache: MutableMap<String, TransformerRegistration<out Any, out Any>> = concurrentMapOf()
     internal val transformersByTypeCache: MutableMap<Class<out MappingTransformer<*, *>>, TransformerRegistration<*, *>> =
         concurrentMapOf()
-    internal val defaultTransformers: MutableMap<ClassPair, TransformerRegistration<out Any, out Any>> = mutableMapOf()
-    private val mappingStructures: MutableMap<ClassPair, MappingStructure> = concurrentMapOf()
-    private val entityFieldsCache: MutableMap<Class<*>, Map<String, Field>> = concurrentMapOf()
+    internal val defaultTransformers: MutableMap<ClassPair<out Any, out Any>, TransformerRegistration<out Any, out Any>> = mutableMapOf()
+    private val mappingStructures: MutableMap<ClassPair<out Any, out Any>, MappingStructure> = concurrentMapOf()
     private val conditionCache: MutableMap<Class<out MappingCondition<*>>, MappingCondition<*>> = concurrentMapOf()
-    private val decoratorCache: MutableMap<ClassPair, List<MappingDecorator<*, *>>> = concurrentMapOf()
+    private val decoratorCache: MutableMap<ClassPair<out Any, out Any>, List<MappingDecorator<*, *>>> = concurrentMapOf()
 
     init {
         if (defaultMappingStrategy == MappingStrategy.NONE) {
@@ -201,7 +200,7 @@ class ShapeShift internal constructor(
     }
 
     private fun getMappingStructure(fromClass: Class<*>, toClass: Class<*>): MappingStructure {
-        val key = fromClass to toClass
+        val key = ClassPair(fromClass, toClass)
         return mappingStructures.computeIfAbsent(key) {
             val resolutions = mappingDefinitionResolvers
                 .mapNotNull { it.resolve(fromClass, toClass) }
@@ -210,7 +209,7 @@ class ShapeShift internal constructor(
         }
     }
 
-    private fun <From : Any, To : Any> getDecorators(classPair: ClassPair): List<MappingDecorator<From, To>> {
+    private fun <From : Any, To : Any> getDecorators(classPair: ClassPair<From, To>): List<MappingDecorator<From, To>> {
         return decoratorCache.computeIfAbsent(classPair) {
             val decks = decorators
                 .filter { decorator ->
@@ -243,7 +242,7 @@ class ShapeShift internal constructor(
             log.trace("Checking transformer field")
             if (coordinates.type == null) {
                 log.trace("Transformer is null, attempting to find a default transformer")
-                val key = fromPair.type to toPair.type
+                val key = ClassPair(fromPair.type, toPair.type)
                 val defaultTransformerRegistration = defaultTransformers[key]
                 if (defaultTransformerRegistration != null) {
                     log.trace("Found a default transformer of type [ " + defaultTransformerRegistration.transformer.javaClass.name + " ]")
