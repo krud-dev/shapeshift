@@ -19,10 +19,10 @@ import dev.krud.shapeshift.util.splitIgnoreEmpty
 import java.lang.reflect.Field
 
 class AnnotationMappingDefinitionResolver : MappingDefinitionResolver {
-    override fun resolve(sourceClazz: Class<*>, targetClazz: Class<*>): MappingDefinition {
-        val defaultMappingTarget = sourceClazz.getDeclaredAnnotation(DefaultMappingTarget::class.java)
+    override fun resolve(fromClazz: Class<*>, toClazz: Class<*>): MappingDefinition {
+        val defaultMappingTarget = fromClazz.getDeclaredAnnotation(DefaultMappingTarget::class.java)
         val defaultToClass: Class<*> = defaultMappingTarget?.value?.java ?: Nothing::class.java
-        val mappedFieldReferences = getMappedFields(sourceClazz, targetClazz, defaultToClass)
+        val mappedFieldReferences = getMappedFields(fromClazz, toClazz, defaultToClass)
 
         val resolvedMappedFields = mutableListOf<ResolvedMappedField>()
         for ((mappedField, field) in mappedFieldReferences) {
@@ -33,13 +33,13 @@ class AnnotationMappingDefinitionResolver : MappingDefinitionResolver {
                 TransformerCoordinates.ofName(mappedField.transformerRef)
             }
 
-            val mapFromCoordinates = resolveNodesToFields(mappedField.mapFrom.splitIgnoreEmpty(NODE_DELIMITER), field, sourceClazz)
+            val mapFromCoordinates = resolveNodesToFields(mappedField.mapFrom.splitIgnoreEmpty(NODE_DELIMITER), field, fromClazz)
 
             val effectiveMapTo = mappedField.mapTo.ifBlank {
                 mapFromCoordinates.last().name
             }
 
-            val mapToCoordinates = resolveNodesToFields(effectiveMapTo.splitIgnoreEmpty(NODE_DELIMITER), null, targetClazz)
+            val mapToCoordinates = resolveNodesToFields(effectiveMapTo.splitIgnoreEmpty(NODE_DELIMITER), null, toClazz)
             val conditionClazz = if (mappedField.condition != Nothing::class) {
                 mappedField.condition
             } else {
@@ -56,7 +56,7 @@ class AnnotationMappingDefinitionResolver : MappingDefinitionResolver {
                 mappedField.overrideMappingStrategy
             )
         }
-        return MappingDefinition(sourceClazz, targetClazz, resolvedMappedFields)
+        return MappingDefinition(fromClazz, toClazz, resolvedMappedFields)
     }
 
     /**
