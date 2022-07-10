@@ -246,7 +246,7 @@ internal class ShapeShiftTests {
             .excludeDefaultTransformers()
             .withTransformer(registration)
             .build()
-        expectThat(shapeShift.transformers.first().name)
+        expectThat(shapeShift.transformerRegistrations.first().name)
             .isEqualTo(
                 "ExampleFieldTransformer"
             )
@@ -262,7 +262,7 @@ internal class ShapeShiftTests {
             .withTransformer(registration)
 
         val shapeShift = builder.build()
-        expectThat(shapeShift.transformers.size)
+        expectThat(shapeShift.transformerRegistrations.size)
             .isEqualTo(1)
     }
 

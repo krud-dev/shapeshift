@@ -10,6 +10,7 @@
 
 package dev.krud.shapeshift
 
+import dev.krud.shapeshift.MappingDecoratorRegistration.Companion.toRegistration
 import dev.krud.shapeshift.MappingTransformerRegistration.Companion.toRegistration
 import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.dsl.KotlinDslMappingDefinitionBuilder
@@ -41,8 +42,8 @@ import dev.krud.shapeshift.transformer.base.MappingTransformer
  * for mapping definitions.
  */
 class ShapeShiftBuilder {
-    private val transformers: MutableSet<MappingTransformerRegistration<out Any, out Any>> = mutableSetOf()
-    private val decorators: MutableSet<MappingDecorator<*, *>> = mutableSetOf()
+    private val transformerRegistrations: MutableSet<MappingTransformerRegistration<out Any, out Any>> = mutableSetOf()
+    private val decoratorRegistrations: MutableSet<MappingDecoratorRegistration<out Any, out Any>> = mutableSetOf()
     private val resolvers: MutableSet<MappingDefinitionResolver> = mutableSetOf()
     private var defaultMappingStrategy: MappingStrategy = MappingStrategy.MAP_NOT_NULL
     private val mappingDefinitions: MutableList<MappingDefinition> = mutableListOf()
@@ -68,8 +69,15 @@ class ShapeShiftBuilder {
     /**
      * Add a decorator to the ShapeShift instance
      */
-    fun withDecorator(decorator: MappingDecorator<out Any, out Any>): ShapeShiftBuilder {
-        decorators += decorator
+    inline fun <reified From : Any, reified To : Any> withDecorator(decorator: MappingDecorator<From, To>): ShapeShiftBuilder {
+        return withDecorator(decorator.toRegistration())
+    }
+
+    /**
+     * Add a decorator to the ShapeShift instance
+     */
+    fun withDecorator(decoratorRegistration: MappingDecoratorRegistration<out Any, out Any>): ShapeShiftBuilder {
+        decoratorRegistrations += decoratorRegistration
         return this
     }
 
@@ -84,7 +92,7 @@ class ShapeShiftBuilder {
      * Add a resolver to the ShapeShift instance
      */
     fun withTransformer(transformerRegistration: MappingTransformerRegistration<out Any, out Any>): ShapeShiftBuilder {
-        transformers += transformerRegistration
+        transformerRegistrations += transformerRegistration
         return this
     }
 
@@ -120,7 +128,7 @@ class ShapeShiftBuilder {
      * Remove all default transformers from the ShapeShift instance
      */
     fun excludeDefaultTransformers(): ShapeShiftBuilder {
-        transformers.removeAll { it in DEFAULT_TRANSFORMERS }
+        transformerRegistrations.removeAll { it in DEFAULT_TRANSFORMERS }
         return this
     }
 
@@ -136,7 +144,7 @@ class ShapeShiftBuilder {
             resolvers += StaticMappingDefinitionResolver(mappingDefinitions)
         }
 
-        return ShapeShift(transformers, resolvers, defaultMappingStrategy, decorators)
+        return ShapeShift(transformerRegistrations, resolvers, defaultMappingStrategy, decoratorRegistrations)
     }
 
     companion object {
