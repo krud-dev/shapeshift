@@ -10,10 +10,6 @@
 
 package dev.krud.shapeshift.decorator
 
-import dev.krud.shapeshift.decorator.MappingDecorator.Companion.id
-import dev.krud.shapeshift.util.ClassPair
-import net.jodah.typetools.TypeResolver
-
 /**
  * Represents a decorator that can be applied to ShapeShift
  * Decorators run after mappers and contain a reference to both the from object and to object and may apply changes on both
@@ -27,12 +23,4 @@ fun interface MappingDecorator<From : Any, To : Any> {
      * @param context The context for the decorator
      */
     fun decorate(context: MappingDecoratorContext<From, To>)
-
-    companion object {
-        val <From : Any, To : Any> MappingDecorator<From, To>.id: ClassPair<From, To>
-            get() {
-                val rawArguments = TypeResolver.resolveRawArguments(MappingDecorator::class.java, this::class.java)
-                return ClassPair(rawArguments[0], rawArguments[1]) as ClassPair<From, To>
-            }
-    }
 }

@@ -20,8 +20,9 @@ data class TransformerCoordinates(
     companion object {
         val NONE = TransformerCoordinates()
         fun ofName(name: String) = TransformerCoordinates(name)
-        fun ofType(type: Class<out MappingTransformer<out Any?, out Any?
-                >>): TransformerCoordinates {
+        fun ofType(
+            type: Class<out MappingTransformer<out Any?, out Any?>>
+        ): TransformerCoordinates {
             if (type == EmptyTransformer::class.java) {
                 return NONE
             }

@@ -10,11 +10,13 @@
 
 package dev.krud.shapeshift.spring.customizer
 
+import dev.krud.shapeshift.MappingDecoratorRegistration
 import dev.krud.shapeshift.ShapeShiftBuilder
 import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.spring.ShapeShiftBuilderCustomizer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.GenericTypeResolver
 
 @Configuration
 class ShapeShiftDecoratorCustomizer : ShapeShiftBuilderCustomizer {
@@ -23,7 +25,14 @@ class ShapeShiftDecoratorCustomizer : ShapeShiftBuilderCustomizer {
 
     override fun customize(builder: ShapeShiftBuilder) {
         mappingDecorators?.forEach { mappingDecorator ->
-            builder.withDecorator(mappingDecorator)
+            val types = GenericTypeResolver.resolveTypeArguments(mappingDecorator::class.java, MappingDecorator::class.java)
+            builder.withDecorator(
+                MappingDecoratorRegistration(
+                    types[0] as Class<Any>,
+                    types[1] as Class<Any>,
+                    mappingDecorator as MappingDecorator<Any, Any>
+                )
+            )
         }
     }
 }

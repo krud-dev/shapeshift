@@ -44,7 +44,7 @@ internal class ShapeShiftSpringTest {
 
     @Test
     internal fun `bean decorator is loaded`() {
-        expectThat(shapeShift.decoratorRegistrations)
+        expectThat(shapeShift.decoratorRegistrations.map { it.decorator })
             .contains(exampleDecorator)
     }
 }

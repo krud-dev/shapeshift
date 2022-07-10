@@ -11,23 +11,21 @@
 package dev.krud.shapeshift.spring
 
 import dev.krud.shapeshift.decorator.MappingDecorator
+import dev.krud.shapeshift.decorator.MappingDecoratorContext
 import dev.krud.shapeshift.transformer.base.MappingTransformer
-import java.lang.reflect.Field
+import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 
 class ExampleClass
 
 class SecondExampleClass
 
 class ExampleDecorator : MappingDecorator<ExampleClass, SecondExampleClass> {
-    override fun decorate(from: ExampleClass, to: SecondExampleClass) {
+    override fun decorate(context: MappingDecoratorContext<ExampleClass, SecondExampleClass>) {
     }
 }
 
 class ExampleTransformer : MappingTransformer<String, String> {
-    override val fromType: Class<String> = String::class.java
-    override val toType: Class<String> = String::class.java
-
-    override fun transform(fromField: Field, toField: Field, originalValue: String?, fromObject: Any, toObject: Any): String? {
-        return originalValue
+    override fun transform(context: MappingTransformerContext<out String>): String? {
+        return context.originalValue
     }
 }
