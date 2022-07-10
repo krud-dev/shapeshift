@@ -10,12 +10,13 @@
 
 package dev.krud.shapeshift.spring.customizer
 
-import dev.krud.shapeshift.ShapeShiftBuilder
 import dev.krud.shapeshift.MappingTransformerRegistration
+import dev.krud.shapeshift.ShapeShiftBuilder
 import dev.krud.shapeshift.spring.ShapeShiftBuilderCustomizer
 import dev.krud.shapeshift.transformer.base.MappingTransformer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.GenericTypeResolver
 
 @Configuration
 class ShapeShiftTransformerCustomizer : ShapeShiftBuilderCustomizer {
@@ -23,13 +24,17 @@ class ShapeShiftTransformerCustomizer : ShapeShiftBuilderCustomizer {
     private val mappingTransformers: Map<String, MappingTransformer<out Any, out Any>>? = null
 
     override fun customize(builder: ShapeShiftBuilder) {
-        mappingTransformers?.forEach { (name, fieldTransformer) ->
+        mappingTransformers?.forEach { (name, mappingTransformer) ->
+            val types = GenericTypeResolver.resolveTypeArguments(mappingTransformer::class.java, MappingTransformer::class.java)
+            val registration = MappingTransformerRegistration(
+                types[0] as Class<Any>,
+                types[1] as Class<Any>,
+                mappingTransformer as MappingTransformer<Any, Any>,
+                false,
+                name
+            )
             builder.withTransformer(
-                MappingTransformerRegistration(
-                    fieldTransformer,
-                    false,
-                    name
-                )
+                registration
             )
         }
     }
