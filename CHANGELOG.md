@@ -1,4 +1,30 @@
-# [](https://github.com/krud-dev/shapeshift/compare/v0.1.0...v) (2022-05-20)
+# [](https://github.com/krud-dev/shapeshift/compare/v0.2.0...v) (2022-07-10)
+
+
+
+# [0.2.0](https://github.com/krud-dev/shapeshift/compare/v0.1.0...v0.2.0) (2022-07-10)
+
+
+### Bug Fixes
+
+* change ClassPair to own data class ([5dd5322](https://github.com/krud-dev/shapeshift/commit/5dd532231ad6238bc67240d56cbda4af566bbbf4))
+* Change error message when a field is not found ([9bb080b](https://github.com/krud-dev/shapeshift/commit/9bb080b15be59be685cc99f0ae5e407e2ec444ef))
+
+
+### Features
+
+* add ad hoc transformers ([8998f34](https://github.com/krud-dev/shapeshift/commit/8998f347d89aca0aa3aaf70689a073f473eace01))
+* add conditions ([fb67786](https://github.com/krud-dev/shapeshift/commit/fb677863ed29151006389942738fce72b928f71d))
+* add decorator registration ([794390f](https://github.com/krud-dev/shapeshift/commit/794390f2287f1977dbf0118c203fe8e9ab581f9f))
+* add decorators ([43572f9](https://github.com/krud-dev/shapeshift/commit/43572f9f8c0507a4d38c9935c1d9bcbf2f9976cd))
+* add default transformers ([4b855ea](https://github.com/krud-dev/shapeshift/commit/4b855ea2e13d5295367b3701f6dade3f2663dac3))
+* add programmatic resolver ([a61d0c6](https://github.com/krud-dev/shapeshift/commit/a61d0c64e8353d5fcc65a9f01265197ab4efd578))
+* add resolver abstraction ([efa1f31](https://github.com/krud-dev/shapeshift/commit/efa1f31545d9745c92dc6e92ef71ddbed49778c4))
+* change decorators and transformers to use a context object ([757e8fa](https://github.com/krud-dev/shapeshift/commit/757e8fad7ecb4e2cf279568225c618723c9b2f1d))
+* change transformers list to set ([c5841b6](https://github.com/krud-dev/shapeshift/commit/c5841b69414f28af8386625a650061c5517f2d9b))
+* change way transformers are registered ([7238424](https://github.com/krud-dev/shapeshift/commit/7238424d234e0350c6c19eb76f3674271d827770))
+* remove concrete type from field transformers ([c9b8f8d](https://github.com/krud-dev/shapeshift/commit/c9b8f8d27ca486c52d63f977a288a59c297229ac))
+* **spring:** add support for bean decorators ([2cbcdd4](https://github.com/krud-dev/shapeshift/commit/2cbcdd450551f6826979f07f93c17b00c64c1c4b))
 
 
 
