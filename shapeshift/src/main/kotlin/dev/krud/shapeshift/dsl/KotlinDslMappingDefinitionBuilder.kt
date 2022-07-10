@@ -10,6 +10,7 @@
 
 package dev.krud.shapeshift.dsl
 
+import dev.krud.shapeshift.MappingDecoratorRegistration
 import dev.krud.shapeshift.MappingStrategy
 import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.decorator.MappingDecorator
@@ -30,7 +31,7 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
     private val toClazz: Class<RootTo>,
 ) {
     private val fieldMappings = mutableListOf<FieldMapping<*, *>>()
-    private val decorators: MutableList<MappingDecorator<RootFrom, RootTo>> = mutableListOf()
+    private val decoratorRegistrations: MutableSet<MappingDecoratorRegistration<RootFrom, RootTo>> = mutableSetOf()
 
     /**
      * Helper operator function to access sub-fields of a field.
@@ -91,7 +92,7 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
      * Defines a decorator for the given pair of classes.
      */
     fun decorate(decorator: MappingDecorator<RootFrom, RootTo>) {
-        this.decorators += decorator
+        this.decoratorRegistrations += MappingDecoratorRegistration(fromClazz, toClazz, decorator)
     }
 
     /**
@@ -155,7 +156,7 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
                     )
                 }
             ),
-            decorators
+            decoratorRegistrations
         )
     }
 
@@ -189,7 +190,7 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
 
         data class Result(
             val mappingDefinition: MappingDefinition,
-            val decorators: List<MappingDecorator<*, *>>
+            val decoratorRegistrations: Set<MappingDecoratorRegistration<*, *>>
         )
     }
 }

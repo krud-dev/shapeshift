@@ -10,11 +10,11 @@
 
 package dev.krud.shapeshift
 
+import dev.krud.shapeshift.MappingDecoratorRegistration.Companion.id
 import dev.krud.shapeshift.MappingTransformerRegistration.Companion.id
 import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.condition.MappingConditionContext
 import dev.krud.shapeshift.decorator.MappingDecorator
-import dev.krud.shapeshift.decorator.MappingDecorator.Companion.id
 import dev.krud.shapeshift.decorator.MappingDecoratorContext
 import dev.krud.shapeshift.dto.MappingStructure
 import dev.krud.shapeshift.dto.ObjectFieldTrio
@@ -34,9 +34,9 @@ class ShapeShift internal constructor(
     transformersRegistrations: Set<MappingTransformerRegistration<out Any, out Any>>,
     val mappingDefinitionResolvers: Set<MappingDefinitionResolver>,
     val defaultMappingStrategy: MappingStrategy,
-    val decorators: Set<MappingDecorator<out Any, out Any>>
+    val decoratorRegistrations: Set<MappingDecoratorRegistration<out Any, out Any>>
 ) {
-    val transformers: MutableList<MappingTransformerRegistration<out Any, out Any>> = mutableListOf()
+    val transformerRegistrations: MutableList<MappingTransformerRegistration<out Any, out Any>> = mutableListOf()
     internal val transformersByNameCache: MutableMap<String, MappingTransformerRegistration<out Any, out Any>> = concurrentMapOf()
     internal val transformersByTypeCache: MutableMap<Class<out MappingTransformer<out Any?, out Any?>>, MappingTransformerRegistration<out Any?, out Any?>> =
         concurrentMapOf()
@@ -189,13 +189,13 @@ class ShapeShift internal constructor(
 
     private fun getTransformerByName(name: String): MappingTransformerRegistration<out Any, out Any> {
         return transformersByNameCache.computeIfAbsent(name) { _ ->
-            transformers.find { it.name == name } ?: MappingTransformerRegistration.EMPTY
+            transformerRegistrations.find { it.name == name } ?: MappingTransformerRegistration.EMPTY
         }
     }
 
     private fun getTransformerByType(type: Class<out MappingTransformer<out Any?, out Any?>>): MappingTransformerRegistration<out Any?, out Any?> {
         return transformersByTypeCache.computeIfAbsent(type) { _ ->
-            transformers.find { it.transformer::class.java == type } ?: MappingTransformerRegistration.EMPTY
+            transformerRegistrations.find { it.transformer::class.java == type } ?: MappingTransformerRegistration.EMPTY
         }
     }
 
@@ -211,12 +211,14 @@ class ShapeShift internal constructor(
 
     private fun <From : Any, To : Any> getDecorators(classPair: ClassPair<From, To>): List<MappingDecorator<From, To>> {
         return decoratorCache.computeIfAbsent(classPair) {
-            val decks = decorators
-                .filter { decorator ->
-                    val id = decorator.id
+            decoratorRegistrations
+                .filter { decoratorRegistration ->
+                    val id = decoratorRegistration.id
                     id == classPair
                 }
-            decks
+                .map { decoratorRegistrations ->
+                    decoratorRegistrations.decorator
+                }
         } as List<MappingDecorator<From, To>>
     }
 
@@ -282,7 +284,7 @@ class ShapeShift internal constructor(
             defaultTransformers[newRegistration.id] = newRegistration
         }
 
-        transformers.add(newRegistration)
+        transformerRegistrations.add(newRegistration)
         transformersByNameCache.remove(name)
         transformersByTypeCache.remove(newRegistration.transformer::class.java)
     }
