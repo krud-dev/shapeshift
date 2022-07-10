@@ -10,7 +10,6 @@
 
 package dev.krud.shapeshift.decorator
 
-import dev.krud.shapeshift.decorator.MappingDecorator.Companion.id
 import dev.krud.shapeshift.util.ClassPair
 import net.jodah.typetools.TypeResolver
 

@@ -15,5 +15,5 @@ import dev.krud.shapeshift.dto.ResolvedMappedField
 data class MappingDefinition(
     val fromClazz: Class<*>,
     val toClazz: Class<*>,
-    val resolvedMappedFields: List<ResolvedMappedField>,
+    val resolvedMappedFields: List<ResolvedMappedField>
 )

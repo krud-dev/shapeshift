@@ -17,7 +17,7 @@ import dev.krud.shapeshift.util.ClassPair
 data class MappingDecoratorRegistration<From : Any, To : Any>(
     val fromClazz: Class<From>,
     val toClazz: Class<To>,
-    val decorator: MappingDecorator<From, To>,
+    val decorator: MappingDecorator<From, To>
 ) {
     companion object {
         val EMPTY = MappingDecoratorRegistration(

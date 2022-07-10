@@ -210,7 +210,8 @@ internal class ShapeShiftTests {
     internal fun `supplying invalid from path should throw exception`() {
         expectThrows<NoSuchFieldException> {
             shapeShift.map(
-                FromWithInvalidFromPath(), GenericTo::class.java
+                FromWithInvalidFromPath(),
+                GenericTo::class.java
             )
         }
     }
@@ -219,7 +220,8 @@ internal class ShapeShiftTests {
     internal fun `supplying invalid to path should throw exception`() {
         expectThrows<NoSuchFieldException> {
             shapeShift.map(
-                FromWithInvalidToPath(), GenericTo::class.java
+                FromWithInvalidToPath(),
+                GenericTo::class.java
             )
         }
     }

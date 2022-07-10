@@ -28,7 +28,7 @@ import kotlin.reflect.jvm.javaField
 @KotlinMappingDsl
 class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
     private val fromClazz: Class<RootFrom>,
-    private val toClazz: Class<RootTo>,
+    private val toClazz: Class<RootTo>
 ) {
     private val fieldMappings = mutableListOf<FieldMapping<*, *>>()
     private val decoratorRegistrations: MutableSet<MappingDecoratorRegistration<RootFrom, RootTo>> = mutableSetOf()
