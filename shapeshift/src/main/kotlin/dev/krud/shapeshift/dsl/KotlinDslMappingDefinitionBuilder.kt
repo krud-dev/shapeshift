@@ -168,12 +168,6 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
     }
 
     companion object {
-        inline fun <reified From : Any, reified To : Any> mapper(block: KotlinDslMappingDefinitionBuilder<From, To>.() -> Unit): Result {
-            val builder = KotlinDslMappingDefinitionBuilder(From::class.java, To::class.java)
-            builder.block()
-            return builder.build()
-        }
-
         class FieldCoordinates<Root, LastField : Any?, LastValue : Any?>(
             val fields: MutableList<KProperty1<LastField, LastValue>> = mutableListOf()
         )
@@ -193,4 +187,10 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
             val decoratorRegistrations: Set<MappingDecoratorRegistration<*, *>>
         )
     }
+}
+
+inline fun <reified From : Any, reified To : Any> mapper(block: KotlinDslMappingDefinitionBuilder<From, To>.() -> Unit): KotlinDslMappingDefinitionBuilder.Companion.Result {
+    val builder = KotlinDslMappingDefinitionBuilder(From::class.java, To::class.java)
+    builder.block()
+    return builder.build()
 }
