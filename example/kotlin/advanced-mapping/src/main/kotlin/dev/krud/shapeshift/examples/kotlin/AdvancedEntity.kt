@@ -23,7 +23,7 @@ data class AdvancedEntity(
     @MappedField(target = ReducedAdvancedEntityDisplay::class, mapFrom = "childName", mapTo = "firstChildName") // This field will be mapped to the "firstChildName" field in the specified target class
     val firstChild: AdvancedChildEntity,
 
-    @MappedField(mapFrom = "childName", mapTo = "secondChildName") // This field will be mapped to the "secondChildName" field in the default target class
     // This field will not be mapped to ReducdedAdvancedEntityDisplay because it is missing the @MappedField annotation with the corresponding target class
+    @MappedField(mapFrom = "childName", mapTo = "secondChildName") // This field will be mapped to the "secondChildName" field in the default target class
     val secondChild: AdvancedChildEntity
 )

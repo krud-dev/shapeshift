@@ -20,5 +20,5 @@ data class SimpleEntity(
     val creationDate: Date, // This field will be mapped to the creationDate field of the target class, and use the DateToLongTransformer implicitly
 
     @MappedField(transformer = StringToCommaSeparatedStringListTransformer::class, mapTo = "stringList")
-    val commaDelimitedString: String, // This field will be mapped to the stringList field of the target class, and use the StringToCommaSeparatedStringListTransformer as it is explicitly specified
+    val commaDelimitedString: String // This field will be mapped to the stringList field of the target class, and use the StringToCommaSeparatedStringListTransformer as it is explicitly specified
 )

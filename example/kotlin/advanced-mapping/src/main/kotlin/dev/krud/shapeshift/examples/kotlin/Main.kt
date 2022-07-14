@@ -23,7 +23,7 @@ fun main() {
     val advancedEntity = AdvancedEntity(
         name = "Test",
         firstChild = AdvancedChildEntity("First Child"),
-        secondChild = AdvancedChildEntity("Second Child"),
+        secondChild = AdvancedChildEntity("Second Child")
     )
     // Map the AdvancedEntity to a AdvancedEntityDisplay using ShapeShift
     val advancedEntityDisplay = shapeShift.map<AdvancedEntityDisplay>(advancedEntity)
