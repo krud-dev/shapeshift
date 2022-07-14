@@ -16,6 +16,9 @@ ij_smart_tabs = false
 ij_visual_guides = none
 ij_wrap_on_typing = false
 
+[{*.yaml,*.yml}]
+tab_width = 2
+indent_size = 2
 
 [{*.gradle.kts,*.kt,*.kts,*.main.kts,*.space.kts}]
 disabled_rules=filename
