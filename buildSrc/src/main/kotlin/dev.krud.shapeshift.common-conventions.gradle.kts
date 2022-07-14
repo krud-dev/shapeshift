@@ -23,3 +23,7 @@ dependencies {
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
     testImplementation("io.strikt:strikt-core:0.31.0")
 }
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
