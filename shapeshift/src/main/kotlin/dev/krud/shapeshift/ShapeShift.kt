@@ -37,7 +37,6 @@ class ShapeShift internal constructor(
     val decoratorRegistrations: Set<MappingDecoratorRegistration<out Any, out Any>>
 ) {
     val transformerRegistrations: MutableList<MappingTransformerRegistration<out Any, out Any>> = mutableListOf()
-    internal val transformersByNameCache: MutableMap<String, MappingTransformerRegistration<out Any, out Any>> = concurrentMapOf()
     internal val transformersByTypeCache: MutableMap<Class<out MappingTransformer<out Any?, out Any?>>, MappingTransformerRegistration<out Any?, out Any?>> =
         concurrentMapOf()
     internal val defaultTransformers: MutableMap<ClassPair<out Any, out Any>, MappingTransformerRegistration<out Any, out Any>> = mutableMapOf()
@@ -187,12 +186,6 @@ class ShapeShift internal constructor(
         return getFieldInstanceByNodes(nodes.drop(1), subTarget, type)
     }
 
-    private fun getTransformerByName(name: String): MappingTransformerRegistration<out Any, out Any> {
-        return transformersByNameCache.computeIfAbsent(name) { _ ->
-            transformerRegistrations.find { it.name == name } ?: MappingTransformerRegistration.EMPTY
-        }
-    }
-
     private fun getTransformerByType(type: Class<out MappingTransformer<out Any?, out Any?>>): MappingTransformerRegistration<out Any?, out Any?> {
         return transformersByTypeCache.computeIfAbsent(type) { _ ->
             transformerRegistrations.find { it.transformer::class.java == type } ?: MappingTransformerRegistration.EMPTY
@@ -230,16 +223,6 @@ class ShapeShift internal constructor(
         val transformationPair = fromPair to toPair
         log.trace("Attempting to find transformer for transformation pair [ $transformationPair ]")
         var transformerRegistration: MappingTransformerRegistration<*, *> = MappingTransformerRegistration.EMPTY
-        log.trace("Checking transformerRef field")
-        if (!coordinates.name.isNullOrBlank()) {
-            log.trace("transformerRef is not empty with value [ " + coordinates.name + " ]")
-            transformerRegistration = getTransformerByName(coordinates.name)
-            if (transformerRegistration != MappingTransformerRegistration.EMPTY) {
-                log.trace("Found transformer by ref [ ${coordinates.name} ] of type [ " + transformerRegistration.transformer.javaClass.name + " ]")
-            } else {
-                error("Could not find transformer by ref [ ${coordinates.name} ] on $fromPair")
-            }
-        }
         if (transformerRegistration == MappingTransformerRegistration.EMPTY) {
             log.trace("Checking transformer field")
             if (coordinates.type == null) {
@@ -270,23 +253,16 @@ class ShapeShift internal constructor(
     }
 
     private fun <From : Any, To : Any> registerTransformer(registration: MappingTransformerRegistration<From, To>) {
-        val name = registration.name ?: registration.transformer::class.simpleName!!
-        val newRegistration = registration.copy(name = name)
-        val existingTransformer = getTransformerByName(name)
-        if (existingTransformer != MappingTransformerRegistration.EMPTY) {
-            error("Transformer with name $name already exists with type ${existingTransformer.transformer::class}")
-        }
-        if (newRegistration.default) {
-            val existingDefaultTransformer = defaultTransformers[newRegistration.id]
+        if (registration.default) {
+            val existingDefaultTransformer = defaultTransformers[registration.id]
             if (existingDefaultTransformer != null) {
-                error("Default transformer with pair ${newRegistration.id} already exists")
+                error("Default transformer with pair ${registration.id} already exists")
             }
-            defaultTransformers[newRegistration.id] = newRegistration
+            defaultTransformers[registration.id] = registration
         }
 
-        transformerRegistrations.add(newRegistration)
-        transformersByNameCache.remove(name)
-        transformersByTypeCache.remove(newRegistration.transformer::class.java)
+        transformerRegistrations.add(registration)
+        transformersByTypeCache.remove(registration.transformer::class.java)
     }
 
     companion object {

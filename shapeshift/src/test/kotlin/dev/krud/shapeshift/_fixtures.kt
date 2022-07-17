@@ -177,11 +177,6 @@ internal class DefaultTransformerFrom {
     val long: Long = 1L
 }
 
-internal class NameTransformerFrom {
-    @MappedField(target = StringTo::class, transformerRef = "myTransformer")
-    val long: Long = 1L
-}
-
 internal class TypeTransformerFrom {
     @MappedField(target = StringTo::class, transformer = LongToStringTransformer::class)
     val long: Long = 1L

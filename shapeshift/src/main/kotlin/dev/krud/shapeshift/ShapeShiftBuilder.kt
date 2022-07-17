@@ -84,8 +84,8 @@ class ShapeShiftBuilder {
     /**
      * Add a transformer to the ShapeShift instance
      */
-    inline fun <reified From : Any, reified To : Any> withTransformer(mappingTransformer: MappingTransformer<From, To>, default: Boolean = false, name: String? = null): ShapeShiftBuilder {
-        return withTransformer(mappingTransformer.toRegistration(default, name))
+    inline fun <reified From : Any, reified To : Any> withTransformer(mappingTransformer: MappingTransformer<From, To>, default: Boolean = false): ShapeShiftBuilder {
+        return withTransformer(mappingTransformer.toRegistration(default))
     }
 
     /**

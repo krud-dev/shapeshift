@@ -61,19 +61,6 @@ internal class ShapeShiftTests {
         }
 
         @Test
-        internal fun `simple mapping with transformer by name`() {
-            shapeShift = ShapeShiftBuilder()
-                .withTransformer(
-                    LongToStringTransformer().toRegistration(name = "myTransformer")
-                )
-                .build()
-            val result = shapeShift.map(NameTransformerFrom(), StringTo::class.java)
-
-            expectThat(result.long)
-                .isEqualTo("1")
-        }
-
-        @Test
         internal fun `simple mapping with default transformer`() {
             shapeShift = ShapeShiftBuilder()
                 .withTransformer(
@@ -238,55 +225,6 @@ internal class ShapeShiftTests {
 
         expectThrows<IllegalStateException> {
             builder.build()
-        }
-    }
-
-    @Test
-    internal fun `registering transformer with null name should use simple class name when registering`() {
-        val registration = ExampleFieldTransformer().toRegistration()
-        shapeShift = ShapeShiftBuilder()
-            .excludeDefaultTransformers()
-            .withTransformer(registration)
-            .build()
-        expectThat(shapeShift.transformerRegistrations.first().name)
-            .isEqualTo(
-                "ExampleFieldTransformer"
-            )
-    }
-
-    @Test
-    internal fun `registering same transformer twice should result in 1 transformer`() {
-        val registration = ExampleFieldTransformer().toRegistration(name = "first")
-
-        val builder = ShapeShiftBuilder()
-            .excludeDefaultTransformers()
-            .withTransformer(registration)
-            .withTransformer(registration)
-
-        val shapeShift = builder.build()
-        expectThat(shapeShift.transformerRegistrations.size)
-            .isEqualTo(1)
-    }
-
-    @Test
-    internal fun `registering transformer with an existing name twice should throw exception`() {
-        val registration = ExampleFieldTransformer().toRegistration(name = "first")
-
-        val secondRegistration = ExampleFieldTransformer().toRegistration(name = "first")
-
-        val builder = ShapeShiftBuilder()
-            .withTransformer(registration)
-            .withTransformer(secondRegistration)
-
-        expectThrows<IllegalStateException> {
-            builder.build()
-        }
-    }
-
-    @Test
-    internal fun `using unregistered transformer by name should throw exception`() {
-        expectThrows<IllegalStateException> {
-            shapeShift.map(NameTransformerFrom(), StringTo::class.java)
         }
     }
 

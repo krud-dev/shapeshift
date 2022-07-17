@@ -26,11 +26,7 @@ class AnnotationMappingDefinitionResolver : MappingDefinitionResolver {
 
         val resolvedMappedFields = mutableListOf<ResolvedMappedField>()
         for ((mappedField, field) in mappedFieldReferences) {
-            val transformerCoordinates = if (mappedField.transformerRef.isBlank()) {
-                TransformerCoordinates.ofType(mappedField.transformer.java)
-            } else {
-                TransformerCoordinates.ofName(mappedField.transformerRef)
-            }
+            val transformerCoordinates = TransformerCoordinates.ofType(mappedField.transformer.java)
 
             val mapFromCoordinates = resolveNodesToFields(mappedField.mapFrom.splitIgnoreEmpty(NODE_DELIMITER), field, fromClazz)
 

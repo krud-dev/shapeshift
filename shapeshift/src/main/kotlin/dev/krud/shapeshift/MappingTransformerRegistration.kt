@@ -18,27 +18,24 @@ data class MappingTransformerRegistration<From : Any?, To : Any?>(
     val fromClazz: Class<From>,
     val toClazz: Class<To>,
     val transformer: MappingTransformer<From, To>,
-    val default: Boolean = false,
-    val name: String? = null
+    val default: Boolean = false
 ) {
     companion object {
         val EMPTY = MappingTransformerRegistration(
             Any::class.java,
             Any::class.java,
             EmptyTransformer,
-            false,
-            "empty"
+            false
         )
 
         val <From : Any?, To : Any?> MappingTransformerRegistration<From, To>.id: ClassPair<From, To> get() = ClassPair(fromClazz, toClazz)
 
-        inline fun <reified From : Any, reified To : Any> MappingTransformer<From, To>.toRegistration(default: Boolean = false, name: String? = null): MappingTransformerRegistration<From, To> {
+        inline fun <reified From : Any, reified To : Any> MappingTransformer<From, To>.toRegistration(default: Boolean = false): MappingTransformerRegistration<From, To> {
             return MappingTransformerRegistration(
                 From::class.java,
                 To::class.java,
                 this,
-                default,
-                name
+                default
             )
         }
     }

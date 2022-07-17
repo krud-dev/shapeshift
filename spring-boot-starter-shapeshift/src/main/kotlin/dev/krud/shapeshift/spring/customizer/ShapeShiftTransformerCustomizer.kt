@@ -21,17 +21,16 @@ import org.springframework.core.GenericTypeResolver
 @Configuration
 class ShapeShiftTransformerCustomizer : ShapeShiftBuilderCustomizer {
     @Autowired(required = false)
-    private val mappingTransformers: Map<String, MappingTransformer<out Any, out Any>>? = null
+    private val mappingTransformers: List<MappingTransformer<out Any, out Any>>? = null
 
     override fun customize(builder: ShapeShiftBuilder) {
-        mappingTransformers?.forEach { (name, mappingTransformer) ->
+        mappingTransformers?.forEach { mappingTransformer ->
             val types = GenericTypeResolver.resolveTypeArguments(mappingTransformer::class.java, MappingTransformer::class.java)
             val registration = MappingTransformerRegistration(
-                types[0] as Class<Any>,
+                types!![0] as Class<Any>,
                 types[1] as Class<Any>,
                 mappingTransformer as MappingTransformer<Any, Any>,
-                false,
-                name
+                false
             )
             builder.withTransformer(
                 registration

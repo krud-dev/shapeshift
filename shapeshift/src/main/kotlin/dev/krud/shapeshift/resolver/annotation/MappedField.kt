@@ -40,11 +40,6 @@ annotation class MappedField(
      * The [MappingTransformer] to use on the value
      */
     val transformer: KClass<out MappingTransformer<*, *>> = EmptyTransformer::class,
-    /**
-     * Bean name for a defined [MappingTransformer] bean to use on the value
-     * Supersedes [MappedField.transformer] if specified
-     */
-    val transformerRef: String = "",
 
     /**
      * The condition to use to determine if the field should be mapped

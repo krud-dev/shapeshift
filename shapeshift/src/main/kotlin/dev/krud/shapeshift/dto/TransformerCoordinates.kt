@@ -14,12 +14,10 @@ import dev.krud.shapeshift.transformer.EmptyTransformer
 import dev.krud.shapeshift.transformer.base.MappingTransformer
 
 data class TransformerCoordinates(
-    val name: String? = null,
     val type: Class<out MappingTransformer<out Any?, out Any?>>? = null
 ) {
     companion object {
         val NONE = TransformerCoordinates()
-        fun ofName(name: String) = TransformerCoordinates(name)
         fun ofType(
             type: Class<out MappingTransformer<out Any?, out Any?>>
         ): TransformerCoordinates {
