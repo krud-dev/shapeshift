@@ -11,7 +11,6 @@
 package dev.krud.shapeshift.examples.kotlin
 
 import dev.krud.shapeshift.ShapeShiftBuilder
-import dev.krud.shapeshift.transformer.DateToLongTransformer
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -21,14 +20,13 @@ internal class TransformerMappingTests {
     @Test
     fun `test mapping with transformer`() {
         val shapeShift = ShapeShiftBuilder()
-            .withTransformer(DateToLongTransformer(), default = true)
             .withTransformer(StringToCommaSeparatedStringListTransformer())
             .build()
         val simpleEntity = SimpleEntity(
             Date(),
             "one,two,three"
         )
-        val result = shapeShift.map<SimpleEntityDisplay>(simpleEntity)
+        val result: SimpleEntityDisplay = shapeShift.map(simpleEntity)
         expectThat(result.creationDate)
             .isEqualTo(simpleEntity.creationDate.time)
         expectThat(result.stringList)

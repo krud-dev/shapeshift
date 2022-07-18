@@ -10,17 +10,14 @@
 
 package dev.krud.shapeshift.examples.kotlin
 
-import dev.krud.shapeshift.transformer.base.FieldTransformer
+import dev.krud.shapeshift.transformer.base.MappingTransformer
+import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 import org.springframework.stereotype.Component
-import java.lang.reflect.Field
 
 // This transformer will be registered by Spring to the ShapeShift instance in the Spring Context
 @Component
-class BeanTransformer : FieldTransformer<String, String> {
-    override val fromType: Class<String> = String::class.java
-    override val toType: Class<String> = String::class.java
-
-    override fun transform(fromField: Field, toField: Field, originalValue: String?, fromObject: Any, toObject: Any): String? {
+class BeanTransformer : MappingTransformer<String, String> {
+    override fun transform(context: MappingTransformerContext<out String>): String? {
         return "******"
     }
 }

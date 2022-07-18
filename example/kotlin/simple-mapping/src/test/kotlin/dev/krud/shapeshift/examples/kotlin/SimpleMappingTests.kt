@@ -11,6 +11,7 @@
 package dev.krud.shapeshift.examples.kotlin
 
 import dev.krud.shapeshift.ShapeShift
+import dev.krud.shapeshift.ShapeShiftBuilder
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -18,9 +19,10 @@ import strikt.assertions.isEqualTo
 internal class SimpleMappingTests {
     @Test
     internal fun `test simple mapping`() {
-        val shapeShift = ShapeShift()
+        val shapeShift = ShapeShiftBuilder()
+            .build()
         val simpleEntity = SimpleEntity("test", "test description", "private data")
-        val result = shapeShift.map<SimpleEntityDisplay>(simpleEntity)
+        val result: SimpleEntityDisplay = shapeShift.map(simpleEntity)
         expectThat(result.name)
             .isEqualTo("test")
         expectThat(result.description)
@@ -29,7 +31,8 @@ internal class SimpleMappingTests {
 
     @Test
     internal fun `test simple mapping with premade destination instance`() {
-        val shapeShift = ShapeShift()
+        val shapeShift = ShapeShiftBuilder()
+            .build()
         val simpleEntity = SimpleEntity("test", "test description", "private data")
         val result = shapeShift.map(simpleEntity, SimpleEntityDisplay())
         expectThat(result.name)

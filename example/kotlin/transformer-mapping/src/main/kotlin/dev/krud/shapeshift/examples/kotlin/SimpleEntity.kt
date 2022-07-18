@@ -10,8 +10,8 @@
 
 package dev.krud.shapeshift.examples.kotlin
 
-import dev.krud.shapeshift.annotation.DefaultMappingTarget
-import dev.krud.shapeshift.annotation.MappedField
+import dev.krud.shapeshift.resolver.annotation.DefaultMappingTarget
+import dev.krud.shapeshift.resolver.annotation.MappedField
 import java.util.*
 
 @DefaultMappingTarget(SimpleEntityDisplay::class) // The default target class for the mapping

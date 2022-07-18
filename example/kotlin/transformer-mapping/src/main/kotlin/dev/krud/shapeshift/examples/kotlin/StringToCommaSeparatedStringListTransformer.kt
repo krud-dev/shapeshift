@@ -10,14 +10,11 @@
 
 package dev.krud.shapeshift.examples.kotlin
 
-import dev.krud.shapeshift.transformer.base.FieldTransformer
-import java.lang.reflect.Field
+import dev.krud.shapeshift.transformer.base.MappingTransformer
+import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 
-class StringToCommaSeparatedStringListTransformer : FieldTransformer<String, List<*>> {
-    override val fromType: Class<String> = String::class.java
-    override val toType: Class<List<*>> = List::class.java
-
-    override fun transform(fromField: Field, toField: Field, originalValue: String?, fromObject: Any, toObject: Any): List<String>? {
-        return originalValue?.split(",")
+class StringToCommaSeparatedStringListTransformer : MappingTransformer<String, List<*>> {
+    override fun transform(context: MappingTransformerContext<out String>): List<*>? {
+        return context.originalValue?.split(",")
     }
 }

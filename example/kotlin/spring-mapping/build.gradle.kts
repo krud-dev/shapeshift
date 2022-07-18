@@ -13,7 +13,9 @@ repositories {
 }
 
 dependencies {
-    implementation("dev.krud:spring-boot-starter-shapeshift:0.1.0")
+    implementation("org.springframework.boot:spring-boot-starter")
+    implementation("dev.krud:spring-boot-starter-shapeshift:0.3.0")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
 group = "dev.krud.shapeshift.examples.kotlin"

@@ -11,7 +11,6 @@
 package dev.krud.shapeshift.examples.kotlin
 
 import dev.krud.shapeshift.ShapeShiftBuilder
-import dev.krud.shapeshift.transformer.DateToLongTransformer
 import java.util.*
 
 /**
@@ -20,7 +19,6 @@ import java.util.*
 fun main() {
     // Initialize ShapeShift with a StringToCommaSeparatedStringListTransformer and a default DateToLongTransformer
     val shapeShift = ShapeShiftBuilder()
-        .withTransformer(DateToLongTransformer(), true)
         .withTransformer(StringToCommaSeparatedStringListTransformer())
         .build()
     // Initialize a SimpleEntity
@@ -29,6 +27,6 @@ fun main() {
         "First,Second,Third"
     )
     // Map the SimpleEntity to a SimpleEntityDisplay using ShapeShift
-    val simpleEntityDisplay = shapeShift.map<SimpleEntityDisplay>(simpleEntity)
+    val simpleEntityDisplay: SimpleEntityDisplay = shapeShift.map(simpleEntity)
     println("SimpleEntityDisplay: $simpleEntityDisplay")
 }

@@ -24,7 +24,7 @@ class Main : InitializingBean {
         val simpleEntity = SimpleEntity(
             "Test"
         )
-        val simpleEntityDisplay = shapeShift.map<SimpleEntityDisplay>(simpleEntity)
+        val simpleEntityDisplay: SimpleEntityDisplay = shapeShift.map(simpleEntity)
         println(simpleEntityDisplay)
     }
 }
