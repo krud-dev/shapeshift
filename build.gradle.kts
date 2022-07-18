@@ -14,7 +14,7 @@ if (hasProperty("release")) {
         apply(plugin = "maven-publish")
         apply(plugin = "org.jetbrains.dokka")
         group = "dev.krud"
-        version = "0.3.0-SNAPSHOT"
+        version = extra["shapeshift.version"] ?: error("shapeshift.version is not set")
         java.sourceCompatibility = JavaVersion.VERSION_1_8
         val isSnapshot = version.toString().endsWith("-SNAPSHOT")
         val repoUri = if (isSnapshot) {
