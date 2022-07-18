@@ -13,8 +13,6 @@ A Kotlin library for intelligent object mapping and conversion between objects.
 <br/>
 
 ![Maven Central](https://img.shields.io/maven-central/v/dev.krud/shapeshift)
-![Sonatype Nexus (Snapshots)](https://img.shields.io/nexus/s/dev.krud/shapeshift?server=https%3A%2F%2Fs01.oss.sonatype.org&label=snapshot)
-
 [![CircleCI](https://img.shields.io/circleci/build/github/krud-dev/shapeshift/master)](https://circleci.com/gh/krud-dev/shapeshift/tree/master)
 [![Codecov](https://img.shields.io/codecov/c/gh/krud-dev/shapeshift?token=1EG9H9RK5Q)](https://codecov.io/gh/krud-dev/shapeshift)
 [![GitHub](https://img.shields.io/github/license/krud-dev/shapeshift)](https://github.com/krud-dev/shapeshift/blob/master/LICENSE)
@@ -38,14 +36,12 @@ A Kotlin library for intelligent object mapping and conversion between objects.
 
 ShapeShift is a Kotlin first object mapping library. We have built ShapeShift because we wanted a simple to use, minimal boiler plate mapping engine, that is also flexible and supports the most advanced use cases.
 
-
 Built with Kotlin in mind, ShapeShift was designed around its ecosystem and best practices. The library has 2 main tools for mapping:
 
 * Annotations - Fully featured annotation based mapping, just add annotations to your objects and ShapeShift handles the rest. Including using custom field transformers, conditional mapping, advanced object decoration and much more.
 * DSL - A Kotlin DSL allowing you to define the relations between objects. This allows you to map objects you can't change (or don't want to), like objects from 3rd party libraries. Additionally you can define inline transformations, conditions and decorations, enabling deep customization and very advanced mapping.
 
-
-### ShapeShift main features:
+ShapeShift main features:
 
 * Custom field transformers
 * Default transformers
@@ -55,6 +51,7 @@ Built with Kotlin in mind, ShapeShift was designed around its ecosystem and best
 * Mapping decorators
 * Seamless spring integration
 * Native Android support
+
 ## Documentation
 
 To learn how to get started with **ShapeShift**, visit the official documentation website. You'll find in-depth documentation, tips and guides to help you get up and running.
