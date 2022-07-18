@@ -50,18 +50,18 @@ To learn how to get started with **ShapeShift**, visit the official documentatio
 <dependency>
   <groupId>dev.krud</groupId>
   <artifactId>shapeshift</artifactId>
-  <version>0.1.0</version>
+  <version>0.3.0</version>
 </dependency>
 ```
 
 ### Gradle
 #### Groovy DSL
 ```groovy
-implementation 'dev.krud:shapeshift:0.1.0'
+implementation 'dev.krud:shapeshift:0.3.0'
 ```
 #### Kotlin DSL
 ```kotlin
-implementation("dev.krud:shapeshift:0.1.0")
+implementation("dev.krud:shapeshift:0.3.0")
 ```
 
 ## Requirements

@@ -1,4 +1,14 @@
-# [](https://github.com/krud-dev/shapeshift/compare/v0.2.0...v) (2022-07-10)
+# [](https://github.com/krud-dev/shapeshift/compare/v0.2.0...v) (2022-07-18)
+
+
+### Bug Fixes
+
+* upgrade org.jetbrains.kotlin:kotlin-stdlib-jdk8 from 1.6.21 to 1.7.0 ([dea01cf](https://github.com/krud-dev/shapeshift/commit/dea01cfdb6e9c4561076b0c92dc816262ff9c5d5))
+
+
+### Features
+
+* BREAKING CHANGE: remove ability to name transformer ([1a5f5e8](https://github.com/krud-dev/shapeshift/commit/1a5f5e895e1e448d24145ee275f9b9fea27a7f00))
 
 
 
