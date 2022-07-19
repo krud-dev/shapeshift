@@ -89,6 +89,24 @@ class ShapeShift internal constructor(
         return toObject
     }
 
+    /**
+     * Map [fromObjects] to a list of [toClazz] objects
+     */
+    fun <From : Any, To : Any> mapCollection(fromObjects: Collection<From>, toClazz: Class<To>): List<To> {
+        val toObjects = ArrayList<To>(fromObjects.size)
+        for (fromObject in fromObjects) {
+            toObjects.add(map(fromObject, toClazz))
+        }
+        return toObjects
+    }
+
+    /**
+     * Map [fromObjects] to a list of [toClazz] objects
+     */
+    inline fun <From : Any, reified To : Any> mapCollection(fromObjects: Collection<From>): List<To> {
+        return mapCollection(fromObjects, To::class.java)
+    }
+
     private fun <From : Any, To : Any> mapField(fromObject: From, toObject: To, resolvedMappedField: ResolvedMappedField) {
         val fromPair = getFieldInstanceByNodes(resolvedMappedField.mapFromCoordinates, fromObject, SourceType.FROM) ?: return
         val toPair = getFieldInstanceByNodes(resolvedMappedField.mapToCoordinates, toObject, SourceType.TO) ?: return

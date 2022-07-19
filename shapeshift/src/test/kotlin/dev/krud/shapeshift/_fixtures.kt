@@ -182,13 +182,13 @@ internal class TypeTransformerFrom {
     val long: Long = 1L
 }
 
-internal class GenericFrom {
-    var long: Long = 1L
-}
+internal data class GenericFrom(
+    val long: Long = 1L
+)
 
-internal class GenericTo {
-    var long: Long? = null
-}
+internal data class GenericTo(
+    val long: Long? = null
+)
 
 internal class StringTo {
     var long: String? = null

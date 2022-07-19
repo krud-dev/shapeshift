@@ -30,6 +30,29 @@ internal class ShapeShiftTests {
     @Nested
     inner class Scenarios {
         @Test
+        internal fun `mapCollection with set of objects`() {
+            val shapeShift = ShapeShiftBuilder()
+                .withMapping<GenericFrom, GenericTo> {
+                    GenericFrom::long mappedTo GenericTo::long
+                }
+                .build()
+            val result: List<GenericTo> = shapeShift.mapCollection(
+                setOf(
+                    GenericFrom(1L),
+                    GenericFrom(2L),
+                    GenericFrom(3L)
+                )
+            )
+            val expected = listOf(
+                GenericTo(1L),
+                GenericTo(2L),
+                GenericTo(3L)
+            )
+            expectThat(result)
+                .isEqualTo(expected)
+        }
+
+        @Test
         internal fun `multiple mapped fields on field`() {
             val result = shapeShift.map(FromWithMultipleMappedFields(), MultipleFieldTo::class.java)
             expectThat(result.long)
