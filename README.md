@@ -21,6 +21,7 @@ A Kotlin library for intelligent object mapping and conversion between objects.
 </div>
 
 - [Overview](#overview)
+- [Quickstart](#quickstart)
 - [Documentation](#documentation)
 - [Installation](#installation)
     * [Maven](#maven)
@@ -52,6 +53,92 @@ ShapeShift main features:
 * Seamless spring integration
 * Native Android support
 
+
+## Quickstart
+
+### DSL Example
+```kotlin
+// Source Class
+data class Source(
+    val firstName: String,
+    val lastName: String,
+    val birthDate: LocalDate
+)
+
+// Target Class
+data class Target(
+    var firstName: String = "",
+    var lastName: String = "",
+    var birthYear: Int = 0
+)
+
+fun main() {
+    /**
+     * Initialize ShapeShift with a mapping definition from From to To
+     */
+    val shapeShift = ShapeShiftBuilder()
+        .withMapping<Source, Target> {
+            // Map firstName
+            Source::firstName mappedTo Target::firstName
+            // Map lastName
+            Source::lastName mappedTo Target::lastName
+            // Map birthDate to birthYear with a transformation function
+            Source::birthDate mappedTo Target::birthYear withTransformer { (originalValue) ->
+                originalValue?.year
+            }
+        }
+        .build()
+
+    // Initialize Source
+    val source = Source("John", "Doe", LocalDate.of(1980, 1, 1))
+    // Perform the mapping
+    val result = shapeShift.map<Source, Target>(source)
+    // Returns: To(firstName=John, lastName=Doe, birthYear=1980)
+}
+```
+
+### Annotation Example
+```kotlin
+// Source Class
+@DefaultMappingTarget(Target::class)
+data class Source(
+    @MappedField
+    val firstName: String,
+    @MappedField
+    val lastName: String,
+    @MappedField(mapTo = "birthYear", transformer = LocalDateToYearTransformer::class)
+    val birthDate: LocalDate
+)
+
+// Target Class
+data class Target(
+    var firstName: String = "",
+    var lastName: String = "",
+    var birthYear: Int = 0
+)
+
+// Define the transformer which will transform the local date to a year
+class LocalDateToYearTransformer : MappingTransformer<LocalDate, Int> {
+    override fun transform(context: MappingTransformerContext<out LocalDate>): Int? {
+        return context.originalValue?.year
+    }
+}
+
+fun main() {
+    /**
+     * Initialize ShapeShift and register the transformer
+     */
+    val shapeShift = ShapeShiftBuilder()
+        .withTransformer(LocalDateToYearTransformer())
+        .build()
+
+    // Initialize Source
+    val source = Source("John", "Doe", LocalDate.of(1980, 1, 1))
+    // Perform the mapping
+    val result = shapeShift.map<Source, Target>(source)
+    // Returns: To(firstName=John, lastName=Doe, birthYear=1980)
+}
+```
 ## Documentation
 
 To learn how to get started with **ShapeShift**, visit the official documentation website. You'll find in-depth documentation, tips and guides to help you get up and running.
