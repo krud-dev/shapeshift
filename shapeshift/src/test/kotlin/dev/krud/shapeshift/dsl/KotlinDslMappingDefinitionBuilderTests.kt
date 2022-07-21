@@ -219,6 +219,50 @@ internal class KotlinDslMappingDefinitionBuilderTests {
         expectThat(resolvedMappedField.mapFromCoordinates)
             .isEqualTo(listOf(From::child.javaField!!, From.Child::grandChild.javaField!!, From.GrandChild::string.javaField!!))
     }
+
+    @Test
+    internal fun `test nullable mapping is correct single level`() {
+        val mapping = mapper<From, To> {
+            From::nullableChild..From.Child::string mappedTo To::string
+        }
+
+        val resolvedMappedField = mapping.mappingDefinition.resolvedMappedFields.first()
+        expectThat(resolvedMappedField.mapFromCoordinates)
+            .isEqualTo(listOf(From::nullableChild.javaField!!, From.Child::string.javaField!!))
+    }
+
+    @Test
+    internal fun `test nullable mapping is correct single level with nullable child`() {
+        val mapping = mapper<From, To> {
+            From::nullableChild..From.Child::nullableString mappedTo To::string
+        }
+
+        val resolvedMappedField = mapping.mappingDefinition.resolvedMappedFields.first()
+        expectThat(resolvedMappedField.mapFromCoordinates)
+            .isEqualTo(listOf(From::nullableChild.javaField!!, From.Child::nullableString.javaField!!))
+    }
+
+    @Test
+    internal fun `test nullable mapping is correct multi level`() {
+        val mapping = mapper<From, To> {
+            From::nullableChild..From.Child::nullableGrandChild..From.GrandChild::string mappedTo To::string
+        }
+
+        val resolvedMappedField = mapping.mappingDefinition.resolvedMappedFields.first()
+        expectThat(resolvedMappedField.mapFromCoordinates)
+            .isEqualTo(listOf(From::nullableChild.javaField!!, From.Child::nullableGrandChild.javaField!!, From.GrandChild::string.javaField!!))
+    }
+
+    @Test
+    internal fun `test nullable mapping is correct multi level with nullable grandchild`() {
+        val mapping = mapper<From, To> {
+            From::nullableChild..From.Child::nullableGrandChild..From.GrandChild::nullableString mappedTo To::string
+        }
+
+        val resolvedMappedField = mapping.mappingDefinition.resolvedMappedFields.first()
+        expectThat(resolvedMappedField.mapFromCoordinates)
+            .isEqualTo(listOf(From::nullableChild.javaField!!, From.Child::nullableGrandChild.javaField!!, From.GrandChild::nullableString.javaField!!))
+    }
 }
 
 internal class AlwaysTrueCondition : MappingCondition<String> {
@@ -242,15 +286,19 @@ internal class SampleTransformer : MappingTransformer<String, String> {
 internal class From(
     var string: String = "Test 1",
     var nullableString: String? = "Nullable Test 1",
-    var child: Child = Child()
+    var child: Child = Child(),
+    var nullableChild: Child? = Child()
 ) {
     class Child(
         var string: String = "Test 2",
-        var grandChild: GrandChild = GrandChild()
+        var nullableString: String? = "Nullable Test 2",
+        var grandChild: GrandChild = GrandChild(),
+        var nullableGrandChild: GrandChild? = GrandChild()
     )
 
     class GrandChild(
-        var string: String = "Test 3"
+        var string: String = "Test 3",
+        var nullableString: String? = "Nullable Test 3"
     )
 }
 
