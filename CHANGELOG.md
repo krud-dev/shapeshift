@@ -1,4 +1,23 @@
-# [](https://github.com/krud-dev/shapeshift/compare/v0.2.0...v) (2022-07-18)
+# [](https://github.com/krud-dev/shapeshift/compare/v0.4.0...v) (2022-07-21)
+
+
+
+# [0.4.0](https://github.com/krud-dev/shapeshift/compare/v0.3.0...v0.4.0) (2022-07-21)
+
+
+### Bug Fixes
+
+* fix generic bug with DSL ([a4cdde0](https://github.com/krud-dev/shapeshift/commit/a4cdde0283970fb13c04370e1789c0838cf0b449))
+
+
+### Features
+
+* add mapCollection ([2cba93f](https://github.com/krud-dev/shapeshift/commit/2cba93fc02968e504d8e18f4e966ccca6b8c111d))
+* move originalValue to the first position in MappingTransformerContext to allow for destructuring ([972656b](https://github.com/krud-dev/shapeshift/commit/972656b5b5ca45d6ba112b1d729dc9c02af1bc6c))
+
+
+
+# [0.3.0](https://github.com/krud-dev/shapeshift/compare/v0.2.0...v0.3.0) (2022-07-18)
 
 
 ### Bug Fixes
