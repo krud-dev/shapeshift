@@ -21,14 +21,16 @@ A Kotlin library for intelligent object mapping and conversion between objects.
 </div>
 
 - [Overview](#overview)
-- [Quickstart](#quickstart)
 - [Documentation](#documentation)
 - [Installation](#installation)
-    * [Maven](#maven)
-    * [Gradle](#gradle)
-        + [Groovy DSL](#groovy-dsl)
-        + [Kotlin DSL](#kotlin-dsl)
-- [Requirements](#requirements)
+  * [Requirements](#requirements)
+  * [Maven](#maven)
+  * [Gradle](#gradle)
+      + [Groovy DSL](#groovy-dsl)
+      + [Kotlin DSL](#kotlin-dsl)
+- [Quickstart](#quickstart)
+  * [DSL Example](#dsl-example)
+  * [Annotation Example](#annotation-example)
 - [Examples](#examples)
 - [Contributing](#contributing)
 - [License](#license)
@@ -53,6 +55,40 @@ ShapeShift main features:
 * Seamless spring integration
 * Native Android support
 
+## Documentation
+
+To learn how to get started with **ShapeShift**, visit the official documentation website. You'll find in-depth documentation, tips and guides to help you get up and running.
+
+<p>
+  <a href="https://shapeshift.krud.dev/">
+    <img alt="Visit ShapeShift documentation" src=".assets/documentation.png" width="240" />
+  </a>
+</p>
+
+## Installation
+### Requirements
+
+* Minimum supported Kotlin version: 1.6.X
+* Minimum supported Java version: 1.8
+
+### Maven
+```xml
+<dependency>
+  <groupId>dev.krud</groupId>
+  <artifactId>shapeshift</artifactId>
+  <version>0.4.0</version>
+</dependency>
+```
+
+### Gradle
+#### Groovy DSL
+```groovy
+implementation 'dev.krud:shapeshift:0.4.0'
+```
+#### Kotlin DSL
+```kotlin
+implementation("dev.krud:shapeshift:0.4.0")
+```
 
 ## Quickstart
 
@@ -139,41 +175,6 @@ fun main() {
     // Returns: To(firstName=John, lastName=Doe, birthYear=1980)
 }
 ```
-## Documentation
-
-To learn how to get started with **ShapeShift**, visit the official documentation website. You'll find in-depth documentation, tips and guides to help you get up and running.
-
-<p>
-  <a href="https://shapeshift.krud.dev/">
-    <img alt="Visit ShapeShift documentation" src=".assets/documentation.png" width="240" />
-  </a>
-</p>
-
-## Installation
-
-### Maven
-```xml
-<dependency>
-  <groupId>dev.krud</groupId>
-  <artifactId>shapeshift</artifactId>
-  <version>0.4.0</version>
-</dependency>
-```
-
-### Gradle
-#### Groovy DSL
-```groovy
-implementation 'dev.krud:shapeshift:0.4.0'
-```
-#### Kotlin DSL
-```kotlin
-implementation("dev.krud:shapeshift:0.4.0")
-```
-
-## Requirements
-
-* Minimum supported Kotlin version: 1.6.X
-* Minimum supported Java version: 1.8
 
 ## Examples
 
