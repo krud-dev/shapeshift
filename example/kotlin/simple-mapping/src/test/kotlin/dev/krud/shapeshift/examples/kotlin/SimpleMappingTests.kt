@@ -10,7 +10,6 @@
 
 package dev.krud.shapeshift.examples.kotlin
 
-import dev.krud.shapeshift.ShapeShift
 import dev.krud.shapeshift.ShapeShiftBuilder
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat

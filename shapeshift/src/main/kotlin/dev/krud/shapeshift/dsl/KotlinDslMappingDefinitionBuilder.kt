@@ -12,7 +12,6 @@ package dev.krud.shapeshift.dsl
 
 import dev.krud.shapeshift.MappingDecoratorRegistration
 import dev.krud.shapeshift.MappingStrategy
-import dev.krud.shapeshift.ShapeShiftBuilder
 import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.dto.ResolvedMappedField
