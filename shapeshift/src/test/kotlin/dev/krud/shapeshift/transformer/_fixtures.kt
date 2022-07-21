@@ -19,10 +19,10 @@ class ExampleObject {
 
 fun <From : Any?> mockMappingTransformerContext(value: From?): MappingTransformerContext<From> {
     return MappingTransformerContext(
+        value,
         ExampleObject(),
         ExampleObject(),
         ExampleObject::name.javaField!!,
-        ExampleObject::name.javaField!!,
-        value
+        ExampleObject::name.javaField!!
     )
 }

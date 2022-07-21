@@ -148,11 +148,11 @@ class ShapeShift internal constructor(
 
                 val valueToSet = if (resolvedMappedField.transformer != null) {
                     val transformer = resolvedMappedField.transformer as MappingTransformer<Any, Any>
-                    val context = MappingTransformerContext(fromObject, toObject, fromPair.field, toPair.field, fromValue)
+                    val context = MappingTransformerContext(fromValue, fromObject, toObject, fromPair.field, toPair.field)
                     transformer.transform(context)
                 } else if (transformerRegistration != MappingTransformerRegistration.EMPTY) {
                     val transformer = transformerRegistration.transformer as MappingTransformer<Any, Any>
-                    val context = MappingTransformerContext(fromObject, toObject, fromPair.field, toPair.field, fromValue)
+                    val context = MappingTransformerContext(fromValue, fromObject, toObject, fromPair.field, toPair.field)
                     transformer.transform(context)
                 } else {
                     fromValue
