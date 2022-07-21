@@ -12,6 +12,7 @@ package dev.krud.shapeshift.dsl
 
 import dev.krud.shapeshift.MappingDecoratorRegistration
 import dev.krud.shapeshift.MappingStrategy
+import dev.krud.shapeshift.ShapeShiftBuilder
 import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.dto.ResolvedMappedField
@@ -37,44 +38,45 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
      * Helper operator function to access sub-fields of a field.
      * For example: `House::person..Person::name`
      */
-    operator fun <Parent : Any, Child : Any, ChildValue : Any> KProperty1<Parent, Child>.rangeTo(other: KProperty1<Child, ChildValue>): FieldCoordinates<Parent, Child, ChildValue> {
-        return FieldCoordinates(mutableListOf(this, other) as MutableList<KProperty1<Child, ChildValue>>)
+    operator fun <Root : Any, Child : Any, ChildValue : Any?> KProperty1<Root, Child?>.rangeTo(other: KProperty1<Child, ChildValue?>): FieldCoordinates<Root, Child, ChildValue?> {
+        return FieldCoordinates(mutableListOf(this, other) as MutableList<KProperty1<Child, ChildValue?>>)
     }
 
-    /**
-     * Helper operator function to access sub-fields of a field.
-     * For example: `House::person..Person::name`
-     */
-    operator fun <Root : Any, Parent : Any, Child : Any, ChildValue : Any> FieldCoordinates<Root, Parent, Child>.rangeTo(other: KProperty1<Child, ChildValue>): FieldCoordinates<Root, Child, ChildValue> {
+    operator fun <Root : Any, Parent : Any, Child : Any, ChildValue : Any?> FieldCoordinates<Root, Parent, Child?>.rangeTo(other: KProperty1<Child, ChildValue?>): FieldCoordinates<Root, Child, ChildValue?> {
         this.fields.add(other as KProperty1<Parent, Child>)
-        return this as FieldCoordinates<Root, Child, ChildValue>
+        return this as FieldCoordinates<Root, Child, ChildValue?>
     }
 
     /**
      * Creates a mapping between two fields
      */
-    infix fun <From : Any, FromValue : Any?, To : Any, ToValue : Any?> KProperty1<From, FromValue>.mappedTo(to: FieldCoordinates<RootTo, To, ToValue>): FieldMapping<FromValue, ToValue> {
+
+    infix fun <From : Any, FromValue : Any, To : Any, ToValue : Any> KProperty1<From, FromValue?>.mappedTo(to: FieldCoordinates<RootTo, To, ToValue?>): FieldMapping<FromValue?, ToValue?> {
+        // KProperty1 -> FieldCoordinates
         return toFieldCoordinates<RootFrom, From, FromValue>().mappedTo(to)
     }
 
     /**
      * Creates a mapping between two fields
      */
-    infix fun <From : Any, FromValue : Any?, To : Any, ToValue : Any?> FieldCoordinates<RootFrom, From, FromValue>.mappedTo(to: KProperty1<To, ToValue>): FieldMapping<FromValue, ToValue> {
+    infix fun <From : Any, FromValue : Any, To : Any, ToValue : Any> FieldCoordinates<RootFrom, From, FromValue?>.mappedTo(to: KProperty1<To, ToValue?>): FieldMapping<FromValue?, ToValue?> {
+        // FieldCoordinates -> KProperty1
         return this.mappedTo(to.toFieldCoordinates())
     }
 
     /**
      * Creates a mapping between two fields
      */
-    infix fun <From : Any, FromValue : Any?, To : Any, ToValue : Any?> KProperty1<From, FromValue>.mappedTo(to: KProperty1<To, ToValue>): FieldMapping<FromValue, ToValue> {
+    infix fun <From : Any, FromValue : Any, To : Any, ToValue : Any> KProperty1<From, FromValue?>.mappedTo(to: KProperty1<To, ToValue?>): FieldMapping<FromValue?, ToValue?> {
+        // KProperty1 -> KProperty1
         return this.toFieldCoordinates<RootFrom, From, FromValue>().mappedTo(to.toFieldCoordinates())
     }
 
     /**
      * Creates a mapping between two fields
      */
-    infix fun <From : Any, FromValue : Any?, To : Any, ToValue : Any?> FieldCoordinates<RootFrom, From, FromValue>.mappedTo(to: FieldCoordinates<RootTo, To, ToValue>): FieldMapping<FromValue, ToValue> {
+    infix fun <From : Any, FromValue : Any, To : Any, ToValue : Any> FieldCoordinates<RootFrom, From, FromValue?>.mappedTo(to: FieldCoordinates<RootTo, To, ToValue?>): FieldMapping<FromValue?, ToValue?> {
+        // FieldCoordinates -> FieldCoordinates
         val fieldMapping = FieldMapping(
             this,
             to,
@@ -160,15 +162,13 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
         )
     }
 
-    private fun <Root : Any, Field : Any, Value : Any?> KProperty1<Field, Value>.toFieldCoordinates(): FieldCoordinates<Root, Field, Value> {
-        if (this is FieldCoordinates<*, *, *>) {
-            return this as FieldCoordinates<Root, Field, Value>
-        }
-        return FieldCoordinates(mutableListOf(this))
+    private fun <Root : Any, Field : Any, Value : Any> KProperty1<Field, Value?>.toFieldCoordinates(): FieldCoordinates<Root, Field, Value?> {
+        val result: FieldCoordinates<Root, Field, Value?> = FieldCoordinates(mutableListOf(this))
+        return result
     }
 
     companion object {
-        class FieldCoordinates<Root, LastField : Any?, LastValue : Any?>(
+        class FieldCoordinates<Root, LastField : Any, LastValue : Any?>(
             val fields: MutableList<KProperty1<LastField, LastValue>> = mutableListOf()
         )
 
