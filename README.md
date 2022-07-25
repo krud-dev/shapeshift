@@ -12,6 +12,7 @@ A Kotlin library for intelligent object mapping and conversion between objects.
 <br/>
 <br/>
 
+[![Awesome Kotlin](https://img.shields.io/badge/awesome-kotlin-orange?logo=awesomelists)](https://kotlin.link/)
 ![Maven Central](https://img.shields.io/maven-central/v/dev.krud/shapeshift)
 [![CircleCI](https://img.shields.io/circleci/build/github/krud-dev/shapeshift/master)](https://circleci.com/gh/krud-dev/shapeshift/tree/master)
 [![Codecov](https://img.shields.io/codecov/c/gh/krud-dev/shapeshift?token=1EG9H9RK5Q)](https://codecov.io/gh/krud-dev/shapeshift)
