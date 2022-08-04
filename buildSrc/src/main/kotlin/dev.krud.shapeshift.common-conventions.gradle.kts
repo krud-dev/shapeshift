@@ -18,6 +18,9 @@ dependencies {
     // Logging
     implementation("org.slf4j:slf4j-api:1.7.36")
 
+    // Misc
+    api("org.jetbrains:annotations:23.0.0")
+
     // Test
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
