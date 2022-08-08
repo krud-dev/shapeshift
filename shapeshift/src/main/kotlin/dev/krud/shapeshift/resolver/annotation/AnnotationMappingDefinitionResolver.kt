@@ -14,6 +14,7 @@ import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
 import dev.krud.shapeshift.resolver.MappingDefinition
 import dev.krud.shapeshift.resolver.MappingDefinitionResolver
+import dev.krud.shapeshift.util.getAutoMappings
 import dev.krud.shapeshift.util.getDeclaredFieldRecursive
 import dev.krud.shapeshift.util.splitIgnoreEmpty
 import java.lang.reflect.Field
@@ -51,7 +52,24 @@ class AnnotationMappingDefinitionResolver : MappingDefinitionResolver {
                 mappedField.overrideMappingStrategy
             )
         }
+        resolvedMappedFields += generateAutoMappings(fromClazz, toClazz).filter { autoResolvedMappedField ->
+            resolvedMappedFields.none {
+                it.mapFromCoordinates.first() == autoResolvedMappedField.mapFromCoordinates.first() || it.mapToCoordinates.first() == autoResolvedMappedField.mapToCoordinates.first()
+            }
+        }
         return MappingDefinition(fromClazz, toClazz, resolvedMappedFields)
+    }
+
+    private fun generateAutoMappings(fromClazz: Class<*>, toClazz: Class<*>): List<ResolvedMappedField> {
+        val autoMappingAnnotations = fromClazz.getDeclaredAnnotationsByType(AutoMapping::class.java)
+
+        if (autoMappingAnnotations.isEmpty()) {
+            return emptyList()
+        }
+
+        val effectiveAnnotation = autoMappingAnnotations.firstOrNull { it.target.java == toClazz }
+            ?: (autoMappingAnnotations.firstOrNull { it.target.java == Nothing::class.java } ?: return emptyList())
+        return getAutoMappings(fromClazz, toClazz, effectiveAnnotation.strategy)
     }
 
     /**

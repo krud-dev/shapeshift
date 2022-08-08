@@ -12,6 +12,8 @@ package dev.krud.shapeshift
 
 import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.condition.MappingConditionContext
+import dev.krud.shapeshift.enums.AutoMappingStrategy
+import dev.krud.shapeshift.resolver.annotation.AutoMapping
 import dev.krud.shapeshift.resolver.annotation.DefaultMappingTarget
 import dev.krud.shapeshift.resolver.annotation.MappedField
 import dev.krud.shapeshift.transformer.base.MappingTransformer
@@ -243,6 +245,36 @@ internal class ToWithComplexPath {
             }
         }
     }
+}
+
+@AutoMapping(strategy = AutoMappingStrategy.BY_NAME_AND_TYPE)
+internal class SameTypeAutomaticMappingFromImplicit {
+    val long: Long = 1L
+}
+
+@AutoMapping(strategy = AutoMappingStrategy.BY_NAME_AND_TYPE)
+internal class NameOnlyAutomaticMappingFromImplicit {
+    val long: Long = 1L
+}
+
+@AutoMapping(GenericTo::class, strategy = AutoMappingStrategy.BY_NAME_AND_TYPE)
+internal class SameTypeAutomaticMappingFromExplicit {
+    val long: Long = 1L
+}
+
+@AutoMapping(GenericTo::class, strategy = AutoMappingStrategy.BY_NAME_AND_TYPE)
+internal class NameOnlyAutomaticMappingFromExplicit {
+    val long: Long = 1L
+}
+
+@AutoMapping(StringTo::class, strategy = AutoMappingStrategy.BY_NAME_AND_TYPE)
+internal class SameTypeAutomaticMappingFromExplicitWrongTarget {
+    val long: Long = 1L
+}
+
+@AutoMapping(StringTo::class, strategy = AutoMappingStrategy.BY_NAME_AND_TYPE)
+internal class NameOnlyTypeAutomaticMappingFromExplicitWrongTarget {
+    val long: Long = 1L
 }
 
 internal abstract class BaseTo {

@@ -14,17 +14,78 @@ import dev.krud.shapeshift.MappingStrategy
 import dev.krud.shapeshift.ShapeShiftBuilder
 import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.condition.MappingConditionContext
+import dev.krud.shapeshift.enums.AutoMappingStrategy
 import dev.krud.shapeshift.transformer.base.MappingTransformer
 import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isNotEqualTo
 import kotlin.reflect.jvm.javaField
 
 internal class KotlinDslMappingDefinitionBuilderTests {
     @Nested
     inner class Scenarios {
+        @Test
+        internal fun `simple auto mapping by name and type`() {
+            val shapeShift = ShapeShiftBuilder()
+                .withMapping<From, To> {
+                    autoMap(AutoMappingStrategy.BY_NAME_AND_TYPE)
+                }
+                .build()
+            val original = From()
+            val result = shapeShift.map<From, To>(From())
+            expectThat(result.string)
+                .isEqualTo(original.string)
+            expectThat(result.nullableString)
+                .isEqualTo(original.nullableString)
+            expectThat(result.child.string)
+                .isNotEqualTo(original.child.string)
+        }
+
+        @Test
+        internal fun `simple auto mapping by name`() {
+            val transformer = MappingTransformer<From.Child, To.Child> { (originalValue) ->
+                To.Child(
+                    originalValue!!.string
+                )
+            }
+
+            val shapeShift = ShapeShiftBuilder()
+                .withTransformer(transformer, true)
+                .withMapping<From, To> {
+                    autoMap(AutoMappingStrategy.BY_NAME)
+                }
+                .build()
+            val original = From()
+            val result = shapeShift.map<From, To>(From())
+            expectThat(result.string)
+                .isEqualTo(original.string)
+            expectThat(result.nullableString)
+                .isEqualTo(original.nullableString)
+            expectThat(result.child.string)
+                .isEqualTo(original.child.string)
+        }
+
+        @Test
+        internal fun `simple auto mapping by name and type with conflicting mapped field`() {
+            val shapeShift = ShapeShiftBuilder()
+                .withMapping<From, To> {
+                    autoMap(AutoMappingStrategy.BY_NAME_AND_TYPE)
+                    From::nullableString mappedTo To::nullableString withTransformer {
+                        "*****"
+                    }
+                }
+                .build()
+            val original = From()
+            val result = shapeShift.map<From, To>(From())
+            expectThat(result.string)
+                .isEqualTo(original.string)
+            expectThat(result.nullableString)
+                .isEqualTo("*****")
+        }
+
         @Test
         internal fun `simple mapping without transformer`() {
             val shapeShift = ShapeShiftBuilder()

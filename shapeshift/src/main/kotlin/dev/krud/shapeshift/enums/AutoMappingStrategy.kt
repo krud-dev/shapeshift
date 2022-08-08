@@ -8,41 +8,24 @@
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-@file:JvmName("ReflectionUtils")
+package dev.krud.shapeshift.enums
 
-package dev.krud.shapeshift.util
+/**
+ * Auto mapping strategy for supported resolvers
+ */
+enum class AutoMappingStrategy {
+    /**
+     * Do not automap, used as a default value
+     */
+    NONE,
 
-import java.lang.reflect.Field
+    /**
+     * Automap by name irrespective of type
+     */
+    BY_NAME,
 
-data class ClassPair<From, To>(val from: Class<out From>, val to: Class<out To>)
-
-internal fun Field.getValue(target: Any): Any? {
-    return this.get(target)
-}
-
-internal fun Field.setValue(target: Any, value: Any?) {
-    this.set(target, value)
-}
-
-internal fun Class<*>.getDeclaredFieldsRecursive(): List<Field> {
-    var clazz: Class<*>? = this
-    val fields = mutableListOf<Field>()
-    while (clazz != null) {
-        fields += clazz.declaredFields
-        clazz = clazz.superclass
-    }
-
-    return fields
-}
-
-internal fun Class<*>.getDeclaredFieldRecursive(name: String): Field {
-    var clazz: Class<*>? = this
-    while (clazz != null) {
-        try {
-            return clazz.getDeclaredField(name)
-        } catch (e: NoSuchFieldException) {
-            clazz = clazz.superclass
-        }
-    }
-    throw NoSuchFieldException(name)
+    /**
+     * Automap by name and type
+     */
+    BY_NAME_AND_TYPE
 }

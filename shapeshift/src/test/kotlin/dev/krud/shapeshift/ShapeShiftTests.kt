@@ -30,6 +30,36 @@ internal class ShapeShiftTests {
     @Nested
     inner class Scenarios {
         @Test
+        internal fun `annotation automatic mapping with implicit target`() {
+            val shapeShift = ShapeShiftBuilder()
+                .build()
+            val from = SameTypeAutomaticMappingFromImplicit()
+            val result = shapeShift.map<SameTypeAutomaticMappingFromImplicit, GenericTo>(from)
+            expectThat(result.long)
+                .isEqualTo(1L)
+        }
+
+        @Test
+        internal fun `annotation automatic mapping with explicit target`() {
+            val shapeShift = ShapeShiftBuilder()
+                .build()
+            val from = SameTypeAutomaticMappingFromExplicit()
+            val result = shapeShift.map<SameTypeAutomaticMappingFromExplicit, GenericTo>(from)
+            expectThat(result.long)
+                .isEqualTo(1L)
+        }
+
+        @Test
+        internal fun `annotation automatic mapping with explicit wrong target`() {
+            val shapeShift = ShapeShiftBuilder()
+                .build()
+            val from = SameTypeAutomaticMappingFromExplicitWrongTarget()
+            val result = shapeShift.map<SameTypeAutomaticMappingFromExplicitWrongTarget, GenericTo>(from)
+            expectThat(result.long)
+                .isNull()
+        }
+
+        @Test
         internal fun `mapCollection with set of objects`() {
             val shapeShift = ShapeShiftBuilder()
                 .withMapping<GenericFrom, GenericTo> {
@@ -203,6 +233,17 @@ internal class ShapeShiftTests {
 
             expectThat(result.long)
                 .isEqualTo("123")
+        }
+    }
+
+//    @Test
+    internal fun `annotation automatic mapping with type mismatch should throw exception`() {
+        val shapeShift = ShapeShiftBuilder()
+            .excludeDefaultTransformers()
+            .build()
+        val from = NameOnlyTypeAutomaticMappingFromExplicitWrongTarget()
+        expectThrows<IllegalStateException> {
+            shapeShift.map<NameOnlyTypeAutomaticMappingFromExplicitWrongTarget, GenericTo>(from)
         }
     }
 

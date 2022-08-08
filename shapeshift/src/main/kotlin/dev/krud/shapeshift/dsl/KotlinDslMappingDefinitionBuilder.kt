@@ -16,8 +16,10 @@ import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
+import dev.krud.shapeshift.enums.AutoMappingStrategy
 import dev.krud.shapeshift.resolver.MappingDefinition
 import dev.krud.shapeshift.transformer.base.MappingTransformer
+import dev.krud.shapeshift.util.getAutoMappings
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty1
 import kotlin.reflect.jvm.javaField
@@ -32,6 +34,17 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
 ) {
     private val fieldMappings = mutableListOf<FieldMapping<*, *>>()
     private val decoratorRegistrations: MutableSet<MappingDecoratorRegistration<RootFrom, RootTo>> = mutableSetOf()
+    private var autoMappingStrategy: AutoMappingStrategy = AutoMappingStrategy.NONE
+
+    /**
+     * Enable automapping with the given strategy
+     */
+    fun autoMap(strategy: AutoMappingStrategy) {
+        if (strategy == AutoMappingStrategy.NONE) {
+            error("Auto mapping strategy cannot be NONE")
+        }
+        autoMappingStrategy = strategy
+    }
 
     /**
      * Helper operator function to access sub-fields of a field.
@@ -137,25 +150,34 @@ class KotlinDslMappingDefinitionBuilder<RootFrom : Any, RootTo : Any>(
     }
 
     fun build(): Result {
+        val resolvedMappedFields = fieldMappings.map { fieldMapping ->
+            ResolvedMappedField(
+                fieldMapping.fromField.fields.map { it.javaField!! },
+                fieldMapping.toField.fields.map { it.javaField!! },
+                if (fieldMapping.transformerClazz == null) {
+                    TransformerCoordinates.NONE
+                } else {
+                    TransformerCoordinates.ofType(fieldMapping.transformerClazz!!.java)
+                },
+                fieldMapping.transformer,
+                fieldMapping.conditionClazz?.java,
+                fieldMapping.condition,
+                fieldMapping.mappingStrategy
+            )
+        }
+            .toMutableList()
+
+        resolvedMappedFields += getAutoMappings(fromClazz, toClazz, autoMappingStrategy)
+            .filter { autoResolvedMappedField ->
+                resolvedMappedFields.none {
+                    it.mapFromCoordinates.first() == autoResolvedMappedField.mapFromCoordinates.first() || it.mapToCoordinates.first() == autoResolvedMappedField.mapToCoordinates.first()
+                }
+            }
         return Result(
             MappingDefinition(
                 fromClazz,
                 toClazz,
-                fieldMappings.map { fieldMapping ->
-                    ResolvedMappedField(
-                        fieldMapping.fromField.fields.map { it.javaField!! },
-                        fieldMapping.toField.fields.map { it.javaField!! },
-                        if (fieldMapping.transformerClazz == null) {
-                            TransformerCoordinates.NONE
-                        } else {
-                            TransformerCoordinates.ofType(fieldMapping.transformerClazz!!.java)
-                        },
-                        fieldMapping.transformer,
-                        fieldMapping.conditionClazz?.java,
-                        fieldMapping.condition,
-                        fieldMapping.mappingStrategy
-                    )
-                }
+                resolvedMappedFields
             ),
             decoratorRegistrations
         )
