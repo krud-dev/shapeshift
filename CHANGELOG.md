@@ -1,4 +1,14 @@
-# [](https://github.com/krud-dev/shapeshift/compare/v0.4.0...v) (2022-07-21)
+# [](https://github.com/krud-dev/shapeshift/compare/v0.5.0...v) (2022-08-09)
+
+
+
+# [0.5.0](https://github.com/krud-dev/shapeshift/compare/v0.4.0...v0.5.0) (2022-08-09)
+
+
+### Features
+
+* add auto mapping capabilities ([9d5fecb](https://github.com/krud-dev/shapeshift/commit/9d5fecbb75210d6327a6e52262e5e491fc3e5c3f)), closes [#10](https://github.com/krud-dev/shapeshift/issues/10)
+* add org.jetbrains:annotations as an api depdendency ([0d1a8a8](https://github.com/krud-dev/shapeshift/commit/0d1a8a8eb606b4c5746d7fc6ebdfd7a03ce2cdf3)), closes [#12](https://github.com/krud-dev/shapeshift/issues/12)
 
 
 
