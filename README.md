@@ -47,6 +47,7 @@ Built with Kotlin in mind, ShapeShift was designed around its ecosystem and best
 
 ShapeShift main features:
 
+* Auto Mapping
 * Custom field transformers
 * Default transformers
 * Deep mapping
@@ -55,6 +56,10 @@ ShapeShift main features:
 * Mapping decorators
 * Seamless spring integration
 * Native Android support
+
+<p align="center">
+  <img src=".assets/mapping.png" alt="ShapeShift object mapping" style="max-width: 800px;" />
+</p>
 
 ## Documentation
 
