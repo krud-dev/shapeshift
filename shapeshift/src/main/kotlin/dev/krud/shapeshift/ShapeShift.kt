@@ -27,7 +27,6 @@ import dev.krud.shapeshift.util.ClassPair
 import dev.krud.shapeshift.util.concurrentMapOf
 import dev.krud.shapeshift.util.getValue
 import dev.krud.shapeshift.util.setValue
-import org.slf4j.LoggerFactory
 import java.lang.reflect.Field
 
 class ShapeShift internal constructor(
@@ -238,25 +237,18 @@ class ShapeShift internal constructor(
         fromPair: ObjectFieldTrio,
         toPair: ObjectFieldTrio
     ): MappingTransformerRegistration<*, *> {
-        val transformationPair = fromPair to toPair
-        log.trace("Attempting to find transformer for transformation pair [ $transformationPair ]")
         var transformerRegistration: MappingTransformerRegistration<*, *> = MappingTransformerRegistration.EMPTY
         if (transformerRegistration == MappingTransformerRegistration.EMPTY) {
-            log.trace("Checking transformer field")
             if (coordinates.type == null) {
-                log.trace("Transformer is null, attempting to find a default transformer")
                 val key = ClassPair(fromPair.type, toPair.type)
                 val defaultTransformerRegistration = defaultTransformers[key]
                 if (defaultTransformerRegistration != null) {
-                    log.trace("Found a default transformer of type [ " + defaultTransformerRegistration.transformer.javaClass.name + " ]")
                     return defaultTransformerRegistration
                 }
                 return MappingTransformerRegistration.EMPTY
             } else {
                 transformerRegistration = getTransformerByType(coordinates.type)
-                if (transformerRegistration != MappingTransformerRegistration.EMPTY) {
-                    log.trace("Found transformer by type [ ${coordinates.type} ]")
-                } else {
+                if (transformerRegistration == MappingTransformerRegistration.EMPTY) {
                     error("Could not find transformer by type [ ${coordinates.type} ] on $fromPair")
                 }
             }
@@ -284,7 +276,6 @@ class ShapeShift internal constructor(
     }
 
     companion object {
-        private val log = LoggerFactory.getLogger(ShapeShift::class.java)
 
         enum class SourceType {
             FROM,
