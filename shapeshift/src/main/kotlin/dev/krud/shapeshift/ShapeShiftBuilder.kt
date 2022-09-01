@@ -82,6 +82,14 @@ class ShapeShiftBuilder {
     }
 
     /**
+     * Add a decorator to the ShapeShift instance
+     */
+    fun <From : Any, To : Any> withDecorator(fromClazz: Class<From>, toClazz: Class<To>, decorator: MappingDecorator<From, To>): ShapeShiftBuilder {
+        decoratorRegistrations += MappingDecoratorRegistration(fromClazz, toClazz, decorator)
+        return this
+    }
+
+    /**
      * Add a transformer to the ShapeShift instance
      */
     inline fun <reified From : Any, reified To : Any> withTransformer(mappingTransformer: MappingTransformer<From, To>, default: Boolean = false): ShapeShiftBuilder {
@@ -93,6 +101,15 @@ class ShapeShiftBuilder {
      */
     fun withTransformer(transformerRegistration: MappingTransformerRegistration<out Any, out Any>): ShapeShiftBuilder {
         transformerRegistrations += transformerRegistration
+        return this
+    }
+
+    /**
+     * Add a resolver to the ShapeShift instance
+     */
+    @JvmOverloads
+    fun <From : Any, To : Any> withTransformer(fromClazz: Class<From>, toClazz: Class<To>, transformer: MappingTransformer<From, To>, default: Boolean = false): ShapeShiftBuilder {
+        transformerRegistrations += MappingTransformerRegistration(fromClazz, toClazz, transformer, default)
         return this
     }
 

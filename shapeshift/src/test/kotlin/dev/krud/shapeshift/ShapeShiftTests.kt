@@ -11,6 +11,8 @@
 package dev.krud.shapeshift
 
 import dev.krud.shapeshift.MappingTransformerRegistration.Companion.toRegistration
+import dev.krud.shapeshift.decorator.MappingDecorator
+import dev.krud.shapeshift.transformer.base.MappingTransformer
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -318,5 +320,26 @@ internal class ShapeShiftTests {
         expectThrows<IllegalStateException> {
             shapeShift.map(TypeFromWithoutDefinedTarget(), GenericTo::class.java)
         }
+    }
+
+    @Test
+    internal fun `test direct withDecorator overload happy flow registers the correct decorator`() {
+        val decorator: MappingDecorator<GenericFrom, GenericTo> = MappingDecorator { }
+        val shapeShift = ShapeShiftBuilder()
+            .withDecorator(GenericFrom::class.java, GenericTo::class.java, decorator)
+            .build()
+        expectThat(shapeShift.decoratorRegistrations.first().decorator)
+            .isEqualTo(decorator)
+    }
+
+    @Test
+    internal fun `test direct withTransformers overload happy flow registers the correct decorator`() {
+        val transformer: MappingTransformer<String, Int> = MappingTransformer { 1 }
+        val shapeShift = ShapeShiftBuilder()
+            .excludeDefaultTransformers()
+            .withTransformer(String::class.java, Int::class.java, transformer)
+            .build()
+        expectThat(shapeShift.transformerRegistrations.first().transformer)
+            .isEqualTo(transformer)
     }
 }
