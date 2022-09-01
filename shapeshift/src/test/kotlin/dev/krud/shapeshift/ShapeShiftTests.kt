@@ -333,7 +333,7 @@ internal class ShapeShiftTests {
     }
 
     @Test
-    internal fun `test direct withTransformers overload happy flow registers the correct decorator`() {
+    internal fun `test direct withTransformers overload happy flow registers the correct transformer`() {
         val transformer: MappingTransformer<String, Int> = MappingTransformer { 1 }
         val shapeShift = ShapeShiftBuilder()
             .excludeDefaultTransformers()
