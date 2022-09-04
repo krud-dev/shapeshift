@@ -14,8 +14,10 @@ import dev.krud.shapeshift.MappingStrategy
 import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.dto.ResolvedMappedField
 import dev.krud.shapeshift.dto.TransformerCoordinates
+import dev.krud.shapeshift.enums.AutoMappingStrategy
 import dev.krud.shapeshift.resolver.MappingDefinition
 import dev.krud.shapeshift.transformer.base.MappingTransformer
+import dev.krud.shapeshift.util.getAutoMappings
 import dev.krud.shapeshift.util.getDeclaredFieldRecursive
 import java.lang.reflect.Field
 
@@ -24,6 +26,22 @@ import java.lang.reflect.Field
  */
 class MappingDefinitionBuilder(val fromClazz: Class<out Any>, val toClazz: Class<out Any>) {
     private val resolvedMappedFields = mutableListOf<ResolvedMappedField>()
+    private var autoMappingStrategy: AutoMappingStrategy = AutoMappingStrategy.NONE
+
+    /**
+     * Automatically map all fields with the given strategy
+     */
+    fun autoMap(strategy: AutoMappingStrategy): MappingDefinitionBuilder {
+        this.autoMappingStrategy = strategy
+        return this
+    }
+
+    /**
+     * Automatically map all fields with the given strategy with strategy [AutoMappingStrategy.BY_NAME_AND_TYPE]
+     */
+    fun autoMap(): MappingDefinitionBuilder {
+        return autoMap(AutoMappingStrategy.BY_NAME_AND_TYPE)
+    }
 
     /**
      * Define a new mapped field, along with an optional condition, transformer and override mapping strategy
@@ -40,10 +58,16 @@ class MappingDefinitionBuilder(val fromClazz: Class<out Any>, val toClazz: Class
      * Return a mapping definition for the fields defined in this builder
      */
     fun build(): MappingDefinition {
+        val autoMappedFields = getAutoMappings(fromClazz, toClazz, autoMappingStrategy)
+            .filter { autoResolvedMappedField ->
+                resolvedMappedFields.none {
+                    it.mapFromCoordinates.first() == autoResolvedMappedField.mapFromCoordinates.first() || it.mapToCoordinates.first() == autoResolvedMappedField.mapToCoordinates.first()
+                }
+            }
         return MappingDefinition(
             fromClazz,
             toClazz,
-            resolvedMappedFields
+            resolvedMappedFields + autoMappedFields
         )
     }
 
@@ -53,6 +77,22 @@ class MappingDefinitionBuilder(val fromClazz: Class<out Any>, val toClazz: Class
         private var transformer: MappingTransformer<out Any, out Any>? = null
         private var transformerCoordinates: TransformerCoordinates = TransformerCoordinates.NONE
         private var mappingStrategy: MappingStrategy? = null
+
+        /**
+         * @see MappingDefinitionBuilder.autoMap
+         */
+        fun autoMap(strategy: AutoMappingStrategy): MappingDefinitionBuilder {
+            buildAndAddSelf()
+            return this@MappingDefinitionBuilder.autoMap(strategy)
+        }
+
+        /**
+         * @see MappingDefinitionBuilder.autoMap
+         */
+        fun autoMap(): MappingDefinitionBuilder {
+            buildAndAddSelf()
+            return this@MappingDefinitionBuilder.autoMap()
+        }
 
         /**
          * @see MappingDefinitionBuilder.mapField

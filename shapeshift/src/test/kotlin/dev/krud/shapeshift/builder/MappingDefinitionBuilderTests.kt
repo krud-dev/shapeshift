@@ -131,6 +131,26 @@ class MappingDefinitionBuilderTests {
         expectThat(result.profession)
             .isNull()
     }
+
+    @Test
+    internal fun `test auto mapping`() {
+        val shapeShift = ShapeShiftBuilder()
+            .excludeDefaultTransformers()
+            .withMapping(
+                MappingDefinitionBuilder(From::class.java, To::class.java)
+                    .autoMap()
+                    .build()
+            )
+            .build()
+        val original = From(profession = "Test")
+        val result = shapeShift.map<From, To>(original)
+        expectThat(result.name)
+            .isEqualTo(original.name)
+        expectThat(result.age)
+            .isEqualTo(original.age)
+        expectThat(result.profession)
+            .isEqualTo(original.profession)
+    }
 }
 
 class From(
