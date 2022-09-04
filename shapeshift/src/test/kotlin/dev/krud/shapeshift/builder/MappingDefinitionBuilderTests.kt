@@ -12,6 +12,10 @@ package dev.krud.shapeshift.builder
 
 import dev.krud.shapeshift.MappingStrategy
 import dev.krud.shapeshift.ShapeShiftBuilder
+import dev.krud.shapeshift.condition.MappingCondition
+import dev.krud.shapeshift.condition.MappingConditionContext
+import dev.krud.shapeshift.transformer.base.MappingTransformer
+import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -60,12 +64,48 @@ class MappingDefinitionBuilderTests {
     }
 
     @Test
+    internal fun `test mapping with condition reference`() {
+        val shapeShift = ShapeShiftBuilder()
+            .excludeDefaultTransformers()
+            .withMapping(
+                MappingDefinitionBuilder(From::class.java, To::class.java)
+                    .mapField("name", "name")
+                    .mapField("age", "age").withCondition(Above31Condition::class.java)
+                    .build()
+            )
+            .build()
+        val original = From()
+        val result = shapeShift.map<From, To>(original)
+        expectThat(result.name)
+            .isEqualTo(original.name)
+        expectThat(result.age)
+            .isNull()
+    }
+
+    @Test
     internal fun `test mapping with transformer`() {
         val shapeShift = ShapeShiftBuilder()
             .excludeDefaultTransformers()
             .withMapping(
                 MappingDefinitionBuilder(From::class.java, To::class.java)
                     .mapField("age", "age").withTransformer { ctx -> ctx.originalValue as Int + 1 }
+                    .build()
+            )
+            .build()
+        val original = From()
+        val result = shapeShift.map<From, To>(original)
+        expectThat(result.age)
+            .isEqualTo(original.age + 1)
+    }
+
+    @Test
+    internal fun `test mapping with transformer reference`() {
+        val shapeShift = ShapeShiftBuilder()
+            .excludeDefaultTransformers()
+            .withTransformer(AddOneTransformer())
+            .withMapping(
+                MappingDefinitionBuilder(From::class.java, To::class.java)
+                    .mapField("age", "age").withTransformer(AddOneTransformer::class.java)
                     .build()
             )
             .build()
@@ -110,3 +150,15 @@ class To(
     var city: String? = null,
     val profession: String? = "placeholder"
 )
+
+class AddOneTransformer : MappingTransformer<Int, Int> {
+    override fun transform(context: MappingTransformerContext<out Int>): Int {
+        return (context.originalValue as Int) + 1
+    }
+}
+
+class Above31Condition : MappingCondition<Int> {
+    override fun isValid(context: MappingConditionContext<Int>): Boolean {
+        return context.originalValue != null && context.originalValue as Int > 31
+    }
+}

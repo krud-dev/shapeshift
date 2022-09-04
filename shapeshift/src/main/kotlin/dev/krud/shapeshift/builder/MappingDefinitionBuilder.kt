@@ -49,7 +49,9 @@ class MappingDefinitionBuilder(val fromClazz: Class<out Any>, val toClazz: Class
 
     inner class MapFieldBuilder(val from: String, val to: String) {
         private var condition: MappingCondition<out Any>? = null
+        private var conditionClazz: Class<out MappingCondition<out Any>>? = null
         private var transformer: MappingTransformer<out Any, out Any>? = null
+        private var transformerCoordinates: TransformerCoordinates = TransformerCoordinates.NONE
         private var mappingStrategy: MappingStrategy? = null
 
         /**
@@ -70,11 +72,29 @@ class MappingDefinitionBuilder(val fromClazz: Class<out Any>, val toClazz: Class
         }
 
         /**
+         * Specify a condition reference to use for this mapped field
+         * Java Example: `withCondition(Above18Condition.class)`
+         */
+        fun withCondition(conditionClazz: Class<out MappingCondition<out Any>>): MapFieldBuilder {
+            this.conditionClazz = conditionClazz
+            return this
+        }
+
+        /**
          * Specify a transformer to use for this mapped field
          * Java Example: `withTransformer(ctx -> (Integer) ctx.originalValue.toString())`
          */
         fun withTransformer(transformer: MappingTransformer<out Any, out Any>): MapFieldBuilder {
             this.transformer = transformer
+            return this
+        }
+
+        /**
+         * Specify a transformer reference to use for this mapped field
+         * Java Example: `withTransformer(IntegerToStringTransoformer.class)`
+         */
+        fun withTransformer(transformerClazz: Class<out MappingTransformer<out Any, out Any>>): MapFieldBuilder {
+            this.transformerCoordinates = TransformerCoordinates.ofType(transformerClazz)
             return this
         }
 
@@ -98,9 +118,9 @@ class MappingDefinitionBuilder(val fromClazz: Class<out Any>, val toClazz: Class
             val resolvedMappedField = ResolvedMappedField(
                 resolveNodes(from.split("."), fromClazz),
                 resolveNodes(to.split("."), toClazz),
-                TransformerCoordinates.NONE,
+                transformerCoordinates,
                 transformer,
-                null,
+                conditionClazz,
                 condition,
                 mappingStrategy
             )
