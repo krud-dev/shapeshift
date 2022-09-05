@@ -7,10 +7,10 @@
 
 ### Features
 
-* add additional withTransformer, withDecorator overloads to builder ([46911ce](https://github.com/krud-dev/shapeshift/commit/46911ce5bae44b9760070f21714b382ac9a4c4d2))
-* add automap option to builder ([bca9548](https://github.com/krud-dev/shapeshift/commit/bca9548d173280f8adfd2b40896c361a5e15b5cd))
-* add MappingDefinitionBuilder ([291fb44](https://github.com/krud-dev/shapeshift/commit/291fb44dc1d9591d0e554747226526aa2765ac92))
-* add transformer/condition class reference overloads to builder ([70ac909](https://github.com/krud-dev/shapeshift/commit/70ac909eaf52651ce4bd0caccc6c8df40df476b4))
+* add MappingDefinitionBuilder as an alternative to the Kotlin DSL ([291fb44](https://github.com/krud-dev/shapeshift/commit/291fb44dc1d9591d0e554747226526aa2765ac92))
+* add additional withTransformer, withDecorator overloads to the ShapeShift Builder ([46911ce](https://github.com/krud-dev/shapeshift/commit/46911ce5bae44b9760070f21714b382ac9a4c4d2))
+* add automap option to the Mapping Definition Builder ([bca9548](https://github.com/krud-dev/shapeshift/commit/bca9548d173280f8adfd2b40896c361a5e15b5cd))
+* add transformer/condition class reference overloads to the Mapping Definition Builder ([70ac909](https://github.com/krud-dev/shapeshift/commit/70ac909eaf52651ce4bd0caccc6c8df40df476b4))
 
 
 
