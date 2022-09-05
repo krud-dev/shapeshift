@@ -24,14 +24,18 @@ A Kotlin library for intelligent object mapping and conversion between objects.
 - [Overview](#overview)
 - [Documentation](#documentation)
 - [Installation](#installation)
-  * [Requirements](#requirements)
-  * [Maven](#maven)
-  * [Gradle](#gradle)
-      + [Groovy DSL](#groovy-dsl)
-      + [Kotlin DSL](#kotlin-dsl)
+  - [Requirements](#requirements)
+  - [Maven](#maven)
+  - [Gradle](#gradle)
+    - [Groovy DSL](#groovy-dsl)
+    - [Kotlin DSL](#kotlin-dsl)
 - [Quickstart](#quickstart)
-  * [DSL Example](#dsl-example)
-  * [Annotation Example](#annotation-example)
+  - [Kotlin](#kotlin)
+    - [DSL](#dsl)
+    - [Kotlin Annotation](#kotlin-annotation)
+  - [Java](#java)
+    - [Builder](#builder)
+    - [Java Annotation](#java-annotation)
 - [Examples](#examples)
 - [Contributing](#contributing)
 - [License](#license)
@@ -42,8 +46,9 @@ ShapeShift is a Kotlin first object mapping library. We have built ShapeShift be
 
 Built with Kotlin in mind, ShapeShift was designed around its ecosystem and best practices. The library has 2 main tools for mapping:
 
-* Annotations - Fully featured annotation based mapping, just add annotations to your objects and ShapeShift handles the rest. Including using custom field transformers, conditional mapping, advanced object decoration and much more.
-* DSL - A Kotlin DSL allowing you to define the relations between objects. This allows you to map objects you can't change (or don't want to), like objects from 3rd party libraries. Additionally you can define inline transformations, conditions and decorations, enabling deep customization and very advanced mapping.
+* Annotations - Fully featured annotation based mapping, just add annotations to your objects and ShapeShift handles the rest. Including using custom field transformers, conditional mapping, advanced object decoration and much more. ([Kotlin Example](#kotlin-annotation), [Java Example](#java-annotation))
+* DSL - A Kotlin DSL allowing you to define the relations between objects. This allows you to map objects you can't change (or don't want to), like objects from 3rd party libraries. Additionally you can define inline transformations, conditions and decorations, enabling deep customization and very advanced mapping. ([Kotlin Example](#dsl))
+* Builder - A Java builder allowing you to define relations between objects. Supports many of the features of the DSL like inline transformations and conditions. ([Java Example](#builder))
 
 ShapeShift main features:
 
@@ -98,7 +103,9 @@ implementation("dev.krud:shapeshift:0.6.0")
 
 ## Quickstart
 
-### DSL Example
+### Kotlin 
+
+#### DSL
 ```kotlin
 // Source Class
 data class Source(
@@ -139,7 +146,7 @@ fun main() {
 }
 ```
 
-### Annotation Example
+#### Kotlin Annotation
 ```kotlin
 // Source Class
 @DefaultMappingTarget(Target::class)
@@ -179,6 +186,119 @@ fun main() {
     // Perform the mapping
     val result = shapeShift.map<Source, Target>(source)
     // Returns: To(firstName=John, lastName=Doe, birthYear=1980)
+}
+```
+
+### Java
+
+#### Builder
+
+```java
+// Source.java
+class Source {
+    private String firstName;
+    private String lastName;
+    private LocalDate birthDate;
+
+    // Constructor
+    // Getters
+    // Setters
+    // ToString
+}
+
+// Target.java
+class Target {
+    private String firstName;
+    private String lastName;
+    private int birthYear;
+
+    // Constructor
+    // Getters
+    // Setters
+    // ToString
+}
+
+// Example.java
+class Example {
+    public static void main(String[] args) {
+        /**
+         * Initialize ShapeShift with a mapping definition from From to To
+         */
+        ShapeShift shapeShift = new ShapeShiftBuilder()
+                .withMapping(
+                        new MappingDefinitionBuilder(Source.class, Target.class)
+                                // Map firstName
+                                .mapField("firstName", "firstName")
+                                // Map lastName
+                                .mapField("lastName", "lastName")
+                                // Map birthDate to birthYear with a transformation function
+                                .mapField("birthDate", "birthYear").withTransformer(ctx -> ((LocalDate) ctx.getOriginalValue()).getYear())
+                                .build()
+                )
+                .build();
+        // Initialize Source
+        Source source = new Source("John", "Doe", LocalDate.of(1980, 1, 1));
+        // Perform the mapping
+        Target result = shapeShift.map(source, Target.class);
+        // Returns: To(firstName=John, lastName=Doe, birthYear=1980)
+    }
+}
+```
+
+#### Java Annotation
+
+```java
+// Source.java
+@DefaultMappingTarget(Target.class)
+class Source {
+    @MappedField
+    private String firstName;
+    @MappedField
+    private String lastName;
+    @MappedField(mapTo = "birthYear", transformer = LocalDateToYearTransformer.class)
+    private LocalDate birthDate;
+
+    // Constructor
+    // Getters
+    // Setters
+    // ToString
+}
+
+// Target.java
+class Target {
+    private String firstName;
+    private String lastName;
+    private int birthYear;
+
+    // Constructor
+    // Getters
+    // Setters
+    // ToString
+}
+
+// Define the transformer which will transform the local date to a year
+// LocalDateToYearTransformer.java
+class LocalDateToYearTransformer implements MappingTransformer<LocalDate, Integer> {
+    @Override
+    public Integer transform(MappingTransformerContext<? extends LocalDate> context) {
+        return context.getOriginalValue().getYear();
+    }
+}
+// Example.java
+class Example {
+    public static void main(String[] args) {
+        /**
+         * Initialize ShapeShift
+         */
+        ShapeShift shapeShift = new ShapeShiftBuilder()
+                .withTransformer(LocalDate.class, Integer.class, new LocalDateToYearTransformer())
+                .build();
+        // Initialize Source
+        Source source = new Source("John", "Doe", LocalDate.of(1980, 1, 1));
+        // Perform the mapping
+        Target result = shapeShift.map(source, Target.class);
+        // Returns: To(firstName=John, lastName=Doe, birthYear=1980)
+    }
 }
 ```
 
