@@ -8,7 +8,7 @@
 <h1 align="center">ShapeShift️</h1>
 
 <div align="center">
-A Kotlin library for intelligent object mapping and conversion between objects.
+A Kotlin/Java library for intelligent object mapping and conversion between objects.
 <br/>
 <br/>
 
@@ -31,10 +31,10 @@ A Kotlin library for intelligent object mapping and conversion between objects.
     - [Kotlin DSL](#kotlin-dsl)
 - [Quickstart](#quickstart)
   - [Kotlin](#kotlin)
-    - [DSL](#dsl)
+    - [Kotlin DSL](#kotlin-dsl-1)
     - [Kotlin Annotation](#kotlin-annotation)
   - [Java](#java)
-    - [Builder](#builder)
+    - [Java Builder](#java-builder)
     - [Java Annotation](#java-annotation)
 - [Examples](#examples)
 - [Contributing](#contributing)
@@ -47,8 +47,8 @@ ShapeShift is a Kotlin first object mapping library. We have built ShapeShift be
 Built with Kotlin in mind, ShapeShift was designed around its ecosystem and best practices. The library has 2 main tools for mapping:
 
 * Annotations - Fully featured annotation based mapping, just add annotations to your objects and ShapeShift handles the rest. Including using custom field transformers, conditional mapping, advanced object decoration and much more. ([Kotlin Example](#kotlin-annotation), [Java Example](#java-annotation))
-* DSL - A Kotlin DSL allowing you to define the relations between objects. This allows you to map objects you can't change (or don't want to), like objects from 3rd party libraries. Additionally you can define inline transformations, conditions and decorations, enabling deep customization and very advanced mapping. ([Kotlin Example](#dsl))
-* Builder - A Java builder allowing you to define relations between objects. Supports many of the features of the DSL like inline transformations and conditions. ([Java Example](#builder))
+* Kotlin DSL - A Kotlin DSL allowing you to define the relations between objects. This allows you to map objects you can't change (or don't want to), like objects from 3rd party libraries. Additionally you can define inline transformations, conditions and decorations, enabling deep customization and very advanced mapping. ([Kotlin Example](#kotlin-dsl-1))
+* Java Builder - The equivalent Java API for the Kotlin DSL. Allowing you to define the relations between objects without modifying their code, and map objects you can't change (or don't want to). ([Java Example](#java-builder))
 
 ShapeShift main features:
 
@@ -105,7 +105,7 @@ implementation("dev.krud:shapeshift:0.6.0")
 
 ### Kotlin 
 
-#### DSL
+#### Kotlin DSL
 ```kotlin
 // Source Class
 data class Source(
@@ -191,7 +191,7 @@ fun main() {
 
 ### Java
 
-#### Builder
+#### Java Builder
 
 ```java
 // Source.java
