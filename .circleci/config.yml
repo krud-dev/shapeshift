@@ -37,6 +37,9 @@ jobs:
           command: |
             mkdir -p ~/test-results/junit/
             find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/test-results/junit/ \;
+            curl -Os https://uploader.codecov.io/latest/linux/codecov
+            chmod +x codecov
+            ./codecov -t ${CODECOV_TOKEN}
           when: always
       - store_test_results:
           path: ~/test-results
