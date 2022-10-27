@@ -290,3 +290,9 @@ internal class LongToStringTransformer : MappingTransformer<Long, String> {
         return context.originalValue?.toString()
     }
 }
+
+internal class ToWithArgConstructor(val long: Long)
+
+internal class ToWithNestedArgConstructor(val child: Child? = null) {
+    class Child(val long: Long)
+}

@@ -28,12 +28,14 @@ import dev.krud.shapeshift.util.concurrentMapOf
 import dev.krud.shapeshift.util.getValue
 import dev.krud.shapeshift.util.setValue
 import java.lang.reflect.Field
+import java.util.function.Supplier
 
 class ShapeShift internal constructor(
     transformersRegistrations: Set<MappingTransformerRegistration<out Any, out Any>>,
     val mappingDefinitionResolvers: Set<MappingDefinitionResolver>,
     val defaultMappingStrategy: MappingStrategy,
-    val decoratorRegistrations: Set<MappingDecoratorRegistration<out Any, out Any>>
+    val decoratorRegistrations: Set<MappingDecoratorRegistration<out Any, out Any>>,
+    val objectSuppliers: Map<Class<*>, Supplier<*>>
 ) {
     val transformerRegistrations: MutableList<MappingTransformerRegistration<out Any, out Any>> = mutableListOf()
     internal val transformersByTypeCache: MutableMap<Class<out MappingTransformer<out Any?, out Any?>>, MappingTransformerRegistration<out Any?, out Any?>> =
@@ -61,7 +63,7 @@ class ShapeShift internal constructor(
      * [toClazz] MUST have a no-arg constructor when using this override
      */
     fun <From : Any, To : Any> map(fromObject: From, toClazz: Class<To>): To {
-        val toObject = toClazz.newInstance()
+        val toObject = initializeObject(toClazz)
         return map(fromObject, toObject)
     }
 
@@ -196,7 +198,7 @@ class ShapeShift internal constructor(
         var subTarget = field.get(target)
 
         if (subTarget == null && type == SourceType.TO) {
-            subTarget = fieldType.newInstance()
+            subTarget = initializeObject(fieldType)
             field.set(target, subTarget)
         }
 
@@ -273,6 +275,18 @@ class ShapeShift internal constructor(
 
         transformerRegistrations.add(registration)
         transformersByTypeCache.remove(registration.transformer::class.java)
+    }
+
+    private fun <Type> initializeObject(clazz: Class<Type>): Type {
+        val supplier = objectSuppliers[clazz]
+        if (supplier != null) {
+            return supplier.get() as Type
+        }
+        val constructor = clazz.constructors.firstOrNull { it.parameterCount == 0 }
+        if (constructor != null) {
+            return constructor.newInstance() as Type
+        }
+        error("Could not find a no-arg constructor or object supplier for class $clazz")
     }
 
     companion object {

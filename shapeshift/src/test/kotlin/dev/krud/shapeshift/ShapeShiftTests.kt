@@ -342,4 +342,54 @@ internal class ShapeShiftTests {
         expectThat(shapeShift.transformerRegistrations.first().transformer)
             .isEqualTo(transformer)
     }
+
+    @Test
+    internal fun `to object with no supplier and arg constructor should throw exception`() {
+        val shapeShift = ShapeShiftBuilder()
+            .withMapping<GenericFrom, ToWithArgConstructor> {
+                GenericFrom::long mappedTo ToWithArgConstructor::long
+            }
+            .build()
+        expectThrows<IllegalStateException> {
+            shapeShift.map(GenericFrom(), ToWithArgConstructor::class.java)
+        }
+    }
+
+    @Test
+    internal fun `to object with supplier happy flow`() {
+        val shapeShift = ShapeShiftBuilder()
+            .withMapping<GenericFrom, ToWithArgConstructor> {
+                GenericFrom::long mappedTo ToWithArgConstructor::long
+            }
+            .withObjectSupplier { ToWithArgConstructor(1) }
+            .build()
+        val result = shapeShift.map(GenericFrom(), ToWithArgConstructor::class.java)
+        expectThat(result.long)
+            .isEqualTo(1L)
+    }
+
+    @Test
+    fun `to object with nested child with no supplier and arg constructor should throw exception`() {
+        val shapeShift = ShapeShiftBuilder()
+            .withMapping<GenericFrom, ToWithNestedArgConstructor> {
+                GenericFrom::long mappedTo ToWithNestedArgConstructor::child..ToWithNestedArgConstructor.Child::long
+            }
+            .build()
+        expectThrows<IllegalStateException> {
+            shapeShift.map(GenericFrom(), ToWithNestedArgConstructor::class.java)
+        }
+    }
+
+    @Test
+    fun `to object with nested child with supplier and arg constructor happy flow`() {
+        val shapeShift = ShapeShiftBuilder()
+            .withMapping<GenericFrom, ToWithNestedArgConstructor> {
+                GenericFrom::long mappedTo ToWithNestedArgConstructor::child..ToWithNestedArgConstructor.Child::long
+            }
+            .withObjectSupplier { ToWithNestedArgConstructor.Child(1) }
+            .build()
+        val result = shapeShift.map(GenericFrom(), ToWithNestedArgConstructor::class.java)
+        expectThat(result.child?.long)
+            .isEqualTo(1L)
+    }
 }

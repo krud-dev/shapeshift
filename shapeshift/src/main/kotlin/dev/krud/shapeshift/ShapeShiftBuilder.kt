@@ -35,6 +35,8 @@ import dev.krud.shapeshift.transformer.StringToIntMappingTransformer
 import dev.krud.shapeshift.transformer.StringToLongMappingTransformer
 import dev.krud.shapeshift.transformer.StringToShortMappingTransformer
 import dev.krud.shapeshift.transformer.base.MappingTransformer
+import java.util.function.Supplier
+import kotlin.reflect.KClass
 
 /**
  * A builder used to create a new ShapeShift instance.
@@ -47,6 +49,7 @@ class ShapeShiftBuilder {
     private val resolvers: MutableSet<MappingDefinitionResolver> = mutableSetOf()
     private var defaultMappingStrategy: MappingStrategy = MappingStrategy.MAP_NOT_NULL
     private val mappingDefinitions: MutableList<MappingDefinition> = mutableListOf()
+    private val objectSuppliers: MutableMap<Class<*>, Supplier<*>> = mutableMapOf()
 
     init {
         // Add default annotation resolver
@@ -141,6 +144,15 @@ class ShapeShiftBuilder {
         return this
     }
 
+    inline fun <reified Object : Any> withObjectSupplier(objectSupplier: Supplier<Object>): ShapeShiftBuilder {
+        return withObjectSupplier(objectSupplier, Object::class.java)
+    }
+
+    fun <Object : Any> withObjectSupplier(objectSupplier: Supplier<Object>, clazz: Class<Object>): ShapeShiftBuilder {
+        objectSuppliers[clazz] = objectSupplier
+        return this
+    }
+
     /**
      * Remove all default transformers from the ShapeShift instance
      */
@@ -161,7 +173,7 @@ class ShapeShiftBuilder {
             resolvers += StaticMappingDefinitionResolver(mappingDefinitions)
         }
 
-        return ShapeShift(transformerRegistrations, resolvers, defaultMappingStrategy, decoratorRegistrations)
+        return ShapeShift(transformerRegistrations, resolvers, defaultMappingStrategy, decoratorRegistrations, objectSuppliers)
     }
 
     companion object {
