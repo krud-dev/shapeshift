@@ -10,6 +10,7 @@
 
 package dev.krud.shapeshift.transformer.base
 
+import dev.krud.shapeshift.ShapeShift
 import java.lang.reflect.Field
 
 data class MappingTransformerContext<From : Any?>(
@@ -17,5 +18,6 @@ data class MappingTransformerContext<From : Any?>(
     val fromObject: Any,
     val toObject: Any,
     val fromField: Field,
-    val toField: Field
+    val toField: Field,
+    val shapeShift: ShapeShift
 )

@@ -10,6 +10,7 @@
 
 package dev.krud.shapeshift.transformer
 
+import dev.krud.shapeshift.ShapeShiftBuilder
 import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 import kotlin.reflect.jvm.javaField
 
@@ -23,6 +24,7 @@ fun <From : Any?> mockMappingTransformerContext(value: From?): MappingTransforme
         ExampleObject(),
         ExampleObject(),
         ExampleObject::name.javaField!!,
-        ExampleObject::name.javaField!!
+        ExampleObject::name.javaField!!,
+        ShapeShiftBuilder().build()
     )
 }

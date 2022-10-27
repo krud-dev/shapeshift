@@ -10,6 +10,8 @@
 
 package dev.krud.shapeshift.condition
 
+import dev.krud.shapeshift.ShapeShift
+
 /**
  * The context payload used for [MappingCondition]
  */
@@ -17,5 +19,9 @@ data class MappingConditionContext<Value : Any?>(
     /**
      * The value to be mapped
      */
-    val originalValue: Value?
+    val originalValue: Value?,
+    /**
+     * The [ShapeShift] instance used
+     */
+    val shapeShift: ShapeShift
 )

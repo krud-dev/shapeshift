@@ -79,7 +79,7 @@ class ShapeShift internal constructor(
 
         val decorators = getDecorators<From, To>(classPair)
         if (decorators.isNotEmpty()) {
-            val context = MappingDecoratorContext(fromObject, toObject)
+            val context = MappingDecoratorContext(fromObject, toObject, this)
             for (decorator in decorators) {
                 decorator.decorate(context)
             }
@@ -139,7 +139,7 @@ class ShapeShift internal constructor(
 
                 if (condition != null) {
                     condition as MappingCondition<Any>
-                    val context = MappingConditionContext(fromValue)
+                    val context = MappingConditionContext(fromValue, this)
                     if (!condition.isValid(context)) {
                         return
                     }
@@ -147,11 +147,11 @@ class ShapeShift internal constructor(
 
                 val valueToSet = if (resolvedMappedField.transformer != null) {
                     val transformer = resolvedMappedField.transformer as MappingTransformer<Any, Any>
-                    val context = MappingTransformerContext(fromValue, fromObject, toObject, fromPair.field, toPair.field)
+                    val context = MappingTransformerContext(fromValue, fromObject, toObject, fromPair.field, toPair.field, this)
                     transformer.transform(context)
                 } else if (transformerRegistration != MappingTransformerRegistration.EMPTY) {
                     val transformer = transformerRegistration.transformer as MappingTransformer<Any, Any>
-                    val context = MappingTransformerContext(fromValue, fromObject, toObject, fromPair.field, toPair.field)
+                    val context = MappingTransformerContext(fromValue, fromObject, toObject, fromPair.field, toPair.field, this)
                     transformer.transform(context)
                 } else {
                     fromValue

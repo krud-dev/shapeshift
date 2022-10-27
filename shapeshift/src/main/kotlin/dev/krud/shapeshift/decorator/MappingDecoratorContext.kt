@@ -10,6 +10,8 @@
 
 package dev.krud.shapeshift.decorator
 
+import dev.krud.shapeshift.ShapeShift
+
 /**
  * The context payload used for [MappingDecorator]
  */
@@ -21,5 +23,9 @@ data class MappingDecoratorContext<From : Any, To : Any>(
     /**
      * The to (target) object of the mapping
      */
-    val to: To
+    val to: To,
+    /**
+     * The [ShapeShift] instance used
+     */
+    val shapeShift: ShapeShift
 )
