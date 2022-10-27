@@ -21,9 +21,7 @@ import java.lang.reflect.Field
 
 class AnnotationMappingDefinitionResolver : MappingDefinitionResolver {
     override fun resolve(fromClazz: Class<*>, toClazz: Class<*>): MappingDefinition {
-        val defaultMappingTarget = fromClazz.getDeclaredAnnotation(DefaultMappingTarget::class.java)
-        val defaultToClass: Class<*> = defaultMappingTarget?.value?.java ?: Nothing::class.java
-        val mappedFieldReferences = getMappedFields(fromClazz, toClazz, defaultToClass)
+        val mappedFieldReferences = getMappedFields(fromClazz, toClazz)
 
         val resolvedMappedFields = mutableListOf<ResolvedMappedField>()
         for ((mappedField, field) in mappedFieldReferences) {
@@ -91,10 +89,12 @@ class AnnotationMappingDefinitionResolver : MappingDefinitionResolver {
         return listOf(field) + resolveNodesToFields(nodes.drop(1), nextField, nextField.type)
     }
 
-    private fun getMappedFields(fromClass: Class<*>, toClass: Class<*>, defaultToClass: Class<*>): List<MappedFieldReference> {
+    private fun getMappedFields(fromClass: Class<*>, toClass: Class<*>): List<MappedFieldReference> {
         var clazz: Class<*>? = fromClass
         val result = mutableListOf<MappedFieldReference>()
         while (clazz != null) {
+            val defaultMappingTarget = clazz.getDeclaredAnnotation(DefaultMappingTarget::class.java)
+            val defaultToClass: Class<*> = defaultMappingTarget?.value?.java ?: Nothing::class.java
             val fields = clazz.declaredFields
             result += clazz.getDeclaredAnnotationsByType(MappedField::class.java)
                 .filter { mappedField ->
