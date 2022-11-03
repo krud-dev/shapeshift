@@ -21,7 +21,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TransformerMappingTests {
+class TransformerMappingTests {
     @Test
     void testTransformerMapping() {
         // Initialize ShapeShift with a StringToCommaSeparatedStringListTransformer

@@ -12,11 +12,11 @@ package dev.krud.shapeshift.examples.java;
 
 import dev.krud.shapeshift.ShapeShift;
 import dev.krud.shapeshift.ShapeShiftBuilder;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
-public class SimpleMappingTests {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class SimpleMappingTests {
     @Test
     void testSimpleMapping() {
         // Initialize ShapeShift with the default configuration

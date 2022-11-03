@@ -260,7 +260,7 @@ class ShapeShift internal constructor(
 
     private fun getConditionInstance(conditionClazz: Class<out MappingCondition<*>>): MappingCondition<*> {
         return conditionCache.computeIfAbsent(conditionClazz) {
-            conditionClazz.newInstance()
+            conditionClazz.getDeclaredConstructor().newInstance()
         }
     }
 

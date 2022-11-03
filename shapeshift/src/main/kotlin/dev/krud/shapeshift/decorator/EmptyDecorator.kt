@@ -12,5 +12,6 @@ package dev.krud.shapeshift.decorator
 
 object EmptyDecorator : MappingDecorator<Any, Any> {
     override fun decorate(context: MappingDecoratorContext<Any, Any>) {
+        // This decorator intentionally does nothing
     }
 }
