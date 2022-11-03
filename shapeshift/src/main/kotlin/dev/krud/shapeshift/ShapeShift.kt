@@ -94,7 +94,7 @@ class ShapeShift internal constructor(
      * Map [fromObjects] to a list of [toClazz] objects
      */
     fun <From : Any, To : Any> mapCollection(fromObjects: Collection<From>, toClazz: Class<To>): List<To> {
-        val toObjects = ArrayList<To>(fromObjects.size)
+        val toObjects = mutableListOf<To>()
         for (fromObject in fromObjects) {
             toObjects.add(map(fromObject, toClazz))
         }
@@ -115,36 +115,18 @@ class ShapeShift internal constructor(
         fromPair.field.isAccessible = true
         toPair.field.isAccessible = true
 
-        val mappingStrategy: MappingStrategy
-
-        if (resolvedMappedField.overrideMappingStrategy != null && resolvedMappedField.overrideMappingStrategy != MappingStrategy.NONE) {
-            mappingStrategy = resolvedMappedField.overrideMappingStrategy
-        } else {
-            mappingStrategy = defaultMappingStrategy
-        }
+        val mappingStrategy = resolvedMappedField.effectiveMappingStrategy(defaultMappingStrategy)
         val fromValue = fromPair.field.getValue(fromPair.target)
-
-        val shouldMap = when (mappingStrategy) {
+        val shouldMapValue = when (mappingStrategy) {
             MappingStrategy.NONE -> error("Mapping strategy is set to NONE")
             MappingStrategy.MAP_ALL -> true
             MappingStrategy.MAP_NOT_NULL -> fromValue != null
         }
 
-        if (shouldMap) {
+        if (shouldMapValue) {
             try {
-                val condition = resolvedMappedField.condition
-                    ?: if (resolvedMappedField.conditionClazz != null) {
-                        getConditionInstance(resolvedMappedField.conditionClazz)
-                    } else {
-                        null
-                    }
-
-                if (condition != null) {
-                    condition as MappingCondition<Any>
-                    val context = MappingConditionContext(fromValue, this)
-                    if (!condition.isValid(context)) {
-                        return
-                    }
+                if (!resolvedMappedField.conditionMatches(fromValue)) {
+                    return
                 }
 
                 val valueToSet = if (resolvedMappedField.transformer != null) {
@@ -173,6 +155,31 @@ class ShapeShift internal constructor(
                 newException.initCause(e)
                 throw newException
             }
+        }
+    }
+
+    private fun ResolvedMappedField.conditionMatches(value: Any?): Boolean {
+        val condition = this.condition
+            ?: this.conditionClazz?.getCachedInstance()
+            ?: return true
+        condition as MappingCondition<Any>
+        val context = MappingConditionContext(value, this@ShapeShift)
+        return condition.isValid(context)
+    }
+
+    private fun ResolvedMappedField.effectiveMappingStrategy(defaultMappingStrategy: MappingStrategy): MappingStrategy {
+        return if (overrideMappingStrategy != null && overrideMappingStrategy != MappingStrategy.NONE
+        ) {
+            overrideMappingStrategy
+        } else {
+            defaultMappingStrategy
+        }
+    }
+
+    private fun Class<out MappingCondition<*>>?.getCachedInstance(): MappingCondition<*>? {
+        this ?: return null
+        return conditionCache.computeIfAbsent(this) {
+            this.getDeclaredConstructor().newInstance()
         }
     }
 
@@ -258,12 +265,6 @@ class ShapeShift internal constructor(
         return transformerRegistration
     }
 
-    private fun getConditionInstance(conditionClazz: Class<out MappingCondition<*>>): MappingCondition<*> {
-        return conditionCache.computeIfAbsent(conditionClazz) {
-            conditionClazz.getDeclaredConstructor().newInstance()
-        }
-    }
-
     private fun <From : Any, To : Any> registerTransformer(registration: MappingTransformerRegistration<From, To>) {
         if (registration.default) {
             val existingDefaultTransformer = defaultTransformers[registration.id]
@@ -290,7 +291,6 @@ class ShapeShift internal constructor(
     }
 
     companion object {
-
         enum class SourceType {
             FROM,
             TO

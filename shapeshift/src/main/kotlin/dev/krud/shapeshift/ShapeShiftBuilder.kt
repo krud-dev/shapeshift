@@ -36,7 +36,6 @@ import dev.krud.shapeshift.transformer.StringToLongMappingTransformer
 import dev.krud.shapeshift.transformer.StringToShortMappingTransformer
 import dev.krud.shapeshift.transformer.base.MappingTransformer
 import java.util.function.Supplier
-import kotlin.reflect.KClass
 
 /**
  * A builder used to create a new ShapeShift instance.
