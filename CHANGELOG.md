@@ -1,4 +1,13 @@
-# [](https://github.com/krud-dev/shapeshift/compare/v0.7.0...v) (2022-11-06)
+# [](https://github.com/krud-dev/shapeshift/compare/v0.8.0...v) (2023-02-02)
+
+
+
+# [0.8.0](https://github.com/krud-dev/shapeshift/compare/v0.7.0...v0.8.0) (2023-02-02)
+
+
+### Bug Fixes
+
+* fix ImplicitCollectionMappingTransformer mapping using the wrong type ([04f1170](https://github.com/krud-dev/shapeshift/commit/04f1170993e252b0a4ea5d14397227dd74927faa))
 
 
 
