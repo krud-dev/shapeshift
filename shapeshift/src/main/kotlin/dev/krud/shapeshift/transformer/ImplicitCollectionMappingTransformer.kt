@@ -19,7 +19,7 @@ class ImplicitCollectionMappingTransformer : MappingTransformer<Collection<Any>,
         context.originalValue ?: return null
         val type = context.toField?.genericType as? ParameterizedType ?: return null
         val collectionType = type.actualTypeArguments[0] as? Class<*> ?: return null
-        val baseMapping = context.originalValue.map { context.shapeShift.map(it, type) }
+        val baseMapping = context.originalValue.map { context.shapeShift.map(it, collectionType) }
         return when (collectionType.kotlin) {
             List::class -> {
                 baseMapping

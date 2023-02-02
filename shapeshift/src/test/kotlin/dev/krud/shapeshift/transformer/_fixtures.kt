@@ -11,11 +11,33 @@
 package dev.krud.shapeshift.transformer
 
 import dev.krud.shapeshift.ShapeShiftBuilder
+import dev.krud.shapeshift.resolver.annotation.DefaultMappingTarget
+import dev.krud.shapeshift.resolver.annotation.MappedField
 import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 import kotlin.reflect.jvm.javaField
 
 class ExampleObject {
     var name: String? = null
+}
+
+@DefaultMappingTarget(ImplicitCollectionTo::class)
+data class ImplicitCollectionFrom(
+    @MappedField(transformer = ImplicitCollectionMappingTransformer::class)
+    val fromChildren: List<FromChild> = emptyList()
+) {
+    @DefaultMappingTarget(ImplicitCollectionTo.ToChild::class)
+    data class FromChild(
+        @MappedField
+        val value: String? = null
+    )
+}
+
+data class ImplicitCollectionTo(
+    val toChildren: List<ToChild> = emptyList()
+) {
+    data class ToChild(
+        val value: String? = null
+    )
 }
 
 fun <From : Any?> mockMappingTransformerContext(value: From?): MappingTransformerContext<From> {

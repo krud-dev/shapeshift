@@ -10,12 +10,16 @@
 
 package dev.krud.shapeshift.transformer
 
+import dev.krud.shapeshift.ShapeShift
+import dev.krud.shapeshift.ShapeShiftBuilder
+import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.api.expectThrows
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNull
 import java.util.*
+import kotlin.reflect.jvm.javaField
 
 class ShapeShiftTransformerTests {
     @Test
@@ -402,5 +406,28 @@ class ShapeShiftTransformerTests {
         val result = EmptyTransformer.transform(context)
         expectThat(result)
             .isEqualTo("test")
+    }
+
+    @Test
+    fun `ImplicitCollectionMappingTransformer should correctly map a collection`() {
+        val shapeShift = ShapeShiftBuilder().build()
+        val transformer = ImplicitCollectionMappingTransformer()
+        val from = ImplicitCollectionFrom(
+            listOf(ImplicitCollectionFrom.FromChild("test"), ImplicitCollectionFrom.FromChild("test2"))
+        )
+        val expectedResult = listOf(ImplicitCollectionTo.ToChild("test"), ImplicitCollectionTo.ToChild("test2"))
+        val to = ImplicitCollectionTo()
+        val context = MappingTransformerContext(
+            from.fromChildren,
+            from,
+            to,
+            from::fromChildren.javaField!!,
+            to::toChildren.javaField!!,
+            shapeShift
+        )
+        val result = transformer.transform(context)
+        expectThat(result)
+            .isEqualTo(expectedResult)
+
     }
 }

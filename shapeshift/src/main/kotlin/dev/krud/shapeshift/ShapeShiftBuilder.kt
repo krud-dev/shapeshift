@@ -20,6 +20,8 @@ import dev.krud.shapeshift.resolver.StaticMappingDefinitionResolver
 import dev.krud.shapeshift.resolver.annotation.AnnotationMappingDefinitionResolver
 import dev.krud.shapeshift.transformer.AnyToStringMappingTransformer
 import dev.krud.shapeshift.transformer.DateToLongMappingTransformer
+import dev.krud.shapeshift.transformer.ImplicitCollectionMappingTransformer
+import dev.krud.shapeshift.transformer.ImplicitMappingTransformer
 import dev.krud.shapeshift.transformer.LongToDateMappingTransformer
 import dev.krud.shapeshift.transformer.NumberToCharMappingTransformer
 import dev.krud.shapeshift.transformer.NumberToDoubleMappingTransformer
@@ -192,7 +194,9 @@ class ShapeShiftBuilder {
             NumberToFloatMappingTransformer().toRegistration(true),
             NumberToLongMappingTransformer().toRegistration(true),
             NumberToShortMappingTransformer().toRegistration(true),
-            NumberToIntMappingTransformer().toRegistration(true)
+            NumberToIntMappingTransformer().toRegistration(true),
+            ImplicitMappingTransformer().toRegistration(false),
+            ImplicitCollectionMappingTransformer().toRegistration(false),
         )
     }
 }
