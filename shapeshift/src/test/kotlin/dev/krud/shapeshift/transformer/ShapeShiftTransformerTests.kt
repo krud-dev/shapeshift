@@ -10,7 +10,6 @@
 
 package dev.krud.shapeshift.transformer
 
-import dev.krud.shapeshift.ShapeShift
 import dev.krud.shapeshift.ShapeShiftBuilder
 import dev.krud.shapeshift.transformer.base.MappingTransformerContext
 import org.junit.jupiter.api.Test
@@ -428,6 +427,5 @@ class ShapeShiftTransformerTests {
         val result = transformer.transform(context)
         expectThat(result)
             .isEqualTo(expectedResult)
-
     }
 }

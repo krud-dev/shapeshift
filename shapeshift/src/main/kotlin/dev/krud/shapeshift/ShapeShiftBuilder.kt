@@ -196,7 +196,7 @@ class ShapeShiftBuilder {
             NumberToShortMappingTransformer().toRegistration(true),
             NumberToIntMappingTransformer().toRegistration(true),
             ImplicitMappingTransformer().toRegistration(false),
-            ImplicitCollectionMappingTransformer().toRegistration(false),
+            ImplicitCollectionMappingTransformer().toRegistration(false)
         )
     }
 }
