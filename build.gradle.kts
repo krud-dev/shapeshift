@@ -8,13 +8,14 @@ plugins {
 }
 
 if (hasProperty("release")) {
+    val releaseVersion = extra["shapeshift.version"].toString()
     subprojects {
         apply(plugin = "java-library")
         apply(plugin = "signing")
         apply(plugin = "maven-publish")
         apply(plugin = "org.jetbrains.dokka")
         group = "dev.krud"
-        version = extra["shapeshift.version"] ?: error("shapeshift.version is not set")
+        version = releaseVersion
         java.sourceCompatibility = JavaVersion.VERSION_1_8
         val isSnapshot = version.toString().endsWith("-SNAPSHOT")
         val repoUri = if (isSnapshot) {
@@ -33,6 +34,7 @@ if (hasProperty("release")) {
         publishing {
             publications.create<MavenPublication>("maven") {
                 from(components["java"])
+                version = releaseVersion
                 repositories {
                     maven {
                         name = "OSSRH"
