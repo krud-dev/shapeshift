@@ -55,7 +55,7 @@ ShapeShift main features:
 * Auto Mapping
 * Custom field transformers
 * Default transformers
-* Deep mapping
+* [Deep mapping](https://shapeshift.krud.dev/guides/implicit-transformers)
 * Multiple mapping targets
 * Conditional mapping
 * Mapping decorators
