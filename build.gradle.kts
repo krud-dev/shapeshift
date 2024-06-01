@@ -8,7 +8,7 @@ plugins {
 }
 
 if (hasProperty("release")) {
-    val releaseVersion = extra["shapeshift.version"].toString()
+    val releaseVersion = System.getenv("RELEASE_VERSION")
     subprojects {
         apply(plugin = "java-library")
         apply(plugin = "signing")
