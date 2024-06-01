@@ -1,0 +1,52 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - v*
+  pull_request:
+    branches:
+      - master
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+      - name: Install Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('*.gradle.kts') }}
+          restore-keys: ${{ runner.os }}-gradle
+      - name: Build and publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          OSSRH_GPG_SECRET_KEY_BASE64: ${{ secrets.OSSRH_GPG_SECRET_KEY_BASE64 }}
+          OSSRH_GPG_SECRET_KEY_PASSWORD: ${{ secrets.OSSRH_GPG_SECRET_KEY_PASSWORD }}
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            export RELEASE_VERSION=${{ github.event.number }}-PR-SNAPSHOT
+            echo "Deploying version $RELEASE_VERSION"
+            ./gradlew -Prelease jar publishToSonatype
+          else
+            if [ "${{ github.ref_type }}" = "tag" ]; then
+              export RELEASE_VERSION=${{ github.ref_name }}
+              export RELEASE_VERSION=${RELEASE_VERSION:1}
+            else
+              export RELEASE_VERSION=${{ github.sha }}-SNAPSHOT
+            fi
+            echo "Deploying version $RELEASE_VERSION"
+            ./gradlew -Prelease jar publishToSonatype closeAndReleaseSonatypeStagingRepository
+          fi
+          
