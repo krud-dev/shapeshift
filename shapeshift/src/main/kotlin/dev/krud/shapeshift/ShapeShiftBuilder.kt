@@ -12,6 +12,8 @@ package dev.krud.shapeshift
 
 import dev.krud.shapeshift.MappingDecoratorRegistration.Companion.toRegistration
 import dev.krud.shapeshift.MappingTransformerRegistration.Companion.toRegistration
+import dev.krud.shapeshift.container.ContainerAdapter
+import dev.krud.shapeshift.container.OptionalContainerAdapter
 import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.dsl.KotlinDslMappingDefinitionBuilder
 import dev.krud.shapeshift.resolver.MappingDefinition
@@ -37,7 +39,9 @@ import dev.krud.shapeshift.transformer.StringToIntMappingTransformer
 import dev.krud.shapeshift.transformer.StringToLongMappingTransformer
 import dev.krud.shapeshift.transformer.StringToShortMappingTransformer
 import dev.krud.shapeshift.transformer.base.MappingTransformer
+import java.util.*
 import java.util.function.Supplier
+import javax.swing.text.html.Option
 
 /**
  * A builder used to create a new ShapeShift instance.
@@ -51,6 +55,7 @@ class ShapeShiftBuilder {
     private var defaultMappingStrategy: MappingStrategy = MappingStrategy.MAP_NOT_NULL
     private val mappingDefinitions: MutableList<MappingDefinition> = mutableListOf()
     private val objectSuppliers: MutableMap<Class<*>, Supplier<*>> = mutableMapOf()
+    private val containerAdapters: MutableMap<Class<*>, ContainerAdapter<out Any>> = mutableMapOf()
 
     init {
         // Add default annotation resolver
@@ -60,6 +65,9 @@ class ShapeShiftBuilder {
         DEFAULT_TRANSFORMERS.forEach {
             withTransformer(it)
         }
+
+        // Default container adapters
+        containerAdapters[Optional::class.java] = OptionalContainerAdapter()
     }
 
     /**
@@ -174,7 +182,7 @@ class ShapeShiftBuilder {
             resolvers += StaticMappingDefinitionResolver(mappingDefinitions)
         }
 
-        return ShapeShift(transformerRegistrations, resolvers, defaultMappingStrategy, decoratorRegistrations, objectSuppliers)
+        return ShapeShift(transformerRegistrations, resolvers, defaultMappingStrategy, decoratorRegistrations, objectSuppliers, containerAdapters)
     }
 
     companion object {

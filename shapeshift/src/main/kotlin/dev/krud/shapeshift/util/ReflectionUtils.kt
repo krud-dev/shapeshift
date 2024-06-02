@@ -13,6 +13,8 @@
 package dev.krud.shapeshift.util
 
 import java.lang.reflect.Field
+import java.lang.reflect.ParameterizedType
+
 
 data class ClassPair<From, To>(val from: Class<out From>, val to: Class<out To>)
 
@@ -45,4 +47,12 @@ internal fun Class<*>.getDeclaredFieldRecursive(name: String): Field {
         }
     }
     throw NoSuchFieldException(name)
+}
+
+internal fun Field.getGenericAtPosition(position: Int): Class<*> {
+    if (genericType !is ParameterizedType) {
+        error("Type ${this.type} is not parameterized")
+    }
+    val typeArgument = (genericType as ParameterizedType).actualTypeArguments[position] as Class<*>
+    return typeArgument
 }

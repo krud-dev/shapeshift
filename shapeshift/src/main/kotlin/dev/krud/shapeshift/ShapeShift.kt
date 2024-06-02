@@ -14,6 +14,7 @@ import dev.krud.shapeshift.MappingDecoratorRegistration.Companion.id
 import dev.krud.shapeshift.MappingTransformerRegistration.Companion.id
 import dev.krud.shapeshift.condition.MappingCondition
 import dev.krud.shapeshift.condition.MappingConditionContext
+import dev.krud.shapeshift.container.ContainerAdapter
 import dev.krud.shapeshift.decorator.MappingDecorator
 import dev.krud.shapeshift.decorator.MappingDecoratorContext
 import dev.krud.shapeshift.dto.MappingStructure
@@ -35,7 +36,8 @@ class ShapeShift internal constructor(
     val mappingDefinitionResolvers: Set<MappingDefinitionResolver>,
     val defaultMappingStrategy: MappingStrategy,
     val decoratorRegistrations: Set<MappingDecoratorRegistration<out Any, out Any>>,
-    val objectSuppliers: Map<Class<*>, Supplier<*>>
+    val objectSuppliers: Map<Class<*>, Supplier<*>>,
+    val containerAdapters: Map<Class<*>, ContainerAdapter<out Any>>
 ) {
     val transformerRegistrations: MutableList<MappingTransformerRegistration<out Any, out Any>> = mutableListOf()
     internal val transformersByTypeCache: MutableMap<Class<out MappingTransformer<out Any?, out Any?>>, MappingTransformerRegistration<out Any?, out Any?>> =
@@ -116,7 +118,7 @@ class ShapeShift internal constructor(
         toPair.field.isAccessible = true
 
         val mappingStrategy = resolvedMappedField.effectiveMappingStrategy(defaultMappingStrategy)
-        val fromValue = fromPair.field.getValue(fromPair.target)
+        var fromValue = fromPair.field.getValue(fromPair.target)
         val shouldMapValue = when (mappingStrategy) {
             MappingStrategy.NONE -> error("Mapping strategy is set to NONE")
             MappingStrategy.MAP_ALL -> true
@@ -124,6 +126,7 @@ class ShapeShift internal constructor(
         }
 
         if (shouldMapValue) {
+            fromValue = fromPair.field.getEffectiveValue(fromPair.target)
             try {
                 if (!resolvedMappedField.conditionMatches(fromValue)) {
                     return
@@ -142,12 +145,12 @@ class ShapeShift internal constructor(
                 }
 
                 if (valueToSet == null) {
-                    toPair.field.setValue(toPair.target, null)
+                    toPair.field.setEffectiveValue(toPair.target, null)
                 } else {
                     if (!toPair.type.isAssignableFrom(valueToSet::class.java)) {
                         error("Type mismatch: Expected ${toPair.type} but got ${valueToSet::class.java}")
                     }
-                    toPair.field.setValue(toPair.target, valueToSet)
+                    toPair.field.setEffectiveValue(toPair.target, valueToSet)
                 }
             } catch (e: Exception) {
                 val newException =
@@ -199,7 +202,7 @@ class ShapeShift internal constructor(
         val fieldType = field.type.kotlin.javaObjectType
 
         if (nodes.size == 1) {
-            return ObjectFieldTrio(target, field, fieldType)
+            return ObjectFieldTrio(target, field, field.getTrueType())
         }
         field.isAccessible = true
         var subTarget = field.get(target)
@@ -288,6 +291,33 @@ class ShapeShift internal constructor(
             return constructor.newInstance() as Type
         }
         error("Could not find a no-arg constructor or object supplier for class $clazz")
+    }
+
+    private val Field.isContainer: Boolean get() = type in containerAdapters
+
+    private fun Field.getEffectiveValue(target: Any): Any? {
+        val value = getValue(target)
+        if (isContainer) {
+            return (containerAdapters[type] as ContainerAdapter<Any?>).unwrapValue(value)
+        }
+        return value
+    }
+
+    private fun Field.setEffectiveValue(target: Any, value: Any?) {
+        val value = if (isContainer) {
+            (containerAdapters[type] as ContainerAdapter<Any?>).wrapValue(value)
+        } else {
+            value
+        }
+        setValue(target, value)
+    }
+
+    private fun Field.getTrueType(): Class<*> {
+        return if (isContainer) {
+            (containerAdapters[type] as ContainerAdapter<Any?>).getTrueType(this)
+        } else {
+            type.kotlin.javaObjectType
+        }
     }
 
     companion object {
