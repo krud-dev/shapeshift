@@ -323,6 +323,25 @@ internal class ShapeShiftTests {
     }
 
     @Test
+    internal fun `decorator registered for parent class should apply to inherited class`() {
+        var decoratorCalled = false
+        val shapeShift = ShapeShiftBuilder()
+            .withMapping<GenericFrom, OpenTo> {
+                GenericFrom::long mappedTo OpenTo::long
+            }
+            .withMapping<GenericFrom, InheritedTo> {
+                GenericFrom::long mappedTo InheritedTo::long
+            }
+            .withDecorator<GenericFrom, OpenTo>(MappingDecorator {
+                decoratorCalled = true
+            })
+            .build()
+        val result = shapeShift.map(GenericFrom(), InheritedTo::class.java)
+        expectThat(decoratorCalled).isEqualTo(true)
+        expectThat(result.long).isEqualTo(1L)
+    }
+
+    @Test
     internal fun `test direct withDecorator overload happy flow registers the correct decorator`() {
         val decorator: MappingDecorator<GenericFrom, GenericTo> = MappingDecorator { }
         val shapeShift = ShapeShiftBuilder()

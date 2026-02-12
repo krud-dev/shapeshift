@@ -291,6 +291,14 @@ internal class LongToStringTransformer : MappingTransformer<Long, String> {
     }
 }
 
+internal open class OpenTo {
+    var long: Long? = null
+}
+
+internal class InheritedTo : OpenTo() {
+    var extra: String? = null
+}
+
 internal class ToWithArgConstructor(val long: Long)
 
 internal class ToWithNestedArgConstructor(val child: Child? = null) {

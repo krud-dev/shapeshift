@@ -236,7 +236,7 @@ class ShapeShift internal constructor(
             decoratorRegistrations
                 .filter { decoratorRegistration ->
                     val id = decoratorRegistration.id
-                    id == classPair
+                    id.from.isAssignableFrom(classPair.from) && id.to.isAssignableFrom(classPair.to)
                 }
                 .map { decoratorRegistrations ->
                     decoratorRegistrations.decorator
